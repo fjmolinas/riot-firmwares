@@ -12,6 +12,10 @@
 #include "coap_utils.h"
 #include "coap_io1_xplained.h"
 
+#ifdef MODULE_TFT_DISPLAY
+#include "tft_display.h"
+#endif
+
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
@@ -79,6 +83,11 @@ void *io1_xplained_thread(void *args)
         size_t p = 0;
         p += sprintf((char*)&response[p], "temperature:%i°C",
                      temperature);
+#ifdef MODULE_TFT_DISPLAY
+        char buffer [32];
+        sprintf(buffer, "Temp: %i C", (uint16_t) temperature);
+        tft_draw_string(tft_get_ptr(), buffer, 10, 96);
+#endif
         response[p] = '\0';
         send_coap_post((uint8_t*)"/server", (uint8_t*)response);
         /* wait 3 seconds */

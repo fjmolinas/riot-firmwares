@@ -73,3 +73,8 @@ ifneq (,$(filter mqtt_utils, $(USEMODULE)))
 DIRS += $(CURDIR)/../../modules/mqtt_utils
 INCLUDES += -I$(CURDIR)/../../modules/mqtt_utils
 endif
+
+ifneq (,$(filter tft_display, $(USEMODULE)))
+DIRS += $(CURDIR)/../../modules/tft_display
+INCLUDES += -I$(CURDIR)/../../modules/tft_display
+endif

@@ -29,3 +29,7 @@ ifneq (,$(filter shell_common,$(USEMODULE)))
   USEMODULE += shell
   USEMODULE += ps
 endif
+
+ifneq (,$(filter tft_display,$(USEMODULE)))
+  USEPKG += ucglib
+endif
