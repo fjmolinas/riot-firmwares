@@ -20,6 +20,11 @@
 #define BMX280_SEND_INTERVAL        (5*US_PER_SEC)
 #define BEACON_SEND_INTERVAL        (30*US_PER_SEC)
 
+#ifdef MODULE_COAP_SUIT
+#include "suit/coap.h"
+#include "riotboot/slot.h"
+#endif
+
 static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
@@ -41,6 +46,10 @@ static const coap_resource_t _resources[] = {
     { "/os", COAP_GET, os_handler, NULL },
     { "/position", COAP_GET, position_handler, NULL },
     { "/pressure", COAP_GET, bmx280_pressure_handler, NULL },
+#ifdef MODULE_COAP_SUIT
+    /* this line adds the whole "/suit"-subtree */
+    SUIT_COAP_SUBTREE,
+#endif
     { "/temperature", COAP_GET, bmx280_temperature_handler, NULL },
 };
 
@@ -85,6 +94,11 @@ int main(void)
     schedreg_t bmx280_reg = SCHEDREG_INIT(bmx280_handler, NULL, &bmx280_msg,
                                           &bmx280_xtimer, BMX280_SEND_INTERVAL);
     schedreg_register(&bmx280_reg, sched_pid);
+
+#ifdef MODULE_COAP_SUIT
+    /* start suit coap updater thread */
+    suit_coap_run();
+#endif
 
     puts("All up, running the shell now");
     char line_buf[SHELL_DEFAULT_BUFSIZE];

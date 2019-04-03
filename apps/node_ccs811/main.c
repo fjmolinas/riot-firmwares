@@ -20,6 +20,11 @@
 #define CCS811_SEND_INTERVAL        (5*US_PER_SEC)
 #define BEACON_SEND_INTERVAL        (30*US_PER_SEC)
 
+#ifdef MODULE_COAP_SUIT
+#include "suit/coap.h"
+#include "riotboot/slot.h"
+#endif
+
 static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
@@ -33,11 +38,15 @@ extern int _gnrc_netif_config(int argc, char **argv);
 /* CoAP resources (alphabetical order) */
 static const coap_resource_t _resources[] = {
     { "/board", COAP_GET, board_handler, NULL },
+    { "/eco2", COAP_GET, ccs811_eco2_handler, NULL },
     { "/mcu", COAP_GET, mcu_handler, NULL },
     { "/name", COAP_GET, name_handler, NULL },
     { "/os", COAP_GET, os_handler, NULL },
     { "/position", COAP_GET, position_handler, NULL },
-    { "/eco2", COAP_GET, ccs811_eco2_handler, NULL },
+#ifdef MODULE_COAP_SUIT
+    /* this line adds the whole "/suit"-subtree */
+    SUIT_COAP_SUBTREE,
+#endif
     { "/tvoc", COAP_GET, ccs811_tvoc_handler, NULL },
 };
 
@@ -82,6 +91,11 @@ int main(void)
     schedreg_t ccs811_reg = SCHEDREG_INIT(ccs811_handler, NULL, &ccs811_msg,
                                           &ccs811_xtimer, CCS811_SEND_INTERVAL);
     schedreg_register(&ccs811_reg, sched_pid);
+
+#ifdef MODULE_COAP_SUIT
+    /* start suit coap updater thread */
+    suit_coap_run();
+#endif
 
     puts("All up, running the shell now");
     char line_buf[SHELL_DEFAULT_BUFSIZE];
