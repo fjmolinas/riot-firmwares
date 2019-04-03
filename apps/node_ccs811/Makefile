@@ -28,9 +28,9 @@ USEMODULE += schedreg
 QUIET ?= 1
 
 # Application specific definitions and includes
-APPLICATION_NAME ?= "Gas\ Sensor"
+APPLICATION_NAME ?= "Gas\ Sensor\ -\ SIDO"
 # CoAP broker server information
-BROKER_ADDR ?= fd00:abad:1e:102::1
+BROKER_ADDR ?= fd00:ab:ad:1e::1
 BROKER_PORT ?= 5683
 
 include $(CURDIR)/../Makefile.dep
