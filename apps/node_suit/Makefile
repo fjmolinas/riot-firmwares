@@ -30,17 +30,20 @@ USEMODULE += netstats_ipv6
 USEMODULE += coap_common
 USEMODULE += coap_utils
 USEMODULE += coap_position
+USEMODULE += coap_suit
 
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1
 
 # Application specific definitions and includes
-APPLICATION_NAME ?= "NodeSuit"
+APPLICATION_NAME ?= "Updatable\ device\ -\ SIDO"
 # CoAP broker server information
 BROKER_ADDR ?= fd00:ab:ad:1e::1
 BROKER_PORT ?= 5683
-NODE_LAT ?= 48.714784
-NODE_LNG ?= 2.205502
+NODE_LAT ?= 45.7832415
+NODE_LNG ?= 4.8488309
+
+DEFAULT_CHANNEL = 11
 
 DIRS += $(CURDIR)/../../modules/coap_common
 INCLUDES += -I$(CURDIR)/../../modules/coap_common
