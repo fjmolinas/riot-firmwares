@@ -17,9 +17,13 @@
 
 #include "coap_common.h"
 #include "coap_position.h"
+#include "coap_suit.h"
 
 #include "suit/coap.h"
 #include "riotboot/slot.h"
+
+#define ENABLE_DEBUG    (0)
+#include "debug.h"
 
 static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
@@ -41,6 +45,8 @@ static const coap_resource_t _resources[] = {
 
     /* this line adds the whole "/suit"-subtree */
     SUIT_COAP_SUBTREE,
+    { "/vendor", COAP_GET , vendor_handler, NULL },
+    { "/version", COAP_GET , version_handler, NULL },
 };
 
 static gcoap_listener_t _listener = {

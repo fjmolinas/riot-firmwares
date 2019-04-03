@@ -7,27 +7,12 @@ BOARD ?= samr21-xpro
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../../RIOT
 
-# SUIT update specific stuff
-USEMODULE += nanocoap_sock sock_util
-# v1:
-# USEMODULE += suit suit_coap suit_v1
-# v4:
-USEMODULE += suit suit_coap suit_v4_cbor uuid
-USEPKG += tinycbor
-
-# v4:
-# USEMODULE += suit suit_coap suit_v4_cbor uuid
-# USEPKG += tinycbor
-
-FEATURES_REQUIRED += riotboot
-USEMODULE += riotboot_slot riotboot_flashwrite
-
 # Include packages that pull up and auto-init the link layer.
 # NOTE: 6LoWPAN will be included if IEEE802.15.4 devices are present
 USEMODULE += gnrc_netdev_default
 USEMODULE += auto_init_gnrc_netif
 # Specify the mandatory networking modules for IPv6 and UDP
-USEMODULE += gnrc_ipv6_router_default
+USEMODULE += gnrc_ipv6_default
 # Additional networking modules that can be dropped if not needed
 USEMODULE += gnrc_icmpv6_echo
 USEMODULE += gnrc_udp
@@ -66,6 +51,11 @@ INCLUDES += -I$(CURDIR)/../../modules/coap_utils
 DIRS += $(CURDIR)/../../modules/coap_position
 INCLUDES += -I$(CURDIR)/../../modules/coap_position
 
+DIRS += $(CURDIR)/../../modules/coap_suit
+INCLUDES += -I$(CURDIR)/../../modules/coap_suit
+
+include $(CURDIR)/../../modules/coap_suit/Makefile.include
+
 include $(RIOTBASE)/Makefile.include
 
 CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"
@@ -73,6 +63,9 @@ CFLAGS += -DBROKER_PORT=$(BROKER_PORT)
 CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
 CFLAGS += -DNODE_LAT=\"$(NODE_LAT)\"
 CFLAGS += -DNODE_LNG=\"$(NODE_LNG)\"
+CFLAGS += -DNODE_SUIT_VERSION=\"$(SUIT_VERSION)\"
+CFLAGS += -DNODE_SUIT_VENDOR=\"$(SUIT_VENDOR)\"
+
 
 # Set a custom channel if needed
 ifneq (,$(filter cc110x,$(USEMODULE)))          # radio is cc110x sub-GHz
