@@ -1,0 +1,13 @@
+# SUIT update specific stuff
+USEMODULE += nanocoap_sock sock_util
+# v1:
+# USEMODULE += suit suit_coap suit_v1
+# v4:
+USEMODULE += suit suit_coap suit_v4_cbor uuid
+USEPKG += tinycbor
+
+FEATURES_REQUIRED += riotboot
+USEMODULE += riotboot_slot riotboot_flashwrite
+
+# Required for SUIT updates to work with gcoap
+CFLAGS += -DGCOAP_PDU_BUF_SIZE=256
