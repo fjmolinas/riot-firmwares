@@ -47,9 +47,8 @@ static void _init_st7735(ucg_t * ucg)
     ucg_Init(ucg, TFT_DISPLAY, TFT_DISPLAY_EXT, ucg_com_riotos_hw_spi);
 
     /* Initial Screen Setup*/
-    ucg_SetFontMode(ucg, UCG_FONT_MODE_SOLID);
-    ucg_SetFont(ucg, TFT_DEFAULT_FONT);
     ucg_ClearScreen(ucg);
+    ucg_SetFontMode(ucg, UCG_FONT_MODE_SOLID);
 }
 
 static void _draw_riot_logo(ucg_t* ucg, uint16_t start_x, uint16_t start_y)
@@ -70,22 +69,44 @@ ucg_t * tft_get_ptr(void)
     return (ucg_t *) ucg_ptr;
 }
 
-void tft_draw_string(ucg_t * ucg, char* str_data, uint8_t offset_x, uint8_t offset_y)
+void tft_puts(ucg_t * ucg, char* str_data, uint8_t offset_x,
+                      uint8_t offset_y, uint8_t center)
 {
+    if(center)
+    {
+        uint8_t width = ucg_GetStrWidth(tft_get_ptr(), str_data);
+        offset_x = (width/2 < (offset_x)) ? (offset_x - width/2) : 0;
+    }
     ucg_SetColor(ucg, 1, 0, 0, 0);
     ucg_SetColor(ucg, 0, 255, 255, 255);
     ucg_DrawString(ucg, offset_x, offset_y, 0, str_data);
 }
 
+void tft_print_int(ucg_t * ucg, int data, uint8_t offset_x,
+                      uint8_t offset_y, uint8_t center)
+{
+    char buffer [8];
+    sprintf(buffer, "%i", data);
+    tft_puts(ucg, buffer, offset_x, offset_y, center);
+}
+
 void init_st7735_printer(ucg_t * ucg)
 {
     ucg_ptr = ucg;
+
     _init_st7735(ucg);
-    ucg_ClearScreen(ucg);
-    _draw_riot_logo(ucg, 16, 5);
+
+    _draw_riot_logo(ucg, 16, 12);
+
+    ucg_SetFontPosTop(ucg);
+    ucg_SetFont(ucg, ucg_font_profont12_mr);
+    tft_puts(ucg, (char* ) APPLICATION_NAME, 63, 0, 1);
+
 #ifdef MODULE_RIOTBOOT_SLOT
-    char buffer [32];
-    sprintf(buffer, "Slot: %i", riotboot_slot_current());
-    tft_draw_string(ucg, buffer, 10, 76);
+    ucg_SetFont(ucg, ucg_font_profont10_mr);
+    tft_puts(ucg, "RUNNING FROM SLOT", 63, 64, 1);
+
+    ucg_SetFont(ucg, ucg_font_profont17_mr);
+    tft_print_int(ucg, riotboot_slot_current(), 65, 76, 1);
 #endif
 }
