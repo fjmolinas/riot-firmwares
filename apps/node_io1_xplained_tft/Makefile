@@ -33,8 +33,8 @@ QUIET ?= 1
 APPLICATION_NAME ?= "IO1\ Xplained-tft\ Updatable\ device\ SIDO"
 APPLICATION_NAME_TFT ?= "IO1\ Xplained\ SIDO"
 # CoAP broker server information
-BROKER_ADDR ?= fd00:ab:ad:1e::1
-BROKER_PORT ?= 5683
+BROKER_ADDR ?= fd00:dead:beef::1
+BROKER_PORT ?= 5688
 
 include $(CURDIR)/../Makefile.dep
 include $(CURDIR)/../Makefile.include

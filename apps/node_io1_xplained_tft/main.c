@@ -17,7 +17,7 @@
 #include "coap_io1_xplained.h"
 #include "tft_display.h"
 
-#ifdef USE_MODULE_COAP_SUIT
+#ifdef MODULE_COAP_SUIT
 #include "suit/coap.h"
 #include "riotboot/slot.h"
 #endif
@@ -38,7 +38,7 @@ static const coap_resource_t _resources[] = {
     { "/mcu", COAP_GET, mcu_handler, NULL },
     { "/name", COAP_GET, name_handler, NULL },
     { "/os", COAP_GET, os_handler, NULL },
-#ifdef USE_MODULE_COAP_SUIT
+#ifdef MODULE_COAP_SUIT
     /* this line adds the whole "/suit"-subtree */
     SUIT_COAP_SUBTREE,
 #endif
@@ -75,7 +75,7 @@ int main(void)
     init_beacon_sender();
     init_io1_xplained_temperature_sender();
 
-#ifdef USE_MODULE_COAP_SUIT
+#ifdef MODULE_COAP_SUIT
     /* start suit coap updater thread */
     suit_coap_run();
 #endif
