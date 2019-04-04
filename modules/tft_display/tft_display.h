@@ -8,12 +8,18 @@
 extern "C" {
 #endif
 
+
+#ifndef APPLICATION_NAME_TFT
+#define APPLICATION_NAME_TFT   "TFT DISPLAY"
+#endif
+
 #ifndef TFT_DISPLAY
 #define TFT_DISPLAY            (ucg_dev_st7735_18x128x160)
 #endif
 #ifndef TFT_DISPLAY_EXT
 #define TFT_DISPLAY_EXT        (ucg_ext_st7735_18)
 #endif
+
 #ifndef TFT_DEV_SPI
 #define TFT_DEV_SPI            (1U)
 #endif

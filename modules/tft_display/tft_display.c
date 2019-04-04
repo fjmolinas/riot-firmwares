@@ -100,7 +100,7 @@ void init_st7735_printer(ucg_t * ucg)
 
     ucg_SetFontPosTop(ucg);
     ucg_SetFont(ucg, ucg_font_profont12_mr);
-    tft_puts(ucg, (char* ) APPLICATION_NAME, 63, 0, 1);
+    tft_puts(ucg, (char* ) APPLICATION_NAME_TFT, 63, 0, 1);
 
 #ifdef MODULE_RIOTBOOT_SLOT
     ucg_SetFont(ucg, ucg_font_profont10_mr);
