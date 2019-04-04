@@ -9,9 +9,9 @@ RIOTBASE ?= $(CURDIR)/../../RIOT
 
 # Include suit Update firmware, default doesn't include
 USE_SUIT ?= 0
-ifeq (1, $(USE_SUIT))
-  USEMODULE += coap_suit
-endif
+
+# Add TFT Display
+USE_TFT ?= 1
 
 # Riot Application modules
 USEMODULE += shell_common
@@ -24,7 +24,6 @@ FEATURES_REQUIRED += periph_i2c periph_gpio periph_spi
 USEMODULE += coap_common
 USEMODULE += coap_utils
 USEMODULE += coap_io1_xplained
-USEMODULE += tft_display
 
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1

@@ -15,7 +15,10 @@
 /* RIOT firmware libraries */
 #include "coap_common.h"
 #include "coap_io1_xplained.h"
+
+#ifdef MODULE_TFT_DISPLAY
 #include "tft_display.h"
+#endif
 
 #ifdef MODULE_COAP_SUIT
 #include "suit/coap.h"
@@ -53,8 +56,6 @@ static gcoap_listener_t _listener = {
 
 int main(void)
 {
-    ucg_t ucg;
-
     puts("RIOT IO1 XPlained Pro Node application");
     
     /* gnrc which needs a msg queue */
@@ -67,8 +68,11 @@ int main(void)
     puts("Configured network interfaces:");
     _gnrc_netif_config(0, NULL);
 
+#ifdef MODULE_TFT_DISPLAY
+    ucg_t ucg;
     /* start tft displays*/
     init_st7735_printer(&ucg);
+#endif
 
     /* start coap server loop */
     gcoap_register_listener(&_listener);

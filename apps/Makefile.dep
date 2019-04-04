@@ -4,6 +4,10 @@ ifeq (1, $(USE_SUIT))
   USEMODULE += coap_suit
 endif
 
+ifeq (1, $(USE_TFT))
+  USEMODULE += tft_display
+endif
+
 ifneq (,$(filter coap_% mqtt_%,$(USEMODULE)))
   # Include packages that pull up and auto-init the link layer.
   # NOTE: 6LoWPAN will be included if IEEE802.15.4 devices are present
