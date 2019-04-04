@@ -30,7 +30,8 @@ USEMODULE += tft_display
 QUIET ?= 1
 
 # Application specific definitions and includes
-APPLICATION_NAME ?= "IO1\ Xplained\ -tft\ Updatable\ device\ -\ SIDO"
+APPLICATION_NAME ?= "IO1\ Xplained-tft\ Updatable\ device\ SIDO"
+APPLICATION_NAME_TFT ?= "IO1\ Xplained\ SIDO"
 # CoAP broker server information
 BROKER_ADDR ?= fd00:ab:ad:1e::1
 BROKER_PORT ?= 5683
@@ -43,6 +44,7 @@ include $(RIOTBASE)/Makefile.include
 CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"
 CFLAGS += -DBROKER_PORT=$(BROKER_PORT)
 CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
+CFLAGS += -DAPPLICATION_NAME_TFT="\"$(APPLICATION_NAME_TFT)\""
 
 # Set a custom channel if needed
 ifneq (,$(filter cc110x,$(USEMODULE)))          # radio is cc110x sub-GHz
