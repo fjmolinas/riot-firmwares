@@ -28,8 +28,8 @@ QUIET ?= 1
 # Application specific definitions and includes
 APPLICATION_NAME ?= "Air\ Quality\ Monitor"
 # CoAP broker server information
-BROKER_ADDR ?= fd00:abad:1e:102::1
-BROKER_PORT ?= 5683
+BROKER_ADDR ?= fd00:dead:beef::1
+BROKER_PORT ?= 5688
 
 # Change default address for sparkfun CCS811 BMX280 combo board
 CFLAGS += -DCCS811_PARAM_I2C_ADDR=CCS811_I2C_ADDRESS_2

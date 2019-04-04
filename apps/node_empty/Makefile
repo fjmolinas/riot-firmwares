@@ -24,8 +24,8 @@ QUIET ?= 1
 # Application specific definitions and includes
 APPLICATION_NAME ?= "Updatable\ device\ -\ SIDO"
 # CoAP broker server information
-BROKER_ADDR ?= fd00:ab:ad:1e::1
-BROKER_PORT ?= 5683
+BROKER_ADDR ?= fd00:dead:beef::1
+BROKER_PORT ?= 5688
 NODE_LAT ?= 45.7832415
 NODE_LNG ?= 4.8488309
 
