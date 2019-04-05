@@ -84,11 +84,11 @@ void *io1_xplained_thread(void *args)
         p += sprintf((char*)&response[p], "temperature:%i°C",
                      temperature);
 #ifdef MODULE_TFT_DISPLAY
-        ucg_SetFont(tft_get_ptr(), ucg_font_profont10_mr);
-        tft_puts(tft_get_ptr(), "TEMPERATURE", 63, 94, 1);
+        ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+        tft_puts(tft_get_ptr(), "TEMPERATURE", 63, 70, 1);
 
-        ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
-        tft_print_int(tft_get_ptr(), temperature, 63, 104, 1);
+        ucg_SetFont(tft_get_ptr(), ucg_font_profont17_mr);
+        tft_print_int(tft_get_ptr(), temperature, 65, 86, 1);
 #endif
         response[p] = '\0';
         send_coap_post((uint8_t*)"/server", (uint8_t*)response);
