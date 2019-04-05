@@ -13,6 +13,10 @@ extern "C" {
 #define APPLICATION_NAME_TFT   "TFT DISPLAY"
 #endif
 
+#ifndef NODE_SUIT_VERSION
+#define NODE_SUIT_VERSION      "SUIT 0.0"
+#endif
+
 #ifndef TFT_DISPLAY
 #define TFT_DISPLAY            (ucg_dev_st7735_18x128x160)
 #endif

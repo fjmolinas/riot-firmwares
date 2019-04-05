@@ -96,17 +96,30 @@ void init_st7735_printer(ucg_t * ucg)
 
     _init_st7735(ucg);
 
-    _draw_riot_logo(ucg, 16, 12);
+    _draw_riot_logo(ucg, 16, 16);
 
+    // Application Name
     ucg_SetFontPosTop(ucg);
     ucg_SetFont(ucg, ucg_font_profont12_mr);
     tft_puts(ucg, (char* ) APPLICATION_NAME_TFT, 63, 0, 1);
 
 #ifdef MODULE_RIOTBOOT_SLOT
-    ucg_SetFont(ucg, ucg_font_profont10_mr);
-    tft_puts(ucg, "RUNNING FROM SLOT", 63, 64, 1);
+    // Running Slot
+    ucg_SetFontPosCenter(ucg);
+    ucg_SetFont(ucg, ucg_font_profont15_mr);
+    tft_print_int(ucg, riotboot_slot_current(), 117, 118, 1);
 
-    ucg_SetFont(ucg, ucg_font_profont17_mr);
-    tft_print_int(ucg, riotboot_slot_current(), 65, 76, 1);
+    // Draw Frame For slot Info
+    ucg_SetColor(ucg, 1, 0, 0, 0);
+    ucg_SetColor(ucg, 0, 255, 255, 255);
+    ucg_DrawRFrame(ucg, 108, 108, 18, 18, 4);
+
+    // Draw Frame For Version Info
+    ucg_DrawRFrame(ucg, 2, 108, 104, 18, 4);
+    ucg_SetFont(ucg, ucg_font_profont12_mr);
+    ucg_SetFontPosTop(ucg);
+    char buffer [32];
+    sprintf(buffer, "VER: %s", NODE_SUIT_VERSION);
+    tft_puts(ucg, buffer, 52, 112, 1);
 #endif
 }
