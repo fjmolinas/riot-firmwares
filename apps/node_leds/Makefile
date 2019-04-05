@@ -7,6 +7,12 @@ BOARD ?= samr21-xpro
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../../RIOT
 
+# Add TFT Display
+USE_TFT ?= 0
+
+# Include suit Update firmware, default doesn't include
+USE_SUIT ?= 0
+
 # Riot Application modules
 USEMODULE += shell_common
 USEMODULE += xtimer

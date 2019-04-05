@@ -22,6 +22,10 @@
 #include "riotboot/slot.h"
 #endif
 
+#ifdef MODULE_TFT_DISPLAY
+#include "tft_display.h"
+#endif
+
 static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
@@ -64,6 +68,12 @@ int main(void)
     /* print network addresses */
     puts("Configured network interfaces:");
     _gnrc_netif_config(0, NULL);
+
+#ifdef MODULE_TFT_DISPLAY
+    ucg_t ucg;
+    /* start tft displays*/
+    init_st7735_printer(&ucg);
+#endif
 
     /* start coap server loop */
     gcoap_register_listener(&_listener);
