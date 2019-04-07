@@ -1,4 +1,4 @@
 [submodule "RIOT"]
 	path = RIOT
-	url = https://github.com/aabadie/RIOT.git
-	branch = ota_suit_http_v4
+	url = https://github.com/fjmolinas/RIOT.git
+	branch = ota_suit_http_tft
