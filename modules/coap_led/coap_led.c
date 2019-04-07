@@ -54,17 +54,9 @@ ssize_t led_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
             code = COAP_CODE_CHANGED;
             p += sprintf(rsp, "led:%i", val);
 #ifdef MODULE_TFT_DISPLAY
-            ucg_SetFontPosCenter(tft_get_ptr());
-            ucg_SetFont(tft_get_ptr(), ucg_font_profont17_mr);
-            if (val)
-            {
-                tft_puts(tft_get_ptr(), "LED ON ", 64, 86, 1);
-            }
-            else
-            {
-                tft_puts(tft_get_ptr(), "LED OFF", 64, 86, 1);
-            }
-            ucg_SetFontPosTop(tft_get_ptr());
+            m.type = TFT_DISPLAY_LED;
+            m.content.value = val;
+            msg_send(&m, tft_get_pid());
 #endif
         }
         else {

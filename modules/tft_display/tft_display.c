@@ -18,20 +18,12 @@
 static msg_t _tft_display_msg_queue[TFT_DISPLAY_QUEUE_SIZE];
 static char tft_display_stack[THREAD_STACKSIZE_DEFAULT];
 
-/**
- * @brief   RIOT-OS pin maping of Ucglib pin numbers to RIOT-OS GPIO pins.
- * @note    To minimize the overhead, you can implement an alternative for
- *          ucg_com_riotos_hw_spi.
- */
 static gpio_t pins[] = {
     [UCG_PIN_CS] = TFT_PIN_CS,
     [UCG_PIN_CD] = TFT_PIN_CD,
     [UCG_PIN_RST] = TFT_PIN_RESET
 };
 
-/**
- * @brief   Bit mapping to indicate which pins are set.
- */
 static uint32_t pins_enabled = (
     (1 << UCG_PIN_CS) +
     (1 << UCG_PIN_CD) +
@@ -99,7 +91,14 @@ static void _draw_app_name(ucg_t* ucg)
 {
     ucg_SetFontPosTop(ucg);
     ucg_SetFont(ucg, ucg_font_profont12_mr);
-    tft_puts(ucg, (char* ) APPLICATION_NAME_TFT, 63, 0, 1);
+    tft_puts(ucg, (char* ) APPLICATION_NAME, 63, 0, 1);
+}
+
+static void _clear_data_area(ucg_t* ucg)
+{
+    ucg_SetColor(ucg, 0, 0, 0, 0);
+    ucg_DrawBox(ucg, 0, 66, 128, 40);
+    ucg_SetColor(ucg, 0, 255, 255, 255);
 }
 
 ucg_t * tft_get_ptr(void)
@@ -139,17 +138,16 @@ void *tft_display_thread(void *args)
 
     msg_init_queue(_tft_display_msg_queue, TFT_DISPLAY_QUEUE_SIZE);
 
-    uint8_t update_count = 0;
-    uint32_t firmware_size = 0;
+    uint8_t update = 0;
+    uint32_t fw_size = 0;
     msg_t m;
 
     while (1) {
-
         msg_receive(&m);
         switch(m.type)
         {
             case TFT_DISPLAY_LED:
-                if(!update_count)
+                if(!update)
                 {
                     ucg_SetFontPosCenter(tft_get_ptr());
                     ucg_SetFont(tft_get_ptr(), ucg_font_profont17_mr);
@@ -165,7 +163,7 @@ void *tft_display_thread(void *args)
                 }
                 break;
             case TFT_DISPLAY_TEMP:
-                if(!update_count)
+                if(!update)
                 {
                     ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                     tft_puts(tft_get_ptr(), "TEMPERATURE", 63, 70, 1);
@@ -175,60 +173,42 @@ void *tft_display_thread(void *args)
                 }
                 break;
             case TFT_DISPLAY_TRIGGER:
-                update_count = 1;
-                ucg_SetColor(tft_get_ptr(), 0, 0, 0, 0);
-                ucg_DrawBox(tft_get_ptr(), 0, 66, 128, 40);
-                ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
+                update = 1;
+                _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "UPDATE", 63, 70, 1);
                 tft_puts(tft_get_ptr(), "STARTING", 63, 84, 1);
                 break;
-            case TFT_DISPLAY_MANIFEST:
-                ucg_SetColor(tft_get_ptr(), 0, 0, 0, 0);
-                ucg_DrawBox(tft_get_ptr(), 0, 66, 128, 40);
-                ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
+            case TFT_DISPLAY_SIGNATURE:
+                DEBUG("[TFT]: drawing signature validation msg.\n");
+                _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "MANIFEST", 63, 70, 1);
-                tft_puts(tft_get_ptr(), "DOWNLOAD", 63, 84, 1);
-                break;
-            case TFT_DISPLAY_FIRMWARE:
-                ucg_SetColor(tft_get_ptr(), 0, 0, 0, 0);
-                ucg_DrawBox(tft_get_ptr(), 0, 66, 128, 40);
-
-                ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
-                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "UPDATING", 63, 70, 1);
-
-                ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
-                ucg_DrawFrame(tft_get_ptr(), 12, 86, 100, 18);
+                tft_puts(tft_get_ptr(), "VERIFYING", 63, 70, 1);
+                tft_puts(tft_get_ptr(), "SIGNATURE", 63, 84, 1);
                 break;
             case TFT_DISPLAY_END:
-                ucg_SetColor(tft_get_ptr(), 0, 0, 0, 0);
-                ucg_DrawBox(tft_get_ptr(), 0, 66, 128, 40);
-                ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
+                _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "UPDATE", 63, 70, 1);
                 tft_puts(tft_get_ptr(), "FINALIZED", 63, 84, 1);
                 break;
             case TFT_DISPLAY_SIZE:
-                firmware_size = m.content.value;
-                (void) firmware_size;
+                _clear_data_area(tft_get_ptr());
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "UPDATING", 63, 70, 1);
+                ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
+                ucg_DrawFrame(tft_get_ptr(), 12, 86, 104, 18);
+                fw_size = m.content.value;
                 break;
             case TFT_DISPLAY_SIZE_UPDATE:
-                update_count++;
                 ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
-                ucg_DrawBox(tft_get_ptr(), 14, 88, 1*update_count, 14);
-                // ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
-                // ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                // tft_puts(tft_get_ptr(), "BYTE COUNT", 63, 70, 1);
-                // ucg_SetFont(tft_get_ptr(), ucg_font_profont17_mr);
-                // tft_print_int(tft_get_ptr(), (int) m.content.value, 65, 86, 1);
+                ucg_DrawBox(tft_get_ptr(), 14, 88,
+                            (100*m.content.value)/ fw_size, 14);
                 break;
             default:
                 break;
         }
     }
-
     return NULL;
 }
 
@@ -239,9 +219,7 @@ void init_st7735_printer(ucg_t * ucg)
     _init_st7735(ucg);
 
     _draw_riot_logo(ucg, 16, 16);
-
     _draw_app_name(ucg);
-
     _draw_riotboot(ucg);
 
     tft_display_pid = thread_create(tft_display_stack, sizeof(tft_display_stack),
