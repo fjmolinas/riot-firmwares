@@ -29,7 +29,7 @@ enum {
 #endif
 
 #ifndef TFT_DISPLAY
-#define TFT_DISPLAY            (ucg_dev_st7735_18x128x160)
+#define TFT_DISPLAY            (ucg_dev_st7735_18x128x128)
 #endif
 #ifndef TFT_DISPLAY_EXT
 #define TFT_DISPLAY_EXT        (ucg_ext_st7735_18)
