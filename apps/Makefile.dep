@@ -5,6 +5,7 @@ ifeq (1, $(USE_SUIT))
 endif
 
 ifeq (1, $(USE_TFT))
+  CFLAGS += -DTFT_DISPLAY_PID=8
   USEMODULE += tft_display
 endif
 
