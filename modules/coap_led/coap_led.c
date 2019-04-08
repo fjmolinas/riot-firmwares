@@ -54,9 +54,10 @@ ssize_t led_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
             code = COAP_CODE_CHANGED;
             p += sprintf(rsp, "led:%i", val);
 #ifdef MODULE_TFT_DISPLAY
+            msg_t m;
             m.type = TFT_DISPLAY_LED;
             m.content.value = val;
-            msg_send(&m, tft_get_pid());
+            msg_send(&m, *(tft_get_pid()));
 #endif
         }
         else {

@@ -56,9 +56,9 @@ void tft_print_int(ucg_t * ucg, int data, uint8_t offset_x,
 
 void init_st7735_printer(ucg_t* ucg);
 
-ucg_t * tft_get_ptr(void);
+ucg_t* tft_get_ptr(void);
 
-int tft_get_pid(void);
+int* tft_get_pid(void);
 
 #ifdef __cplusplus
 }

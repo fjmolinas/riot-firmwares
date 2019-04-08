@@ -90,7 +90,7 @@ void *io1_xplained_thread(void *args)
 #ifdef MODULE_TFT_DISPLAY
         m.type = TFT_DISPLAY_TEMP;
         m.content.value = temperature;
-        msg_send(&m, tft_get_pid());
+        msg_send(&m, *(tft_get_pid()));
 #endif
         response[p] = '\0';
         send_coap_post((uint8_t*)"/server", (uint8_t*)response);

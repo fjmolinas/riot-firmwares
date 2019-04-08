@@ -6,6 +6,7 @@
 
 #include "xtimer.h"
 #include "riotboot/slot.h"
+#include "suit/v4/suit.h"
 
 #include "logo.h"
 #include "tft_display.h"
@@ -51,10 +52,8 @@ static void _init_st7735(ucg_t * ucg)
 
 static void _draw_riot_logo(ucg_t* ucg, uint16_t start_x, uint16_t start_y)
 {
-    for (int y = 0; y < 48 ; y++)
-    {
-        for (int x = 0; x < 96; x++)
-        {
+    for (int y = 0; y < 48 ; y++) {
+        for (int x = 0; x < 96; x++) {
             uint32_t offset = (x + (y * 96)) * 3;
             ucg_SetColor(ucg, 0, logo[offset + 2], logo[offset + 1], logo[offset + 0]);
             ucg_DrawPixel(ucg, x + start_x, y + start_y);
@@ -106,16 +105,15 @@ ucg_t * tft_get_ptr(void)
     return (ucg_t *) ucg_ptr;
 }
 
-int tft_get_pid(void)
+int* tft_get_pid(void)
 {
-    return (int) tft_display_pid;
+    return (int*) &tft_display_pid;
 }
 
 void tft_puts(ucg_t * ucg, char* str_data, uint8_t offset_x,
                       uint8_t offset_y, uint8_t center)
 {
-    if(center)
-    {
+    if(center) {
         uint8_t width = ucg_GetStrWidth(tft_get_ptr(), str_data);
         offset_x = (width/2 < (offset_x)) ? (offset_x - width/2) : 0;
     }
@@ -144,27 +142,22 @@ void *tft_display_thread(void *args)
 
     while (1) {
         msg_receive(&m);
-        switch(m.type)
-        {
+        switch(m.type) {
             case TFT_DISPLAY_LED:
-                if(!update)
-                {
+                if (!update) {
                     ucg_SetFontPosCenter(tft_get_ptr());
                     ucg_SetFont(tft_get_ptr(), ucg_font_profont17_mr);
-                    if (m.content.value)
-                    {
+                    if (m.content.value) {
                         tft_puts(tft_get_ptr(), "LED ON ", 64, 86, 1);
                     }
-                    else
-                    {
+                    else {
                         tft_puts(tft_get_ptr(), "LED OFF", 64, 86, 1);
                     }
                     ucg_SetFontPosTop(tft_get_ptr());
                 }
                 break;
             case TFT_DISPLAY_TEMP:
-                if(!update)
-                {
+                if (!update) {
                     ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                     tft_puts(tft_get_ptr(), "TEMPERATURE", 63, 70, 1);
 
@@ -172,27 +165,26 @@ void *tft_display_thread(void *args)
                     tft_print_int(tft_get_ptr(), m.content.value, 65, 86, 1);
                 }
                 break;
-            case TFT_DISPLAY_TRIGGER:
+            case SUIT_TRIGGER:
                 update = 1;
                 _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "UPDATE", 63, 70, 1);
                 tft_puts(tft_get_ptr(), "STARTING", 63, 84, 1);
                 break;
-            case TFT_DISPLAY_SIGNATURE:
-                DEBUG("[TFT]: drawing signature validation msg.\n");
+            case SUIT_SIGNATURE_VALIDATION:
                 _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "VERIFYING", 63, 70, 1);
                 tft_puts(tft_get_ptr(), "SIGNATURE", 63, 84, 1);
                 break;
-            case TFT_DISPLAY_END:
+            case SUIT_UPDATE_COMPLETE:
                 _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "UPDATE", 63, 70, 1);
                 tft_puts(tft_get_ptr(), "FINALIZED", 63, 84, 1);
                 break;
-            case TFT_DISPLAY_SIZE:
+            case SUIT_FW_SIZE:
                 _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "UPDATING", 63, 70, 1);
@@ -200,7 +192,7 @@ void *tft_display_thread(void *args)
                 ucg_DrawFrame(tft_get_ptr(), 12, 86, 104, 18);
                 fw_size = m.content.value;
                 break;
-            case TFT_DISPLAY_SIZE_UPDATE:
+            case SUIT_FW_PROGRESS:
                 ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
                 ucg_DrawBox(tft_get_ptr(), 14, 88,
                             (100*m.content.value)/ fw_size, 14);

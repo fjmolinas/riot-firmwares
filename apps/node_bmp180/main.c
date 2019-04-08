@@ -73,7 +73,8 @@ int main(void)
 
 #ifdef MODULE_COAP_SUIT
     /* start suit coap updater thread */
-    suit_coap_run();
+    int* subs_pid = NULL;
+    suit_coap_run(subs_pid);
 #endif
 
     puts("All up, running the shell now");
