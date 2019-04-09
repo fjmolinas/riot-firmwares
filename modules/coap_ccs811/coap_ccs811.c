@@ -17,6 +17,10 @@
 #include "coap_utils.h"
 #include "coap_ccs811.h"
 
+#ifdef MODULE_TFT_DISPLAY
+#include "tft_display.h"
+#endif
+
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
@@ -67,6 +71,9 @@ void *ccs811_thread(void *args)
 {
     (void) args;
     msg_init_queue(_ccs811_msg_queue, CCS811_QUEUE_SIZE);
+#ifdef MODULE_TFT_DISPLAY
+    msg_t m;
+#endif
 
     for(;;) {
         if (use_eco2) {
@@ -76,6 +83,11 @@ void *ccs811_thread(void *args)
             p += sprintf((char*)&response[p], "eco2:");
             p += sprintf((char*)&response[p], "%ippm", eco2);
             response[p] = '\0';
+#ifdef MODULE_TFT_DISPLAY
+            m.type = TFT_DISPLAY_ECO2;
+            m.content.ptr = response;
+            msg_send(&m, *(tft_get_pid()));
+#endif
             send_coap_post((uint8_t*)"/server", response);
         }
 
@@ -86,6 +98,11 @@ void *ccs811_thread(void *args)
             p += sprintf((char*)&response[p], "tvoc:");
             p += sprintf((char*)&response[p], "%ippb", tvoc);
             response[p] = '\0';
+#ifdef MODULE_TFT_DISPLAY
+            m.type = TFT_DISPLAY_TVOC;
+            m.content.ptr = response;
+            msg_send(&m, *(tft_get_pid()));
+#endif
             send_coap_post((uint8_t*)"/server", response);
         }
 
