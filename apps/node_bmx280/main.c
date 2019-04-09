@@ -26,6 +26,18 @@
 #include "coap_suit.h"
 #endif
 
+#ifndef USE_TEMP
+#define USE_TEMP    true
+#endif
+
+#ifndef USE_PRES
+#define USE_PRES    true
+#endif
+
+#ifndef USE_HUM
+#define USE_HUM     true
+#endif
+
 static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
@@ -91,7 +103,7 @@ int main(void)
     /* start coap server loop */
     gcoap_register_listener(&_listener);
     init_beacon_sender();
-    init_bmx280_sender(true, true, true);
+    init_bmx280_sender(USE_TEMP, USE_PRES, USE_HUM);
 
 #ifdef MODULE_COAP_SUIT
     /* start suit coap updater thread */

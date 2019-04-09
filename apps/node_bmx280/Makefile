@@ -19,6 +19,7 @@ USE_TFT ?= 1
 USEMODULE += printf_float
 USEMODULE += $(DRIVER)
 USEMODULE += shell_common
+
 # Include pyaiot modules
 USEMODULE += coap_common
 USEMODULE += coap_utils
@@ -33,6 +34,10 @@ APPLICATION_NAME ?= "Weather\ Sensor\ -\ SIDO"
 # CoAP broker server information
 BROKER_ADDR ?= fd00:dead:beef::1
 BROKER_PORT ?= 5688
+
+# CFLAGS += -DUSE_TEMP="false"
+# CFLAGS += -DUSE_PRES="false"
+# CFLAGS += -DUSE_HUM="false"
 
 include $(CURDIR)/../Makefile.dep
 include $(CURDIR)/../Makefile.include
