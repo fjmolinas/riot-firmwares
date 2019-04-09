@@ -17,6 +17,10 @@
 #include "coap_utils.h"
 #include "coap_bmx280.h"
 
+#ifdef MODULE_TFT_DISPLAY
+#include "tft_display.h"
+#endif
+
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
@@ -95,6 +99,9 @@ void *bmx280_thread(void *args)
 {
     (void)args;
     msg_init_queue(_bmx280_msg_queue, BMX280_QUEUE_SIZE);
+#ifdef MODULE_TFT_DISPLAY
+    msg_t m;
+#endif
 
     for(;;) {
         if (use_temperature) {
@@ -109,6 +116,12 @@ void *bmx280_thread(void *args)
                          negative ? "-" : "",
                          temp / 100, (temp % 100) /10);
             response[p] = '\0';
+#ifdef MODULE_TFT_DISPLAY
+            m.type = TFT_DISPLAY_TEMP;
+            m.content.ptr = response;
+            msg_send(&m, *(tft_get_pid()));
+            thread_yield();
+#endif
             send_coap_post((uint8_t*)"/server", response);
         }
 
@@ -120,6 +133,12 @@ void *bmx280_thread(void *args)
                          (unsigned long)pres / 100,
                          (int)pres % 100);
             response[p] = '\0';
+#ifdef MODULE_TFT_DISPLAY
+            m.type = TFT_DISPLAY_PRES;
+            m.content.ptr = response;
+            msg_send(&m, *(tft_get_pid()));
+            thread_yield();
+#endif
             send_coap_post((uint8_t*)"/server", response);
         }
 
@@ -132,10 +151,15 @@ void *bmx280_thread(void *args)
                          (unsigned int)(hum / 100),
                          (unsigned int)(hum % 100));
             response[p] = '\0';
+#ifdef MODULE_TFT_DISPLAY
+            m.type = TFT_DISPLAY_HUM;
+            m.content.ptr = response;
+            msg_send(&m, *(tft_get_pid()));
+            thread_yield();
+#endif
             send_coap_post((uint8_t*)"/server", response);
         }
 #endif
-
         /* wait 5 seconds */
         xtimer_usleep(SEND_INTERVAL);
     }

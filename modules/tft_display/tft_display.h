@@ -18,6 +18,8 @@ enum {
 // application related display messages
     TFT_DISPLAY_LED = 0xA0,
     TFT_DISPLAY_TEMP = 0xA1,
+    TFT_DISPLAY_PRES = 0xA2,
+    TFT_DISPLAY_HUM = 0xA3,
 };
 
 #ifndef APPLICATION_NAME

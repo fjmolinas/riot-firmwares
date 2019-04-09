@@ -136,15 +136,15 @@ void *tft_display_thread(void *args)
 
     msg_init_queue(_tft_display_msg_queue, TFT_DISPLAY_QUEUE_SIZE);
 
-    uint8_t update = 0;
     uint32_t fw_size = 0;
+    uint8_t updating = 0;
     msg_t m;
 
     while (1) {
         msg_receive(&m);
         switch(m.type) {
             case TFT_DISPLAY_LED:
-                if (!update) {
+                if(!updating) {
                     ucg_SetFontPosCenter(tft_get_ptr());
                     ucg_SetFont(tft_get_ptr(), ucg_font_profont17_mr);
                     if (m.content.value) {
@@ -156,17 +156,26 @@ void *tft_display_thread(void *args)
                     ucg_SetFontPosTop(tft_get_ptr());
                 }
                 break;
-            case TFT_DISPLAY_TEMP:
-                if (!update) {
+            case TFT_DISPLAY_HUM:
+                if(!updating) {
                     ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                    tft_puts(tft_get_ptr(), "TEMPERATURE", 63, 70, 1);
-
-                    ucg_SetFont(tft_get_ptr(), ucg_font_profont17_mr);
-                    tft_print_int(tft_get_ptr(), m.content.value, 65, 86, 1);
+                    tft_puts(tft_get_ptr(), m.content.ptr, 65, 66, 1);
+                }
+                break;
+            case TFT_DISPLAY_TEMP:
+                if(!updating) {
+                    ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                    tft_puts(tft_get_ptr(), m.content.ptr, 65, 78, 1);
+                }
+                break;
+            case TFT_DISPLAY_PRES:
+                if(!updating) {
+                    ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                    tft_puts(tft_get_ptr(), m.content.ptr, 65, 90, 1);
                 }
                 break;
             case SUIT_TRIGGER:
-                update = 1;
+                updating = 1;
                 _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "UPDATE", 63, 70, 1);
@@ -210,7 +219,7 @@ void init_st7735_printer(ucg_t * ucg)
 
     _init_st7735(ucg);
 
-    _draw_riot_logo(ucg, 16, 16);
+    _draw_riot_logo(ucg, 16, 14);
     _draw_app_name(ucg);
     _draw_riotboot(ucg);
 
