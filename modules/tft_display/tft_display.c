@@ -182,16 +182,18 @@ void *tft_display_thread(void *args)
                     tft_puts(tft_get_ptr(), m.content.ptr, 65, 90, 1);
                 }
                 break;
-            case TFT_DISPLAY_TVOC:
-                if(!updating) {
-                    ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
-                    tft_puts(tft_get_ptr(), m.content.ptr, 65, 66, 1);
-                }
-                break;
             case TFT_DISPLAY_ECO2:
                 if(!updating) {
                     ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
-                    tft_puts(tft_get_ptr(), m.content.ptr, 65, 84, 1);
+                    tft_puts(tft_get_ptr(), "             ", 31, 66, 0);
+                    tft_puts(tft_get_ptr(), m.content.ptr, 25, 66, 0);
+                }
+                break;
+            case TFT_DISPLAY_TVOC:
+                if(!updating) {
+                    ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
+                    tft_puts(tft_get_ptr(), "             ", 31, 84, 0);
+                    tft_puts(tft_get_ptr(), m.content.ptr, 25, 84, 0);
                 }
                 break;
             case TFT_DISPLAY_HELLO:
