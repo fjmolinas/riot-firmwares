@@ -18,9 +18,14 @@
 #include "coap_common.h"
 #include "coap_position.h"
 
+#ifdef MODULE_TFT_DISPLAY
+#include "tft_display.h"
+#endif
+
 #ifdef MODULE_COAP_SUIT
 #include "suit/coap.h"
 #include "riotboot/slot.h"
+#include "coap_suit.h"
 #endif
 
 static const shell_command_t shell_commands[] = {
@@ -43,6 +48,8 @@ static const coap_resource_t _resources[] = {
 #ifdef MODULE_COAP_SUIT
     /* this line adds the whole "/suit"-subtree */
     SUIT_COAP_SUBTREE,
+    { "/vendor", COAP_GET, vendor_handler, NULL },
+    { "/version", COAP_GET, version_handler, NULL },
 #endif
 };
 
@@ -66,13 +73,25 @@ int main(void)
     puts("Configured network interfaces:");
     _gnrc_netif_config(0, NULL);
 
+#ifdef MODULE_COAP_SUIT
+    int* subs_pid = NULL;
+#endif
+#ifdef MODULE_TFT_DISPLAY
+    ucg_t ucg;
+    msg_t msg;
+    msg.type = TFT_DISPLAY_HELLO;
+    /* start tft displays*/
+    init_st7735_printer(&ucg);
+    subs_pid = tft_get_pid();
+    msg_send(&msg, *(tft_get_pid()));
+#endif
+
     /* start coap server loop */
     gcoap_register_listener(&_listener);
     init_beacon_sender();
 
 #ifdef MODULE_COAP_SUIT
     /* start suit coap updater thread */
-    int* subs_pid = NULL;
     suit_coap_run(subs_pid);
 #endif
 

@@ -174,6 +174,11 @@ void *tft_display_thread(void *args)
                     tft_puts(tft_get_ptr(), m.content.ptr, 65, 90, 1);
                 }
                 break;
+            case TFT_DISPLAY_HELLO:
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
+                tft_puts(tft_get_ptr(), "H E L L O", 63, 70, 1);
+                tft_puts(tft_get_ptr(), "W O R L D !!", 63, 90, 1);
+                break;
             case SUIT_TRIGGER:
                 updating = 1;
                 _clear_data_area(tft_get_ptr());
