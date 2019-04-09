@@ -78,10 +78,12 @@ int main(void)
 #endif
 #ifdef MODULE_TFT_DISPLAY
     ucg_t ucg;
-    msg_t msg;
-    msg.type = TFT_DISPLAY_HELLO;
     /* start tft displays*/
     init_st7735_printer(&ucg);
+#endif
+#if defined(MODULE_COAP_SUIT) && defined(MODULE_TFT_DISPLAY)
+    msg_t msg;
+    msg.type = TFT_DISPLAY_HELLO;
     subs_pid = tft_get_pid();
     msg_send(&msg, *(tft_get_pid()));
 #endif

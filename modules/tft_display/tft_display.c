@@ -6,7 +6,10 @@
 
 #include "xtimer.h"
 #include "riotboot/slot.h"
+
+#ifdef MODULE_COAP_SUIT
 #include "suit/v4/suit.h"
+#endif
 
 #include "logo.h"
 #include "tft_display.h"
@@ -93,12 +96,14 @@ static void _draw_app_name(ucg_t* ucg)
     tft_puts(ucg, (char* ) APPLICATION_NAME, 63, 0, 1);
 }
 
+#ifdef MODULE_COAP_SUIT
 static void _clear_data_area(ucg_t* ucg)
 {
     ucg_SetColor(ucg, 0, 0, 0, 0);
     ucg_DrawBox(ucg, 0, 66, 128, 40);
     ucg_SetColor(ucg, 0, 255, 255, 255);
 }
+#endif
 
 ucg_t * tft_get_ptr(void)
 {
@@ -136,7 +141,10 @@ void *tft_display_thread(void *args)
 
     msg_init_queue(_tft_display_msg_queue, TFT_DISPLAY_QUEUE_SIZE);
 
+#ifdef MODULE_COAP_SUIT
     uint32_t fw_size = 0;
+#endif
+
     uint8_t updating = 0;
     msg_t m;
 
@@ -179,6 +187,7 @@ void *tft_display_thread(void *args)
                 tft_puts(tft_get_ptr(), "H E L L O", 63, 70, 1);
                 tft_puts(tft_get_ptr(), "W O R L D !!", 63, 90, 1);
                 break;
+#ifdef MODULE_COAP_SUIT
             case SUIT_TRIGGER:
                 updating = 1;
                 _clear_data_area(tft_get_ptr());
@@ -211,6 +220,7 @@ void *tft_display_thread(void *args)
                 ucg_DrawBox(tft_get_ptr(), 14, 88,
                             (100*m.content.value)/ fw_size, 14);
                 break;
+#endif
             default:
                 break;
         }

@@ -76,11 +76,12 @@ int main(void)
 #ifdef MODULE_COAP_SUIT
     int* subs_pid = NULL;
 #endif
-
 #ifdef MODULE_TFT_DISPLAY
     ucg_t ucg;
     /* start tft displays*/
     init_st7735_printer(&ucg);
+#endif
+#if defined(MODULE_COAP_SUIT) && defined(MODULE_TFT_DISPLAY)
     subs_pid = tft_get_pid();
 #endif
 

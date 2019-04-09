@@ -80,6 +80,8 @@ int main(void)
     ucg_t ucg;
     /* start tft displays*/
     init_st7735_printer(&ucg);
+#endif
+#if defined(MODULE_COAP_SUIT) && defined(MODULE_TFT_DISPLAY)
     subs_pid = tft_get_pid();
 #endif
 
