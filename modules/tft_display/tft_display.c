@@ -11,6 +11,10 @@
 #include "suit/v4/suit.h"
 #endif
 
+#ifdef MODULE_SUITREG
+#include "suitreg.h"
+#endif
+
 #include "logo.h"
 #include "tft_display.h"
 
@@ -133,8 +137,17 @@ void *tft_display_thread(void *args)
 
     msg_init_queue(_tft_display_msg_queue, TFT_DISPLAY_QUEUE_SIZE);
 
+#ifdef MODULE_SUITREG
+    uint32_t fw_size = 0;
+#endif
+
     uint8_t updating = 0;
     msg_t m;
+#ifdef MODULE_SUITREG
+    suitreg_t entry = SUITREG_INIT_PID(SUITREG_TYPE_STATUS, thread_getpid());
+    suitreg_register(&entry);
+    uint8_t count = 0;
+#endif
 
     while (1) {
         msg_receive(&m);
@@ -189,6 +202,45 @@ void *tft_display_thread(void *args)
                 tft_puts(tft_get_ptr(), "H E L L O", 63, 70, 1);
                 tft_puts(tft_get_ptr(), "W O R L D !!", 63, 90, 1);
                 break;
+#ifdef MODULE_SUITREG
+            case SUIT_TRIGGER:
+                updating = 1;
+                _clear_data_area(tft_get_ptr());
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "UPDATE", 63, 70, 1);
+                tft_puts(tft_get_ptr(), "STARTING", 63, 84, 1);
+                break;
+            case SUIT_SIGNATURE_START:
+                _clear_data_area(tft_get_ptr());
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "VERIFYING", 63, 70, 1);
+                tft_puts(tft_get_ptr(), "SIGNATURE", 63, 84, 1);
+                break;
+            case SUIT_REBOOT:
+                _clear_data_area(tft_get_ptr());
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "UPDATE", 63, 70, 1);
+                tft_puts(tft_get_ptr(), "FINALIZED", 63, 84, 1);
+                break;
+            case SUIT_DOWNLOAD_START:
+                _clear_data_area(tft_get_ptr());
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "UPDATING", 63, 70, 1);
+                ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
+                ucg_DrawFrame(tft_get_ptr(), 12, 86, 104, 18);
+                fw_size = m.content.value;
+                break;
+            case SUIT_DOWNLOAD_PROGRESS:
+                if (count == 0) {
+                    ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
+                    ucg_DrawBox(tft_get_ptr(), 14, 88,
+                                (100*m.content.value)/ fw_size, 14);
+                }
+                count++;
+                count = count % SUIT_FW_PROGRESS_CYCLE;
+
+                break;
+#endif
             default:
                 break;
         }
