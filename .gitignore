@@ -29,3 +29,7 @@ RIOT-Fw.*
 
 # Visual Studio Code
 .vscode/
+
+# Ignore keys
+*.key
+*_key.h
