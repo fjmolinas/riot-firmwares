@@ -97,15 +97,6 @@ static void _draw_app_name(ucg_t* ucg)
     tft_puts(ucg, (char* ) APPLICATION_NAME, 63, 0, 1);
 }
 
-#ifdef MODULE_COAP_SUIT
-static void _clear_data_area(ucg_t* ucg)
-{
-    ucg_SetColor(ucg, 0, 0, 0, 0);
-    ucg_DrawBox(ucg, 0, 66, 128, 40);
-    ucg_SetColor(ucg, 0, 255, 255, 255);
-}
-#endif
-
 ucg_t * tft_get_ptr(void)
 {
     return (ucg_t *) ucg_ptr;

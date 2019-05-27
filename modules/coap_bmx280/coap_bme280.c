@@ -15,6 +15,10 @@
 #include "coap_utils.h"
 #include "coap_bmx280.h"
 
+#ifdef MODULE_TFT_DISPLAY
+#include "tft_display.h"
+#endif
+
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
@@ -84,7 +88,10 @@ ssize_t bmx280_humidity_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void 
 
 void bmx280_handler(void *args)
 {
-    (void) args;
+    (void)args;
+#ifdef MODULE_TFT_DISPLAY
+    msg_t m;
+#endif
 
     if (use_temperature) {
         ssize_t p = 0;
@@ -98,6 +105,12 @@ void bmx280_handler(void *args)
                         negative ? "-" : "",
                         temp / 100, (temp % 100) /10);
         response[p] = '\0';
+#ifdef MODULE_TFT_DISPLAY
+        m.type = TFT_DISPLAY_TEMP;
+        m.content.ptr = response;
+        msg_send(&m, *(tft_get_pid()));
+        thread_yield();
+#endif
         send_coap_post((uint8_t*)"/server", response);
     }
 
@@ -109,6 +122,12 @@ void bmx280_handler(void *args)
                         (unsigned long)pres / 100,
                         (int)pres % 100);
         response[p] = '\0';
+#ifdef MODULE_TFT_DISPLAY
+        m.type = TFT_DISPLAY_PRES;
+        m.content.ptr = response;
+        msg_send(&m, *(tft_get_pid()));
+        thread_yield();
+#endif
         send_coap_post((uint8_t*)"/server", response);
     }
 
@@ -121,6 +140,12 @@ void bmx280_handler(void *args)
                         (unsigned int)(hum / 100),
                         (unsigned int)(hum % 100));
         response[p] = '\0';
+#ifdef MODULE_TFT_DISPLAY
+        m.type = TFT_DISPLAY_HUM;
+        m.content.ptr = response;
+        msg_send(&m, *(tft_get_pid()));
+        thread_yield();
+#endif
         send_coap_post((uint8_t*)"/server", response);
     }
 #endif

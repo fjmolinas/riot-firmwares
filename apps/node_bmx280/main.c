@@ -20,9 +20,26 @@
 #define BMX280_SEND_INTERVAL        (5*US_PER_SEC)
 #define BEACON_SEND_INTERVAL        (30*US_PER_SEC)
 
+#ifdef MODULE_TFT_DISPLAY
+#include "tft_display.h"
+#endif
+
 #ifdef MODULE_COAP_SUIT
 #include "suit/coap.h"
 #include "riotboot/slot.h"
+#include "coap_suit.h"
+#endif
+
+#ifndef USE_TEMP
+#define USE_TEMP    true
+#endif
+
+#ifndef USE_PRES
+#define USE_PRES    true
+#endif
+
+#ifndef USE_HUM
+#define USE_HUM     true
 #endif
 
 static const shell_command_t shell_commands[] = {
@@ -51,6 +68,10 @@ static const coap_resource_t _resources[] = {
     SUIT_COAP_SUBTREE,
 #endif
     { "/temperature", COAP_GET, bmx280_temperature_handler, NULL },
+#ifdef MODULE_COAP_SUIT
+    { "/vendor", COAP_GET, vendor_handler, NULL },
+    { "/version", COAP_GET, version_handler, NULL },
+#endif
 };
 
 static gcoap_listener_t _listener = {
@@ -73,6 +94,12 @@ int main(void)
     puts("Configured network interfaces:");
     _gnrc_netif_config(0, NULL);
 
+#ifdef MODULE_TFT_DISPLAY
+    ucg_t ucg;
+    /* start tft displays*/
+    init_st7735_printer(&ucg);
+#endif
+
     /* start coap server loop */
     gcoap_register_listener(&_listener);
 
@@ -88,7 +115,7 @@ int main(void)
     schedreg_register(&beacon_reg, sched_pid);
 
     /* start bmx280 and register */
-    init_bmx280_sender(true, true, true);
+    init_bmx280_sender(USE_TEMP, USE_PRES, USE_HUM);
     xtimer_t bmx280_xtimer;
     msg_t bmx280_msg;
     schedreg_t bmx280_reg = SCHEDREG_INIT(bmx280_handler, NULL, &bmx280_msg,
