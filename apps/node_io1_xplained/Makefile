@@ -1,4 +1,4 @@
-# Name of your application
+# name of your application
 APPLICATION = node_io1_xplained
 
 # If no BOARD is found in the environment, use this default:
@@ -9,6 +9,9 @@ RIOTBASE ?= $(CURDIR)/../../RIOT
 
 # Include suit Update firmware, default doesn't include
 USE_SUIT ?= 0
+
+# Add TFT Display
+USE_TFT ?= 1
 
 # Riot Application modules
 USEMODULE += shell_common
@@ -26,7 +29,7 @@ USEMODULE += coap_io1_xplained
 QUIET ?= 1
 
 # Application specific definitions and includes
-APPLICATION_NAME ?= "IO1\ Xplained\ Updatable\ device\ -\ SIDO"
+APPLICATION_NAME ?= "IO1\ Xplained\ Node"
 # CoAP broker server information
 BROKER_ADDR ?= fd00:dead:beef::1
 BROKER_PORT ?= 5688
@@ -39,6 +42,9 @@ include $(RIOTBASE)/Makefile.include
 CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"
 CFLAGS += -DBROKER_PORT=$(BROKER_PORT)
 CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
+
+CFLAGS += -DNODE_SUIT_VENDOR="\"$(SUIT_VENDOR)\""
+CFLAGS += -DNODE_SUIT_VERSION="\"$(APP_VER)\""
 
 # Set a custom channel if needed
 ifneq (,$(filter cc110x,$(USEMODULE)))          # radio is cc110x sub-GHz
