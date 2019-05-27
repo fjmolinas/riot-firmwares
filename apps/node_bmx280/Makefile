@@ -36,6 +36,14 @@ APPLICATION_NAME ?= "Weather\ Sensor\ -\ SIDO"
 BROKER_ADDR ?= fd00:dead:beef::1
 BROKER_PORT ?= 5688
 
+USE_TEMP ?= true
+USE_PRES ?= true
+USE_HUM ?= true
+
+CFLAGS += -DUSE_TEMP="$(USE_TEMP)"
+CFLAGS += -DUSE_PRES="$(USE_PRES)"
+CFLAGS += -DUSE_HUM="$(USE_HUM)"
+
 include $(CURDIR)/../Makefile.dep
 include $(CURDIR)/../Makefile.include
 

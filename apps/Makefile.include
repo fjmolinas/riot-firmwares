@@ -79,3 +79,7 @@ DIRS += $(CURDIR)/../../modules/schedreg
 INCLUDES += -I$(CURDIR)/../../modules/schedreg
 endif
 
+ifneq (,$(filter tft_display, $(USEMODULE)))
+DIRS += $(CURDIR)/../../modules/tft_display
+INCLUDES += -I$(CURDIR)/../../modules/tft_display
+endif
