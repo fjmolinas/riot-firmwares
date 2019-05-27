@@ -15,15 +15,17 @@
 #include "coap_utils.h"
 #include "coap_ccs811.h"
 
+#ifdef MODULE_TFT_DISPLAY
+#include "tft_display.h"
+#endif
+
 #define ENABLE_DEBUG (0)
 #include "debug.h"
-
-#define CCS811_QUEUE_SIZE    (8)
 
 #define I2C_DEVICE           (0)
 
 static ccs811_t ccs811_dev;
-static uint8_t response[64] = { 0 };
+static uint8_t response[32] = { 0 };
 
 static bool use_eco2 = false;
 static bool use_tvoc = false;
@@ -33,9 +35,14 @@ ssize_t ccs811_eco2_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, void *ctx
     (void)ctx;
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
     memset(response, 0, sizeof(response));
-    uint16_t eco2;
-    ccs811_read_iaq(&ccs811_dev, NULL, &eco2, NULL, NULL);
-    sprintf((char*)response, "%ippm", eco2);
+    if (ccs811_data_ready(&ccs811_dev) != CCS811_OK) {
+        sprintf((char*)response, "0ppm");
+    }
+    else {
+        uint16_t eco2;
+        ccs811_read_iaq(&ccs811_dev, NULL, &eco2, NULL, NULL);
+        sprintf((char*)response, "%ippm", eco2);
+    }
     size_t payload_len = sizeof(response);
     memcpy(pdu->payload, response, payload_len);
 
@@ -47,9 +54,14 @@ ssize_t ccs811_tvoc_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, void *ctx
     (void)ctx;
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
     memset(response, 0, sizeof(response));
-    uint16_t tvoc;
-    ccs811_read_iaq(&ccs811_dev, &tvoc, NULL, NULL, NULL);
-    sprintf((char*)response, "%ippb", tvoc);
+    if (ccs811_data_ready(&ccs811_dev) != CCS811_OK) {
+        sprintf((char*)response, "0ppb");
+    }
+    else {
+        uint16_t tvoc;
+        ccs811_read_iaq(&ccs811_dev, &tvoc, NULL, NULL, NULL);
+        sprintf((char*)response, "%ippb", tvoc);
+    }
     size_t payload_len = sizeof(response);
     memcpy(pdu->payload, response, payload_len);
 
@@ -61,22 +73,41 @@ void ccs811_handler(void *args)
     (void) args;
 
     if (use_eco2) {
+        char eco2_buf[16] = { '\0' };
         ssize_t p = 0;
         uint16_t eco2;
         ccs811_read_iaq(&ccs811_dev, NULL, &eco2, NULL, NULL);
         p += sprintf((char*)&response[p], "eco2:");
         p += sprintf((char*)&response[p], "%ippm", eco2);
         response[p] = '\0';
+        memcpy(eco2_buf, response, p--);
+#ifdef MODULE_TFT_DISPLAY
+        msg_t meco2;
+        meco2.type = TFT_DISPLAY_ECO2;
+        meco2.content.ptr = eco2_buf;
+        msg_send(&meco2, *(tft_get_pid()));
+        thread_yield();
+#endif
         send_coap_post((uint8_t*)"/server", response);
     }
 
     if (use_tvoc) {
+        char tvoc_buf[16] = { '\0' };
         ssize_t p = 0;
         uint16_t tvoc;
         ccs811_read_iaq(&ccs811_dev, &tvoc, NULL, NULL, NULL);
         p += sprintf((char*)&response[p], "tvoc:");
         p += sprintf((char*)&response[p], "%ippb", tvoc);
         response[p] = '\0';
+        memcpy(tvoc_buf, response, p--);
+#ifdef MODULE_TFT_DISPLAY
+        msg_t mtvoc;
+        mtvoc.type = TFT_DISPLAY_TVOC;
+        mtvoc.content.ptr = tvoc_buf;
+        // printf("TVOC: %s\n", tvoc_buf);
+        msg_send(&mtvoc, *(tft_get_pid()));
+        thread_yield();
+#endif
         send_coap_post((uint8_t*)"/server", response);
     }
 }
