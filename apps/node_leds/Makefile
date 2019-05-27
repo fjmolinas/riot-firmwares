@@ -7,6 +7,12 @@ BOARD ?= samr21-xpro
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../../RIOT
 
+# Add TFT Display
+USE_TFT ?= 0
+
+# Include suit Update firmware, default doesn't include
+USE_SUIT ?= 0
+
 # Riot Application modules
 USEMODULE += shell_common
 USEMODULE += xtimer
@@ -37,6 +43,9 @@ include $(RIOTBASE)/Makefile.include
 CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"
 CFLAGS += -DBROKER_PORT=$(BROKER_PORT)
 CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
+
+CFLAGS += -DNODE_SUIT_VENDOR="\"$(SUIT_VENDOR)\""
+CFLAGS += -DNODE_SUIT_VERSION="\"$(APP_VER)\""
 
 # Set a custom channel if needed
 ifneq (,$(filter cc110x,$(USEMODULE)))          # radio is cc110x sub-GHz
