@@ -1,13 +1,13 @@
 # SUIT update specific stuff
 USEMODULE += nanocoap_sock sock_util
-# v1:
-# USEMODULE += suit suit_coap suit_v1
+USEMODULE += suit suit_coap
+
 # v4:
-USEMODULE += suit suit_coap suit_v4_cbor uuid
-USEPKG += tinycbor
+USEMODULE += suit_v4
+INCLUDES += -I$(CURDIR) # Include public_key.h in the path
 
 FEATURES_REQUIRED += riotboot
-USEMODULE += riotboot_slot riotboot_flashwrite
+USEMODULE += riotboot_slot riotboot_flashwrite riotboot_flashwrite_verify_sha256
 
 # Required for SUIT updates to work with gcoap
 CFLAGS += -DGCOAP_PDU_BUF_SIZE=256
