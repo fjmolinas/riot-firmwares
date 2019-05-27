@@ -13,6 +13,8 @@ ifneq (,$(filter coap_% mqtt_%,$(USEMODULE)))
   USEMODULE += gnrc_ipv6_default
   # Additional networking modules that can be dropped if not needed
   USEMODULE += gnrc_sock_udp
+  # lower pktbuf size a little
+  CFLAGS += -DGNRC_PKTBUF_SIZE=2000
 endif
 
 ifneq (,$(filter coap_%,$(USEMODULE)))
