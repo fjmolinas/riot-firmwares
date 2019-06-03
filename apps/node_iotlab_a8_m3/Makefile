@@ -8,7 +8,7 @@ BOARD = iotlab-a8-m3
 RIOTBASE ?= $(CURDIR)/../../RIOT
 
 # Include suit Update firmware, default doesn't include
-USE_SUIT ?= 0
+USE_SUIT ?= 1
 
 # Riot Application modules
 USEMODULE += printf_float

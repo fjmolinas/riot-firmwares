@@ -8,7 +8,7 @@ BOARD = iotlab-m3
 RIOTBASE ?= $(CURDIR)/../../RIOT
 
 # Include suit Update firmware, default doesn't include
-USE_SUIT ?= 0
+USE_SUIT ?= 1
 
 # include this to get the shell
 USEMODULE += shell_common

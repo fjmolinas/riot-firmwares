@@ -11,7 +11,7 @@ RIOTBASE ?= $(CURDIR)/../../RIOT
 USE_TFT ?= 0
 
 # Include suit Update firmware, default doesn't include
-USE_SUIT ?= 0
+USE_SUIT ?= 1
 
 # Riot Application modules
 USEMODULE += shell_common

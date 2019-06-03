@@ -8,7 +8,7 @@ BOARD ?= samr21-xpro
 RIOTBASE ?= $(CURDIR)/../../RIOT
 
 # Include suit Update firmware, default doesn't include
-USE_SUIT ?= 0
+USE_SUIT ?= 1
 
 # Add TFT Display
 USE_TFT ?= 1
