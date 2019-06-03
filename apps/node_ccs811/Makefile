@@ -38,6 +38,9 @@ include $(CURDIR)/../Makefile.include
 
 include $(RIOTBASE)/Makefile.include
 
+# Change default address for CCS811
+CFLAGS += -DCCS811_PARAM_I2C_ADDR=CCS811_I2C_ADDRESS_2
+
 CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"
 CFLAGS += -DBROKER_PORT=$(BROKER_PORT)
 CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
