@@ -75,6 +75,7 @@ int main(void)
     init_iotlab_a8_m3_sender();
 
 #ifdef MODULE_COAP_SUIT
+    printf("running from slot %u\n", riotboot_slot_current());
     /* start suit coap updater thread */
     suit_coap_run();
 #endif

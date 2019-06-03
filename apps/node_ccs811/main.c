@@ -109,6 +109,7 @@ int main(void)
     schedreg_register(&ccs811_reg, sched_pid);
 
 #ifdef MODULE_COAP_SUIT
+    printf("running from slot %u\n", riotboot_slot_current());
     /* start suit coap updater thread */
     suit_coap_run();
 #endif
