@@ -101,6 +101,15 @@ static void _draw_app_name(ucg_t* ucg)
     tft_puts(ucg, (char* ) APPLICATION_NAME, 63, 0, 1);
 }
 
+#ifdef MODULE_COAP_SUIT
+static void _clear_data_area(ucg_t* ucg)
+{
+    ucg_SetColor(ucg, 0, 0, 0, 0);
+    ucg_DrawBox(ucg, 0, 14, 128, 48);
+    ucg_SetColor(ucg, 0, 255, 255, 255);
+}
+#endif
+
 ucg_t * tft_get_ptr(void)
 {
     return (ucg_t *) ucg_ptr;
@@ -141,7 +150,6 @@ void *tft_display_thread(void *args)
     uint32_t fw_size = 0;
 #endif
 
-    uint8_t updating = 0;
     msg_t m;
 #ifdef MODULE_SUITREG
     suitreg_t entry = SUITREG_INIT_PID(SUITREG_TYPE_STATUS, thread_getpid());
@@ -153,49 +161,37 @@ void *tft_display_thread(void *args)
         msg_receive(&m);
         switch(m.type) {
             case TFT_DISPLAY_LED:
-                if(!updating) {
-                    ucg_SetFontPosCenter(tft_get_ptr());
-                    ucg_SetFont(tft_get_ptr(), ucg_font_profont17_mr);
-                    if (m.content.value) {
-                        tft_puts(tft_get_ptr(), "LED ON ", 64, 86, 1);
-                    }
-                    else {
-                        tft_puts(tft_get_ptr(), "LED OFF", 64, 86, 1);
-                    }
-                    ucg_SetFontPosTop(tft_get_ptr());
+                ucg_SetFontPosCenter(tft_get_ptr());
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont17_mr);
+                if (m.content.value) {
+                    tft_puts(tft_get_ptr(), "LED ON ", 64, 86, 1);
                 }
+                else {
+                    tft_puts(tft_get_ptr(), "LED OFF", 64, 86, 1);
+                }
+                ucg_SetFontPosTop(tft_get_ptr());
                 break;
             case TFT_DISPLAY_HUM:
-                if(!updating) {
-                    ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                    tft_puts(tft_get_ptr(), m.content.ptr, 65, 66, 1);
-                }
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), m.content.ptr, 65, 66, 1);
                 break;
             case TFT_DISPLAY_TEMP:
-                if(!updating) {
-                    ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                    tft_puts(tft_get_ptr(), m.content.ptr, 65, 78, 1);
-                }
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), m.content.ptr, 65, 78, 1);
                 break;
             case TFT_DISPLAY_PRES:
-                if(!updating) {
-                    ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                    tft_puts(tft_get_ptr(), m.content.ptr, 65, 90, 1);
-                }
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), m.content.ptr, 65, 90, 1);
                 break;
             case TFT_DISPLAY_ECO2:
-                if(!updating) {
-                    ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
-                    tft_puts(tft_get_ptr(), "             ", 31, 66, 0);
-                    tft_puts(tft_get_ptr(), m.content.ptr, 25, 66, 0);
-                }
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
+                tft_puts(tft_get_ptr(), "             ", 31, 66, 0);
+                tft_puts(tft_get_ptr(), m.content.ptr, 25, 66, 0);
                 break;
             case TFT_DISPLAY_TVOC:
-                if(!updating) {
-                    ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
-                    tft_puts(tft_get_ptr(), "             ", 31, 84, 0);
-                    tft_puts(tft_get_ptr(), m.content.ptr, 25, 84, 0);
-                }
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
+                tft_puts(tft_get_ptr(), "             ", 31, 84, 0);
+                tft_puts(tft_get_ptr(), m.content.ptr, 25, 84, 0);
                 break;
             case TFT_DISPLAY_HELLO:
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
@@ -204,36 +200,35 @@ void *tft_display_thread(void *args)
                 break;
 #ifdef MODULE_SUITREG
             case SUIT_TRIGGER:
-                updating = 1;
                 _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "UPDATE", 63, 70, 1);
-                tft_puts(tft_get_ptr(), "STARTING", 63, 84, 1);
+                tft_puts(tft_get_ptr(), "UPDATE", 63, 20, 1);
+                tft_puts(tft_get_ptr(), "STARTING", 63, 34, 1);
                 break;
             case SUIT_SIGNATURE_START:
                 _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "VERIFYING", 63, 70, 1);
-                tft_puts(tft_get_ptr(), "SIGNATURE", 63, 84, 1);
+                tft_puts(tft_get_ptr(), "VERIFYING", 63, 20, 1);
+                tft_puts(tft_get_ptr(), "SIGNATURE", 63, 34, 1);
                 break;
             case SUIT_REBOOT:
                 _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "UPDATE", 63, 70, 1);
-                tft_puts(tft_get_ptr(), "FINALIZED", 63, 84, 1);
+                tft_puts(tft_get_ptr(), "UPDATE", 63, 20, 1);
+                tft_puts(tft_get_ptr(), "FINALIZED", 63, 34, 1);
                 break;
             case SUIT_DOWNLOAD_START:
                 _clear_data_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "UPDATING", 63, 70, 1);
+                tft_puts(tft_get_ptr(), "UPDATING", 63, 20, 1);
                 ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
-                ucg_DrawFrame(tft_get_ptr(), 12, 86, 104, 18);
+                ucg_DrawFrame(tft_get_ptr(), 12, 36, 104, 18);
                 fw_size = m.content.value;
                 break;
             case SUIT_DOWNLOAD_PROGRESS:
                 if (count == 0) {
                     ucg_SetColor(tft_get_ptr(), 0, 255, 255, 255);
-                    ucg_DrawBox(tft_get_ptr(), 14, 88,
+                    ucg_DrawBox(tft_get_ptr(), 14, 38,
                                 (100*m.content.value)/ fw_size, 14);
                 }
                 count++;

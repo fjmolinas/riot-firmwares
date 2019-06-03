@@ -31,7 +31,7 @@ USEMODULE += schedreg
 QUIET ?= 1
 
 # Application specific definitions and includes
-APPLICATION_NAME ?= "Weather\ Sensor\ -\ SIDO"
+APPLICATION_NAME ?= "Weather\ Sensor"
 # CoAP broker server information
 BROKER_ADDR ?= fd00:dead:beef::1
 BROKER_PORT ?= 5688
