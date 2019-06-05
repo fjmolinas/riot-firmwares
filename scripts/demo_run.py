@@ -11,7 +11,7 @@ import time
 
 DEMO_RESET     = 300
 DEMO_PERIOD    = 150
-UPDATE_TIMEOUT = 300
+TIMEOUT        = 10
 
 LOG_HANDLER = logging.StreamHandler()
 LOG_HANDLER.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
@@ -24,6 +24,16 @@ COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
 
 START_APP = 'node/empty'
 
+def wait_for_update(child):
+    try:
+        while True:
+            child.expect(r"riotboot_flashwrite: processing bytes (\d+)-(\d+)",
+                         timeout=TIMEOUT)
+    except pexpect.TIMEOUT:
+        child.expect_exact(
+            "riotboot_flashwrite: riotboot flashing completed successfully",
+            timeout=TIMEOUT)
+
 def list_from_string(list_str=None):
     value = (list_str or '').split(' ')
     return [v for v in value if v]
@@ -32,7 +42,7 @@ def list_from_string(list_str=None):
 def make_reset(board, cwd_dir, port):
     logger.info('Reseting board {}'.format(board))
     cmd = ['make', 'reset', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
-    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
+    assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL)
 
@@ -48,14 +58,14 @@ def make_flash(board, cwd_dir, make_args):
     logger.info('Initial Flash of {}'.format(board))
     cmd = ['make', 'clean', 'riotboot/flash-extended-slot0', 'BOARD={}'.format(board)]
     cmd.extend(make_args)
-    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+    assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
 def make_flash_only(board, cwd_dir, make_args):
     logger.info('Initial Flash of {}'.format(board))
     cmd = ['make', 'riotboot/flash-only-extended-slot0', 'BOARD={}'.format(board)]
     cmd.extend(make_args)
-    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+    assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
 def notify(board, server_url, client_url, cwd_dir, tag):
@@ -64,7 +74,7 @@ def notify(board, server_url, client_url, cwd_dir, tag):
         'SUIT_COAP_SERVER={}'.format(server_url),
         'SUIT_COAP_FSROOT={}'.format(COAPROOT),
         'SUIT_CLIENT={}'.format(client_url)]
-    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+    assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
 PARSER = argparse.ArgumentParser(
@@ -117,15 +127,16 @@ if __name__ == "__main__":
 
             # Get device global address
             term.expect(r'inet6 addr: (?P<gladdr>[0-9a-fA-F:]+:[A-Fa-f:0-9]+)'
-                        '  scope: global', timeout=10)
+                        '  scope: global', timeout=TIMEOUT)
             client = '[{}]'.format(term.match.group("gladdr").lower())
             # Leave some time for discovery discovery
             time.sleep(3)
 
             for tag in tags:
                 time.sleep(DEMO_PERIOD)
-                term.expect_exact('suit_coap: started.', timeout=UPDATE_TIMEOUT)
+                term.expect_exact('suit_coap: started.', timeout=TIMEOUT)
                 notify(board, host, client, app_base, tag)
+                wait_for_update(term)
             
             time.sleep(DEMO_RESET)
 
