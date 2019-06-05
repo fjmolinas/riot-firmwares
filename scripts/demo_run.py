@@ -10,7 +10,7 @@ import sys
 import time
 
 DEMO_RESET     = 300
-DEMO_PERIOD    = 150
+DEMO_PERIOD    = 1
 TIMEOUT        = 10
 
 LOG_HANDLER = logging.StreamHandler()
@@ -18,9 +18,10 @@ LOG_HANDLER.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
 LOG_LEVELS = ('debug', 'info', 'warning', 'error')
 
 SUIT_DIR = os.path.dirname(sys.argv[0])
-RIOT_DIR = os.path.abspath(os.path.join(SUIT_DIR, '../../../..'))
 BASE_DIR = os.path.abspath(os.path.join(SUIT_DIR, '..'))
 COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
+
+OTA_SERVER_MAKEFILE = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
 START_APP = 'node/empty'
 
@@ -68,12 +69,20 @@ def make_flash_only(board, cwd_dir, make_args):
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
-def notify(board, server_url, client_url, cwd_dir, tag):
-    cmd = ['make', 'USE_SUIT=1', 'suit/notify', 'BOARD={}'.format(board),
-        'SUIT_MANIFEST_SIGNED_LATEST={}'.format(tag),
-        'SUIT_COAP_SERVER={}'.format(server_url),
-        'SUIT_COAP_FSROOT={}'.format(COAPROOT),
-        'SUIT_CLIENT={}'.format(client_url)]
+def notify(board, server_url, client_url, cwd_dir, mode, tag):
+
+    if mode is True:
+        cmd = ['make','suit/notify', 'BOARD={}'.format(board),
+            'SUIT_PUBLISH_ID={}'.format(tag),
+            'SUIT_OTA_SERVER_URL={}'.format(server_url),
+            'SUIT_CLIENT={}'.format(client_url),
+            'SUIT_MAKEFILE={}'.format(OTA_SERVER_MAKEFILE)]
+    else:
+        cmd = ['make', 'suit/notify', 'BOARD={}'.format(board),
+            'SUIT_MANIFEST_SIGNED_LATEST={}'.format(tag),
+            'SUIT_COAP_SERVER={}'.format(server_url),
+            'SUIT_COAP_FSROOT={}'.format(COAPROOT),
+            'SUIT_CLIENT={}'.format(client_url)]
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
@@ -85,8 +94,8 @@ PARSER.add_argument('--app-base', default='apps/node_empty',
                     help='List of applications publish')
 PARSER.add_argument('--board', default='samr21-xpro',
                     help='Board to test')
-PARSER.add_argument('--coap-host', default='[fd00:dead:beef::1]',
-                    help='CoAP server host.')
+PARSER.add_argument('--http', default=False, action='store_true',
+                    help='Use http server')
 PARSER.add_argument('--loglevel', choices=LOG_LEVELS, default='info',
                     help='Python logger log level')
 PARSER.add_argument('--make', type=list_from_string, default=None,
@@ -97,6 +106,8 @@ PARSER.add_argument('--flash-only', default=False, action='store_true',
                     help='Flashes target node , Default False')
 PARSER.add_argument('--port', default='/dev/ttyACM0',
                     help='Node serial port.')
+PARSER.add_argument('--server', default='[fd00:dead:beef::1]',
+                    help='Server url.')
 
 
 if __name__ == "__main__":
@@ -111,10 +122,11 @@ if __name__ == "__main__":
 
     app_base    = args.app_base
     board       = args.board
-    host        = args.coap_host
+    host        = args.server
     port        = args.port
     make_args   = args.make
     tags        = args.tags
+    http        = args.http
 
     term = None
 
@@ -135,7 +147,7 @@ if __name__ == "__main__":
             for tag in tags:
                 time.sleep(DEMO_PERIOD)
                 term.expect_exact('suit_coap: started.', timeout=TIMEOUT)
-                notify(board, host, client, app_base, tag)
+                notify(board, host, client, app_base, http, tag)
                 wait_for_update(term)
             
             time.sleep(DEMO_RESET)
