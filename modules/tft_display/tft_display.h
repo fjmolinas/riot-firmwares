@@ -40,6 +40,20 @@ enum {
 #define TFT_DISPLAY_EXT        (ucg_ext_st7735_18)
 #endif
 
+#ifdef BOARD_NUCLEO_L476RG
+#ifndef TFT_DEV_SPI
+#define TFT_DEV_SPI            (0U)
+#endif
+#ifndef TFT_PIN_CS
+#define TFT_PIN_CS             (GPIO_PIN(PORT_B,6))
+#endif
+#ifndef TFT_PIN_CD
+#define TFT_PIN_CD             (GPIO_PIN(PORT_A,9))
+#endif
+#ifndef TFT_PIN_RESET
+#define TFT_PIN_RESET          (GPIO_PIN(PORT_C,7))
+#endif
+#else
 #ifndef TFT_DEV_SPI
 #define TFT_DEV_SPI            (1U)
 #endif
@@ -51,6 +65,7 @@ enum {
 #endif
 #ifndef TFT_PIN_RESET
 #define TFT_PIN_RESET          (GPIO_PIN(PA,8))
+#endif
 #endif
 
 void tft_puts(ucg_t* ucg, char* str_data, uint8_t offset_x,
