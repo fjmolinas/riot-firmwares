@@ -24,6 +24,24 @@ ifneq (,$(filter coap_% mqtt_%,$(USEMODULE)))
   USEMODULE += gnrc_sock_udp
   # lower pktbuf size a little
   CFLAGS += -DGNRC_PKTBUF_SIZE=2000
+
+  ifeq (1,$(USE_ETHOS))
+    TAP ?= tap0
+    IPV6_PREFIX ?= 2001:db8::/64
+
+    GNRC_NETIF_NUMOF := 2
+    USEMODULE += ethos
+    USEMODULE += stdio_uart_rx
+    USEMODULE += gnrc_uhcpc
+
+    # ethos baudrate can be configured from make command
+    ETHOS_BAUDRATE ?= 115200
+    CFLAGS += -DETHOS_BAUDRATE=$(ETHOS_BAUDRATE) -DUSE_ETHOS_FOR_STDIO
+
+    TERMDEPS += host-tools
+    TERMPROG ?= sudo sh $(RIOTTOOLS)/ethos/start_network.sh
+    TERMFLAGS ?= $(PORT) $(TAP) $(IPV6_PREFIX)
+  endif
 endif
 
 ifneq (,$(filter coap_%,$(USEMODULE)))

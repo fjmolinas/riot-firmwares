@@ -83,3 +83,8 @@ ifneq (,$(filter tft_display, $(USEMODULE)))
 DIRS += $(CURDIR)/../../modules/tft_display
 INCLUDES += -I$(CURDIR)/../../modules/tft_display
 endif
+
+.PHONY: host-tools
+
+host-tools:
+	$(Q)env -u CC -u CFLAGS make -C $(RIOTTOOLS)
