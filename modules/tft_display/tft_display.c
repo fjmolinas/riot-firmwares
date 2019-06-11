@@ -52,7 +52,7 @@ static void _init_st7735(ucg_t * ucg)
     /* Initialize the display */
     DEBUG("Initializing display.\n");
     ucg_Init(ucg, TFT_DISPLAY, TFT_DISPLAY_EXT, ucg_com_riotos_hw_spi);
-
+    ucg_SetRotate90(ucg);
     /* Initial Screen Setup*/
     ucg_ClearScreen(ucg);
     ucg_SetFontMode(ucg, UCG_FONT_MODE_SOLID);
