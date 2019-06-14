@@ -28,8 +28,8 @@
 #include "tft_display.h"
 #endif
 
-#define BMX280_SEND_INTERVAL        (5*US_PER_SEC)
-#define CCS811_SEND_INTERVAL        (5*US_PER_SEC)
+#define BMX280_SEND_INTERVAL        (6*US_PER_SEC)
+#define CCS811_SEND_INTERVAL        (6*US_PER_SEC)
 #define BEACON_SEND_INTERVAL        (30*US_PER_SEC)
 
 #ifndef USE_TEMP
@@ -130,6 +130,8 @@ int main(void)
                                           &ccs811_xtimer, CCS811_SEND_INTERVAL);
     schedreg_register(&ccs811_reg, sched_pid);
 
+    /* delay start of bmx280 so display shows at different time the sensors data*/
+    xtimer_sleep(3);
     /* start bmx280 and register */
     init_bmx280_sender(USE_TEMP, USE_PRES, USE_HUMI);
     xtimer_t bmx280_xtimer;
