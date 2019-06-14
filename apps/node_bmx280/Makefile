@@ -16,7 +16,6 @@ USE_SUIT ?= 1
 USE_TFT ?= 1
 
 # Riot Application modules
-USEMODULE += printf_float
 USEMODULE += $(DRIVER)
 USEMODULE += shell_common
 
