@@ -18,9 +18,35 @@
 #include "coap_bmx280.h"
 #include "schedreg.h"
 
+#ifdef MODULE_COAP_SUIT
+#include "suit/coap.h"
+#include "riotboot/slot.h"
+#include "coap_suit.h"
+#endif
+
+#ifdef MODULE_TFT_DISPLAY
+#include "tft_display.h"
+#endif
+
 #define BMX280_SEND_INTERVAL        (5*US_PER_SEC)
 #define CCS811_SEND_INTERVAL        (5*US_PER_SEC)
 #define BEACON_SEND_INTERVAL        (30*US_PER_SEC)
+
+#ifndef USE_TEMP
+#define USE_TEMP    true
+#endif
+#ifndef USE_PRES
+#define USE_PRES    true
+#endif
+#ifndef USE_HUMI
+#define USE_HUMI    true
+#endif
+#ifndef USE_TVOC
+#define USE_TVOC    true
+#endif
+#ifndef USE_ECO2
+#define USE_ECO2    true
+#endif
 
 static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
@@ -44,8 +70,16 @@ static const coap_resource_t _resources[] = {
     { "/os", COAP_GET, os_handler, NULL },
     { "/position", COAP_GET, position_handler, NULL },
     { "/pressure", COAP_GET, bmx280_pressure_handler, NULL },
+#ifdef MODULE_COAP_SUIT
+    /* this line adds the whole "/suit"-subtree */
+    SUIT_COAP_SUBTREE,
+#endif
     { "/temperature", COAP_GET, bmx280_temperature_handler, NULL },
     { "/tvoc", COAP_GET, ccs811_tvoc_handler, NULL },
+#ifdef MODULE_COAP_SUIT
+    { "/vendor", COAP_GET, vendor_handler, NULL },
+    { "/version", COAP_GET, version_handler, NULL },
+#endif
 };
 
 static gcoap_listener_t _listener = {
@@ -68,6 +102,12 @@ int main(void)
     puts("Configured network interfaces:");
     _gnrc_netif_config(0, NULL);
 
+#ifdef MODULE_TFT_DISPLAY
+    ucg_t ucg;
+    /* start tft displays*/
+    init_st7735_printer(&ucg);
+#endif
+
     /* start coap server loop */
     gcoap_register_listener(&_listener);
 
@@ -83,7 +123,7 @@ int main(void)
     schedreg_register(&beacon_reg, sched_pid);
 
     /* start ccs811 and register */
-    init_ccs811_sender(true, true);
+    init_ccs811_sender(USE_ECO2, USE_TVOC);
     xtimer_t ccs811_xtimer;
     msg_t ccs811_msg;
     schedreg_t ccs811_reg = SCHEDREG_INIT(ccs811_handler, NULL, &ccs811_msg,
@@ -91,12 +131,18 @@ int main(void)
     schedreg_register(&ccs811_reg, sched_pid);
 
     /* start bmx280 and register */
-    init_bmx280_sender(true, true, true);
+    init_bmx280_sender(USE_TEMP, USE_PRES, USE_HUMI);
     xtimer_t bmx280_xtimer;
     msg_t bmx280_msg;
     schedreg_t bmx280_reg = SCHEDREG_INIT(bmx280_handler, NULL, &bmx280_msg,
                                           &bmx280_xtimer, BMX280_SEND_INTERVAL);
     schedreg_register(&bmx280_reg, sched_pid);
+
+#ifdef MODULE_COAP_SUIT
+    printf("running from slot %u\n", riotboot_slot_current());
+    /* start suit coap updater thread */
+    suit_coap_run();
+#endif
 
     puts("All up, running the shell now");
     char line_buf[SHELL_DEFAULT_BUFSIZE];

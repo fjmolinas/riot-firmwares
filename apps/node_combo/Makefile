@@ -7,6 +7,12 @@ BOARD = samr21-xpro
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../../RIOT
 
+# Include suit Update firmware, default doesn't include
+USE_SUIT ?= 1
+
+# Add TFT Display
+USE_TFT ?= 1
+
 DRIVER ?= bme280
 
 # Riot Application modules
@@ -31,17 +37,33 @@ APPLICATION_NAME ?= "Air\ Quality\ Monitor"
 BROKER_ADDR ?= fd00:dead:beef::1
 BROKER_PORT ?= 5688
 
-# Change default address for sparkfun CCS811 BMX280 combo board
-CFLAGS += -DCCS811_PARAM_I2C_ADDR=CCS811_I2C_ADDRESS_2
+# Partial sensor support flags
+USE_TEMP ?= true
+USE_PRES ?= true
+USE_HUMI ?= true
+USE_TVOC ?= true
+USE_ECO2 ?= true
+
+CFLAGS += -DUSE_TEMP="$(USE_TEMP)"
+CFLAGS += -DUSE_PRES="$(USE_PRES)"
+CFLAGS += -DUSE_HUMI="$(USE_HUMI)"
+CFLAGS += -DUSE_TVOC="$(USE_TVOC)"
+CFLAGS += -DUSE_ECO2="$(USE_ECO2)"
 
 include $(CURDIR)/../Makefile.dep
 include $(CURDIR)/../Makefile.include
 
 include $(RIOTBASE)/Makefile.include
 
+# Change default address for sparkfun CCS811 BMX280 combo board
+CFLAGS += -DCCS811_PARAM_I2C_ADDR=CCS811_I2C_ADDRESS_2
+
 CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"
 CFLAGS += -DBROKER_PORT=$(BROKER_PORT)
 CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
+
+CFLAGS += -DNODE_SUIT_VENDOR="\"$(SUIT_VENDOR)\""
+CFLAGS += -DNODE_SUIT_VERSION="\"$(APP_VER)\""
 
 # Set a custom channel if needed
 ifneq (,$(filter cc110x,$(USEMODULE)))          # radio is cc110x sub-GHz
