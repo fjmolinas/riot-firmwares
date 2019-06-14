@@ -40,17 +40,18 @@ def list_from_string(list_str=None):
     return [v for v in value if v]
 
 
-def make_reset(board, cwd_dir, port):
+def make_reset(board, cwd_dir, port, make_args):
     logger.info('Reseting board {}'.format(board))
     cmd = ['make', 'reset', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
+    cmd.extend(make_args)
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL)
 
 
-def make_term(board, app_dir):
+def make_term(board, app_dir, port):
     logger.info('Setting up Terminal {}'.format(board))
-    cmd = ['make', 'term', 'BOARD={}'.format(board)]
+    cmd = ['make', 'term', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
     process = pexpect.spawn(' '.join(cmd), cwd=os.path.expanduser(app_dir), encoding='utf-8')
     return process
 
@@ -106,6 +107,8 @@ PARSER.add_argument('--flash-only', default=False, action='store_true',
                     help='Flashes target node , Default False')
 PARSER.add_argument('--port', default='/dev/ttyACM0',
                     help='Node serial port.')
+PARSER.add_argument('--serial',
+                    help='device DEBUG_ADAPTER_ID.')
 PARSER.add_argument('--server', default='[fd00:dead:beef::1]',
                     help='Server url.')
 
@@ -128,14 +131,17 @@ if __name__ == "__main__":
     tags        = args.tags
     http        = args.http
 
+    if args.serial is not None:
+        make_args.append("DEBUG_ADAPTER_ID={}".format(args.serial))
+
     term = None
 
     try:
         while True:
             # Reset Device to demo start up and open terminal
             make_flash_only(board, app_base, make_args)
-            term = make_term(board, app_base)
-            make_reset(board, app_base, port)
+            term = make_term(board, app_base, port)
+            make_reset(board, app_base, port, make_args)
 
             # Get device global address
             term.expect(r'inet6 addr: (?P<gladdr>[0-9a-fA-F:]+:[A-Fa-f:0-9]+)'
@@ -162,4 +168,4 @@ if __name__ == "__main__":
                 logger.info("Killing process pid: {}".format(term_pid))
                 os.kill(term_pid, signal.SIGKILL)
             except:
-                logger.info("Failed to stop process {}".format(term))  
+                logger.info("Failed to stop process {}".format(term))
