@@ -242,3 +242,5 @@ if __name__ == "__main__":
                     subprocess.check_call(["sudo", "kill", '-{}'.format(gpid)])
                 except:
                     logger.info("Failed to stop process {}".format(process.pid))
+            cmd = ['fuser', '-k', port_ethos, port_node]
+            subprocess.call(cmd)

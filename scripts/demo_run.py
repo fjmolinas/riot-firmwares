@@ -9,9 +9,9 @@ import subprocess
 import sys
 import time
 
-DEMO_RESET     = 300
+DEMO_RESET     = 5
 DEMO_PERIOD    = 1
-TIMEOUT        = 10
+TIMEOUT        = 15
 
 LOG_HANDLER = logging.StreamHandler()
 LOG_HANDLER.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
@@ -169,3 +169,6 @@ if __name__ == "__main__":
                 os.kill(term_pid, signal.SIGKILL)
             except:
                 logger.info("Failed to stop process {}".format(term))
+            cmd = ['fuser', '-k', port]
+            subprocess.call(cmd)
+
