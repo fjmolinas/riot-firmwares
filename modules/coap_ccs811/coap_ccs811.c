@@ -73,42 +73,31 @@ void ccs811_handler(void *args)
     (void) args;
 
     if (use_eco2) {
-        char eco2_buf[16] = { '\0' };
-        ssize_t p = 0;
+        ssize_t p1 = 0;
+        ssize_t p2 = 0;
         uint16_t eco2;
         ccs811_read_iaq(&ccs811_dev, NULL, &eco2, NULL, NULL);
-        p += sprintf((char*)&response[p], "eco2:");
-        p += sprintf((char*)&response[p], "%ippm", eco2);
-        response[p] = '\0';
-        memcpy(eco2_buf, response, p--);
-#ifdef MODULE_TFT_DISPLAY
-        msg_t meco2;
-        meco2.type = TFT_DISPLAY_ECO2;
-        meco2.content.ptr = eco2_buf;
-        msg_send(&meco2, *(tft_get_pid()));
-        thread_yield();
-#endif
+        p1 = sprintf((char*)&response[p1], "eco2:");
+        p2 = sprintf((char*)&response[p1], "%.4ippm", eco2);
+        response[p1 + p2] = '\0';
         send_coap_post((uint8_t*)"/server", response);
+#ifdef MODULE_TFT_DISPLAY
+        display_send_str(TFT_DISPLAY_ECO2, (char*) (response + p1), p2);
+#endif
     }
 
     if (use_tvoc) {
-        char tvoc_buf[16] = { '\0' };
-        ssize_t p = 0;
+        ssize_t p1 = 0;
+        ssize_t p2 = 0;
         uint16_t tvoc;
         ccs811_read_iaq(&ccs811_dev, &tvoc, NULL, NULL, NULL);
-        p += sprintf((char*)&response[p], "tvoc:");
-        p += sprintf((char*)&response[p], "%ippb", tvoc);
-        response[p] = '\0';
-        memcpy(tvoc_buf, response, p--);
-#ifdef MODULE_TFT_DISPLAY
-        msg_t mtvoc;
-        mtvoc.type = TFT_DISPLAY_TVOC;
-        mtvoc.content.ptr = tvoc_buf;
-        // printf("TVOC: %s\n", tvoc_buf);
-        msg_send(&mtvoc, *(tft_get_pid()));
-        thread_yield();
-#endif
+        p1 = sprintf((char*)&response[p1], "tvoc:");
+        p2 = sprintf((char*)&response[p1], "%.4ippb", tvoc);
+        response[p1 + p2] = '\0';
         send_coap_post((uint8_t*)"/server", response);
+#ifdef MODULE_TFT_DISPLAY
+        display_send_str(TFT_DISPLAY_TVOC, (char*) (response + p1), p2);
+#endif
     }
 }
 

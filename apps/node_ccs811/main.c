@@ -85,7 +85,6 @@ int main(void)
     init_st7735_printer(&ucg);
 #endif
 
-
     /* start coap server loop */
     gcoap_register_listener(&_listener);
 

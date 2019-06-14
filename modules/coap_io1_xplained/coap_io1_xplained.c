@@ -88,9 +88,7 @@ void *io1_xplained_thread(void *args)
         p += sprintf((char*)&response[p], "temperature:%i°C",
                      temperature);
 #ifdef MODULE_TFT_DISPLAY
-        m.type = TFT_DISPLAY_TEMP;
-        m.content.value = temperature;
-        msg_send(&m, *(tft_get_pid()));
+        display_send_str(TFT_DISPLAY_TEMP, (char*) response , p);
 #endif
         response[p] = '\0';
         send_coap_post((uint8_t*)"/server", (uint8_t*)response);

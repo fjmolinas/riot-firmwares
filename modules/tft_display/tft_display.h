@@ -68,17 +68,15 @@ enum {
 #endif
 #endif
 
-void tft_puts(ucg_t* ucg, char* str_data, uint8_t offset_x,
-                     uint8_t offset_y, uint8_t center);
-
-void tft_print_int(ucg_t * ucg, int data, uint8_t offset_x,
-                      uint8_t offset_y, uint8_t center);
-
 void init_st7735_printer(ucg_t* ucg);
 
 ucg_t* tft_get_ptr(void);
 
-int* tft_get_pid(void);
+int tft_get_pid(void);
+
+void display_send_str(uint16_t type, char* str, uint8_t len);
+
+void display_send_val(uint16_t type, uint32_t value);
 
 #ifdef __cplusplus
 }

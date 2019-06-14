@@ -89,62 +89,52 @@ ssize_t bmx280_humidity_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void 
 void bmx280_handler(void *args)
 {
     (void)args;
-#ifdef MODULE_TFT_DISPLAY
-    msg_t m;
-#endif
-
     if (use_temperature) {
-        ssize_t p = 0;
+        ssize_t p1 = 0;
+        ssize_t p2 = 0;
         int16_t temp = bmx280_read_temperature(&bmx280_dev);
         bool negative = (temp < 0);
         if (negative) {
             temp = -temp;
         }
-        p += sprintf((char*)&response[p], "temperature:");
-        p += sprintf((char*)&response[p], "%s%d.%d°C",
+        p1 = sprintf((char*)&response[p1], "temperature:");
+        p2 = sprintf((char*)&response[p1], "%s%2d.%02d°C",
                         negative ? "-" : "",
                         temp / 100, (temp % 100) /10);
-        response[p] = '\0';
+        response[p1 + p2] = '\0';
 #ifdef MODULE_TFT_DISPLAY
-        m.type = TFT_DISPLAY_TEMP;
-        m.content.ptr = response;
-        msg_send(&m, *(tft_get_pid()));
-        thread_yield();
+        display_send_str(TFT_DISPLAY_TEMP, (char*) response + p1, p2);
 #endif
         send_coap_post((uint8_t*)"/server", response);
     }
 
     if (use_pressure) {
-        ssize_t p = 0;
+        ssize_t p1 = 0;
+        ssize_t p2 = 0;
         uint32_t pres = bmx280_read_pressure(&bmx280_dev);
-        p += sprintf((char*)&response[p], "pressure:");
-        p += sprintf((char*)&response[p], "%lu.%dhPa",
+        p1 = sprintf((char*)&response[p1], "pressure:");
+        p2 = sprintf((char*)&response[p1], "%lu.%dhPa",
                         (unsigned long)pres / 100,
                         (int)pres % 100);
-        response[p] = '\0';
+        response[p1 + p2] = '\0';
 #ifdef MODULE_TFT_DISPLAY
-        m.type = TFT_DISPLAY_PRES;
-        m.content.ptr = response;
-        msg_send(&m, *(tft_get_pid()));
-        thread_yield();
+        display_send_str(TFT_DISPLAY_PRES, (char*) response + p1, p2);
 #endif
         send_coap_post((uint8_t*)"/server", response);
     }
 
 #ifdef MODULE_BME280
     if (use_humidity) {
-        ssize_t p = 0;
+        ssize_t p1 = 0;
+        ssize_t p2 = 0;
         uint16_t hum = bme280_read_humidity(&bmx280_dev);
-        p += sprintf((char*)&response[p], "humidity:");
-        p += sprintf((char*)&response[p], "%u.%02u%%",
+        p1 = sprintf((char*)&response[p1], "humidity:");
+        p2 = sprintf((char*)&response[p1], "%u.%02u%%",
                         (unsigned int)(hum / 100),
                         (unsigned int)(hum % 100));
-        response[p] = '\0';
+        response[p1 + p2] = '\0';
 #ifdef MODULE_TFT_DISPLAY
-        m.type = TFT_DISPLAY_HUM;
-        m.content.ptr = response;
-        msg_send(&m, *(tft_get_pid()));
-        thread_yield();
+        display_send_str(TFT_DISPLAY_HUM, (char*) response + p1, p2);
 #endif
         send_coap_post((uint8_t*)"/server", response);
     }

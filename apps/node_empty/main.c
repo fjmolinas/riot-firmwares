@@ -77,10 +77,7 @@ int main(void)
     ucg_t ucg;
     /* start tft displays*/
     init_st7735_printer(&ucg);
-
-    msg_t msg;
-    msg.type = TFT_DISPLAY_HELLO;
-    msg_send(&msg, *(tft_get_pid()));
+    display_send_val(TFT_DISPLAY_HELLO, 0);
 #endif
 
     /* start coap server loop */
