@@ -16,6 +16,7 @@ SUIT_DIR  = os.path.dirname(sys.argv[0])
 RIOT_DIR  = os.path.abspath(os.path.join(SUIT_DIR, '../../RIOT'))
 BASE_DIR  = os.path.abspath(os.path.join(SUIT_DIR, '..'))
 COAPROOT  = os.path.join(BASE_DIR, 'firmwares/ota')
+BIN_DIR   = os.path.join(BASE_DIR, 'firmwares/setup')
 OTASERVER = os.path.join(BASE_DIR, '../ota-server')
 OTA_SERVER_MAKEFILE = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
@@ -72,14 +73,6 @@ def make_genkey(cwd_dir):
     subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
                     stdout=subprocess.DEVNULL)
 
-
-def make_reset(board, cwd_dir, port):
-    logger.info('Reseting board {}'.format(board))
-    cmd = ['make', 'reset', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
-    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
-                    stdout=subprocess.DEVNULL)
-
-
 def make_flash(board, cwd_dir, make_args):
     logger.info('Initial Flash of {}'.format(board))
     cmd = ['make', 'clean', 'riotboot/flash-extended-slot0',
@@ -88,12 +81,25 @@ def make_flash(board, cwd_dir, make_args):
     subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
-def make_flash_only(board, cwd_dir, make_args):
-    logger.info('Initial Flash of {}'.format(board))
-    cmd = ['make', 'riotboot/flash-only-extended-slot0',
-           'BOARD={}'.format(board)]
-    cmd.extend(make_args)
+def make_start_bin(board, cwd_dir):
+    cmd = ['mkdir', '-p', '{}/{}/'.format(BIN_DIR, board)]
     subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+    cmd = ['cp', 'bin/{}/node_empty-slot0-extended.bin'.format(board),
+           '{}/{}/'.format(BIN_DIR, board)]
+    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+
+
+def update_pi(rpi):
+    cmd = ['scp', '-r', '{}/'.format(BIN_DIR),
+           'pi@{}:/opt/src/riot-firmwares/firmwares'.format(rpi)]
+    subprocess.call(cmd, cwd=BASE_DIR)
+
+
+def make_reset(board, cwd_dir, port):
+    logger.info('Reseting board {}'.format(board))
+    cmd = ['make', 'reset', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
+    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
+                    stdout=subprocess.DEVNULL)
 
 
 def make_publish(board, server_url, cwd_dir, make_args, mode, tag):
@@ -136,10 +142,6 @@ PARSER.add_argument('--loglevel', choices=LOG_LEVELS, default='info',
                     help='Python logger log level')
 PARSER.add_argument('--make', type=list_from_string, default=None,
                     help='Additional make arguments')
-PARSER.add_argument('--flash', default=False, action='store_true',
-                    help='Flashes target node with new firmware, Default False')
-PARSER.add_argument('--flash-only', default=False, action='store_true',
-                    help='Flashes target node , Default False')
 PARSER.add_argument('--port-ethos', default='/dev/ttyUSB1',
                     help='Ethos serial port.')
 PARSER.add_argument('--port-node', default='/dev/ttyACM0',
@@ -148,10 +150,14 @@ PARSER.add_argument('--prefix', default='2001:db8::1/64',
                     help='Prefix to propagate over ethos.')
 PARSER.add_argument('--publish', default=False, action='store_true',
                     help='Published new Firmware , Default=False')
+PARSER.add_argument('--rpi', default=None,
+                    help='update Rpi files')
 PARSER.add_argument('--riot_dir', default=RIOT_DIR,
                     help='Base Directory for RIOT')
 PARSER.add_argument('--server', default='[fd00:dead:beef::1]',
                     help='Server url.')
+PARSER.add_argument('--start-bin', default=False, action='store_true',
+                    help='Makes and copies the start bin to firmwares/setup/')
 PARSER.add_argument('--tags', type=list_from_string, default='latest',
                     help='List of manifest tags to publish')
 
@@ -205,13 +211,9 @@ if __name__ == "__main__":
                 make_genkey(app_dir)
 
         # Provide node, initial flash
-        if args.flash is True:
+        if args.start_bin is True:
             make_flash(board_node, app_base, make_args)
-            make_reset(board_node, app_base, port_node)
-
-        # Flash only
-        if args.flash_only is True:
-            make_flash_only(board_node, app_base, make_args)
+            make_start_bin(board_node, app_base)
             make_reset(board_node, app_base, port_node)
 
         # Publish firmware(s)
@@ -224,6 +226,10 @@ if __name__ == "__main__":
                 for i in range(0, len(app_dirs)):
                     make_publish(board_node, host, app_dirs[i], make_args, http,
                                  "latest-{}".format(i))
+
+        # Copy firmware(s) to pi
+        if args.rpi is not None:
+            update_pi(args.rpi)
 
         # Run tests and keep running if fileserver or ethos were setup
         if args.ethos is True or args.fileserver is True:

@@ -19,11 +19,13 @@ LOG_LEVELS = ('debug', 'info', 'warning', 'error')
 
 SUIT_DIR = os.path.dirname(sys.argv[0])
 BASE_DIR = os.path.abspath(os.path.join(SUIT_DIR, '..'))
+BIN_DIR   = os.path.join(BASE_DIR, 'firmwares/setup')
 COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
 
 OTA_SERVER_MAKEFILE = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
 START_APP = 'node/empty'
+BIN_FILE = 'samr21-xpro/node_empty-slot0-extended.bin'
 
 def wait_for_update(child):
     try:
@@ -70,6 +72,13 @@ def make_flash_only(board, cwd_dir, make_args):
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
+def make_flash_bin(board, cwd_dir, binfile, make_args):
+    logger.info('Initial Flash of {}'.format(board))
+    cmd = ['make', 'BINFILE={}'.format(binfile), 'flash-only',
+           'BOARD={}'.format(board)]
+    cmd.extend(make_args)
+    assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+
 def notify(board, server_url, client_url, cwd_dir, mode, tag):
 
     if mode is True:
@@ -93,6 +102,8 @@ PARSER.add_argument('tags', type=list_from_string,
                     help='List of firmwares to loop over')
 PARSER.add_argument('--app-base', default='apps/node_empty',
                     help='List of applications publish')
+PARSER.add_argument('--binfile', default=os.path.join(BIN_DIR, BIN_FILE),
+                    help='Start binfile absolute location')
 PARSER.add_argument('--board', default='samr21-xpro',
                     help='Board to test')
 PARSER.add_argument('--http', default=False, action='store_true',
@@ -105,6 +116,8 @@ PARSER.add_argument('--flash', default=False, action='store_true',
                     help='Flashes target node with new firmware, Default False')
 PARSER.add_argument('--flash-only', default=False, action='store_true',
                     help='Flashes target node , Default False')
+PARSER.add_argument('--flash-bin', default=False, action='store_true',
+                    help='Flashes specific bin file, Default False')
 PARSER.add_argument('--port', default='/dev/ttyACM0',
                     help='Node serial port.')
 PARSER.add_argument('--serial',
@@ -124,6 +137,7 @@ if __name__ == "__main__":
     logger.addHandler(LOG_HANDLER)
 
     app_base    = args.app_base
+    binfile     = args.binfile
     board       = args.board
     host        = args.server
     port        = args.port
@@ -138,8 +152,14 @@ if __name__ == "__main__":
 
     try:
         while True:
-            # Reset Device to demo start up and open terminal
-            make_flash_only(board, app_base, make_args)
+
+            # Reset Device to demo start state
+            if args.flash_bin is True:
+                make_flash_bin(board, app_base, binfile, make_args)
+            else:
+                make_flash_only(board, app_base, make_args)
+
+            # Open terminal
             term = make_term(board, app_base, port)
             make_reset(board, app_base, port, make_args)
 

@@ -222,14 +222,14 @@ void *tft_display_thread(void *args)
                 tft_puts(tft_get_ptr(),"TEMP: ", m.content.ptr, NULL, 64, 66, 1);
                 display_release();
                 break;
-            case TFT_DISPLAY_HUM:
-                ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
-                tft_puts(tft_get_ptr(),"HUM: ", m.content.ptr, NULL, 64, 78, 1);
-                display_release();
-                break;
             case TFT_DISPLAY_PRES:
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
-                tft_puts(tft_get_ptr(),"PRES: ", m.content.ptr, NULL, 64, 90, 1);
+                tft_puts(tft_get_ptr(),"PRES: ", m.content.ptr, NULL, 64, 78, 1);
+                display_release();
+                break;
+            case TFT_DISPLAY_HUM:
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont15_mr);
+                tft_puts(tft_get_ptr(),"HUM: ", m.content.ptr, NULL, 64, 90, 1);
                 display_release();
                 break;
             case TFT_DISPLAY_ECO2:
@@ -252,20 +252,20 @@ void *tft_display_thread(void *args)
             case SUIT_TRIGGER:
                 _clear_logo_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "UPDATE", NULL, NULL,  63, 20, 1);
-                tft_puts(tft_get_ptr(), "STARTING", NULL, NULL,  63, 34, 1);
+                tft_puts(tft_get_ptr(), "UPDATE", NULL, NULL,  63, 24, 1);
+                tft_puts(tft_get_ptr(), "STARTING", NULL, NULL,  63, 38, 1);
                 break;
             case SUIT_SIGNATURE_START:
                 _clear_logo_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "VERIFYING", NULL, NULL,  63, 20, 1);
-                tft_puts(tft_get_ptr(), "SIGNATURE", NULL, NULL,  63, 34, 1);
+                tft_puts(tft_get_ptr(), "VERIFYING", NULL, NULL,  63, 24, 1);
+                tft_puts(tft_get_ptr(), "SIGNATURE", NULL, NULL,  63, 38, 1);
                 break;
             case SUIT_REBOOT:
                 _clear_logo_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "UPDATE", NULL, NULL,  63, 20, 1);
-                tft_puts(tft_get_ptr(), "FINALIZED", NULL, NULL,  63, 34, 1);
+                tft_puts(tft_get_ptr(), "UPDATE", NULL, NULL,  63, 24, 1);
+                tft_puts(tft_get_ptr(), "FINALIZED", NULL, NULL,  63, 38, 1);
                 break;
             case SUIT_DOWNLOAD_START:
                 _clear_logo_area(tft_get_ptr());
