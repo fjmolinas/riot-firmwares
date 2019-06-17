@@ -1,5 +1,11 @@
 PSEUDOMODULES += shell_common
 
+ifeq (1, $(RPI))
+  DEFAULT_CHANNEL ?= 16
+  BROKER_ADDR ?= fd00:ab:ad:1e::1
+  BROKER_PORT ?= 5684
+endif
+
 ifeq (1, $(USE_SUIT))
   USEMODULE += coap_suit
 endif
