@@ -75,7 +75,7 @@ def make_genkey(cwd_dir):
 
 def make_flash(board, cwd_dir, make_args):
     logger.info('Initial Flash of {}'.format(board))
-    cmd = ['make', 'clean', 'riotboot/flash-extended-slot0',
+    cmd = ['make', 'FLASHFILE=$(RIOTBOOT_COMBINED_BIN)', 'clean', 'flash',
            'BOARD={}'.format(board)]
     cmd.extend(make_args)
     subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
@@ -106,7 +106,7 @@ def make_publish(board, server_url, cwd_dir, make_args, mode, tag):
     logger.info('Publishing  %s Firmware to %s', cwd_dir, server_url)
     if mode is True:
         cmd = ['make','suit/publish', 'BOARD={}'.format(board),
-            'SUIT_PUBLISH_ID={}'.format(tag),
+            'APPLICATION={}'.format(tag),
             'SUIT_OTA_SERVER_URL={}'.format(server_url),
             'SUIT_MAKEFILE={}'.format(OTA_SERVER_MAKEFILE)]
     else:

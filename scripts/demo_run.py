@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 
-DEMO_RESET     = 5
+DEMO_RESET     = 5*60
 DEMO_PERIOD    = 1
 TIMEOUT        = 15
 
@@ -32,6 +32,7 @@ def wait_for_update(child):
         while True:
             child.expect(r"riotboot_flashwrite: processing bytes (\d+)-(\d+)",
                          timeout=TIMEOUT)
+            logger.debug(child.after)
     except pexpect.TIMEOUT:
         child.expect_exact(
             "riotboot_flashwrite: riotboot flashing completed successfully",
@@ -54,20 +55,23 @@ def make_reset(board, cwd_dir, port, make_args):
 def make_term(board, app_dir, port):
     logger.info('Setting up Terminal {}'.format(board))
     cmd = ['make', 'term', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
-    process = pexpect.spawn(' '.join(cmd), cwd=os.path.expanduser(app_dir), encoding='utf-8')
+    process = pexpect.spawn(' '.join(cmd), cwd=os.path.expanduser(app_dir),
+                            encoding='utf-8')
     return process
 
 
 def make_flash(board, cwd_dir, make_args):
     logger.info('Initial Flash of {}'.format(board))
-    cmd = ['make', 'clean', 'riotboot/flash-extended-slot0', 'BOARD={}'.format(board)]
+    cmd = ['make', 'FLASHFILE=$(RIOTBOOT_COMBINED_BIN)' 'clean', 'flash',
+           'BOARD={}'.format(board)]
     cmd.extend(make_args)
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
 def make_flash_only(board, cwd_dir, make_args):
     logger.info('Initial Flash of {}'.format(board))
-    cmd = ['make', 'riotboot/flash-only-extended-slot0', 'BOARD={}'.format(board)]
+    cmd = ['make', 'FLASHFILE=$(RIOTBOOT_COMBINED_BIN)', 'flash-only',
+           'BOARD={}'.format(board)]
     cmd.extend(make_args)
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
@@ -83,7 +87,7 @@ def notify(board, server_url, client_url, cwd_dir, mode, tag):
 
     if mode is True:
         cmd = ['make','suit/notify', 'BOARD={}'.format(board),
-            'SUIT_PUBLISH_ID={}'.format(tag),
+            'APPLICATION={}'.format(tag),
             'SUIT_OTA_SERVER_URL={}'.format(server_url),
             'SUIT_CLIENT={}'.format(client_url),
             'SUIT_MAKEFILE={}'.format(OTA_SERVER_MAKEFILE)]
@@ -156,7 +160,7 @@ if __name__ == "__main__":
             # Reset Device to demo start state
             if args.flash_bin is True:
                 make_flash_bin(board, app_base, binfile, make_args)
-            else:
+            if args.flash_only is True:
                 make_flash_only(board, app_base, make_args)
 
             # Open terminal
@@ -175,7 +179,7 @@ if __name__ == "__main__":
                 term.expect_exact('suit_coap: started.', timeout=TIMEOUT)
                 notify(board, host, client, app_base, http, tag)
                 wait_for_update(term)
-            
+
             time.sleep(DEMO_RESET)
 
     except SystemExit as e:
