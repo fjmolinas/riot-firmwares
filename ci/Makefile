@@ -2,14 +2,14 @@ APPLICATION ?= tests_$(notdir $(patsubst %/,%,$(CURDIR)))
 
 BOARD ?= samr21-xpro
 
-RIOTBASE ?= $(CURDIR)/../../RIOT
+RIOTBASE ?= $(CURDIR)/../RIOT
 
 # SUIT update specific stuff
 USEMODULE += suit_v4
 FEATURES_REQUIRED += riotboot
 
 # Change this to 0 to not use ethos
-USE_ETHOS ?= 1
+USE_ETHOS ?= 0
 
 ifeq (1,$(USE_ETHOS))
 TAP ?= tap0
