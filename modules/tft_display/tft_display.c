@@ -24,6 +24,7 @@
 
 #define TFT_DISPLAY_QUEUE_SIZE    (4)
 #define SUIT_FW_PROGRESS_CYCLE  (16U)
+#define SUIT_ERROR_DELAY        (5*US_PER_SEC)
 
 static msg_t _tft_display_msg_queue[TFT_DISPLAY_QUEUE_SIZE];
 static char tft_display_stack[THREAD_STACKSIZE_DEFAULT];
@@ -32,8 +33,8 @@ static mutex_t lock = MUTEX_INIT;
 static char msg_data_buffer[16];
 
 static gpio_t pins[] = {
-    [UCG_PIN_CS] = TFT_PIN_CS,
-    [UCG_PIN_CD] = TFT_PIN_CD,
+    [UCG_PIN_CS]  = TFT_PIN_CS,
+    [UCG_PIN_CD]  = TFT_PIN_CD,
     [UCG_PIN_RST] = TFT_PIN_RESET
 };
 
@@ -196,8 +197,11 @@ void *tft_display_thread(void *args)
 #endif
 
     msg_t m;
+    msg_t m_tx;
+    xtimer_t timer;
 #ifdef MODULE_SUITREG
-    suitreg_t entry = SUITREG_INIT_PID(SUITREG_TYPE_STATUS, thread_getpid());
+    suitreg_t entry = SUITREG_INIT_PID(SUITREG_TYPE_STATUS | SUITREG_TYPE_ERROR,
+                                       thread_getpid());
     suitreg_register(&entry);
     uint8_t count = 0;
 #endif
@@ -248,21 +252,50 @@ void *tft_display_thread(void *args)
                 tft_puts(tft_get_ptr(), "H E L L O", NULL, NULL, 63, 70, 1);
                 tft_puts(tft_get_ptr(), "W O R L D !!", NULL, NULL,  63, 90, 1);
                 break;
+            case TFT_DISPLAY_LOGO:
+                _draw_riot_logo(tft_get_ptr(), 16, 14);
+                break;
 #ifdef MODULE_SUITREG
             case SUIT_TRIGGER:
                 _clear_logo_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
-                tft_puts(tft_get_ptr(), "UPDATE", NULL, NULL,  63, 24, 1);
+                tft_puts(tft_get_ptr(), "  UPDATE  ", NULL, NULL,  63, 24, 1);
                 tft_puts(tft_get_ptr(), "STARTING", NULL, NULL,  63, 38, 1);
                 break;
             case SUIT_SIGNATURE_START:
-                _clear_logo_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "VERIFYING", NULL, NULL,  63, 24, 1);
                 tft_puts(tft_get_ptr(), "SIGNATURE", NULL, NULL,  63, 38, 1);
                 break;
+            case SUIT_SIGNATURE_ERROR:
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "SIGNATURE", NULL, NULL,  63, 24, 1);
+                tft_puts(tft_get_ptr(), "  ERROR  ", NULL, NULL,  63, 38, 1);
+                m_tx.type = TFT_DISPLAY_LOGO;
+                xtimer_set_msg(&timer, SUIT_ERROR_DELAY, &m_tx, thread_getpid());
+                break;
+            case SUIT_SEQ_NR_ERROR:
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "  INVALID  ", NULL, NULL,  63, 24, 1);
+                tft_puts(tft_get_ptr(), "SEQUENCE NUMBER", NULL, NULL,  63, 38, 1);
+                m_tx.type = TFT_DISPLAY_LOGO;
+                xtimer_set_msg(&timer, SUIT_ERROR_DELAY, &m_tx, thread_getpid());
+                break;
+            case SUIT_DIGEST_START:
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "VERIFYING", NULL, NULL,  63, 24, 1);
+                tft_puts(tft_get_ptr(), " DIGEST ", NULL, NULL,  63, 38, 1);
+                m_tx.type = TFT_DISPLAY_LOGO;
+                xtimer_set_msg(&timer, SUIT_ERROR_DELAY, &m_tx, thread_getpid());
+                break;
+            case SUIT_DIGEST_ERROR:
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "INVALID", NULL, NULL,  63, 24, 1);
+                tft_puts(tft_get_ptr(), " DIGEST ", NULL, NULL,  63, 38, 1);
+                m_tx.type = TFT_DISPLAY_LOGO;
+                xtimer_set_msg(&timer, SUIT_ERROR_DELAY, &m_tx, thread_getpid());
+                break;
             case SUIT_REBOOT:
-                _clear_logo_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "UPDATE", NULL, NULL,  63, 24, 1);
                 tft_puts(tft_get_ptr(), "FINALIZED", NULL, NULL,  63, 38, 1);
@@ -283,7 +316,13 @@ void *tft_display_thread(void *args)
                 }
                 count++;
                 count = count % SUIT_FW_PROGRESS_CYCLE;
-
+                break;
+            case SUIT_DOWNLOAD_ERROR:
+                ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
+                tft_puts(tft_get_ptr(), "FAILED", NULL, NULL,  63, 24, 1);
+                tft_puts(tft_get_ptr(), "DOWNLOAD", NULL, NULL,  63, 38, 1);
+                m_tx.type = TFT_DISPLAY_LOGO;
+                xtimer_set_msg(&timer, SUIT_ERROR_DELAY, &m_tx, thread_getpid());
                 break;
 #endif
             default:

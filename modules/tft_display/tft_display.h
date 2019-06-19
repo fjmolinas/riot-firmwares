@@ -9,20 +9,15 @@ extern "C" {
 #endif
 
 enum {
-// suit related display messages
-    TFT_DISPLAY_TRIGGER = 0x00,
-    TFT_DISPLAY_SIGNATURE = 0x01,
-    TFT_DISPLAY_END = 0x02,
-    TFT_DISPLAY_SIZE_UPDATE = 0x03,
-    TFT_DISPLAY_SIZE = 0x04,
-// application related display messages
-    TFT_DISPLAY_LED = 0xA0,
-    TFT_DISPLAY_TEMP = 0xA1,
-    TFT_DISPLAY_PRES = 0xA2,
-    TFT_DISPLAY_HUM = 0xA3,
-    TFT_DISPLAY_HELLO = 0xA4,
-    TFT_DISPLAY_TVOC = 0xA5,
-    TFT_DISPLAY_ECO2 = 0xA6,
+/* application related display messages */
+    TFT_DISPLAY_LOGO  = 0xA0,
+    TFT_DISPLAY_LED   = 0xA1,
+    TFT_DISPLAY_TEMP  = 0xA2,
+    TFT_DISPLAY_PRES  = 0xA3,
+    TFT_DISPLAY_HUM   = 0xA4,
+    TFT_DISPLAY_HELLO = 0xA5,
+    TFT_DISPLAY_TVOC  = 0xA6,
+    TFT_DISPLAY_ECO2  = 0xA7,
 };
 
 #ifndef APPLICATION_NAME
