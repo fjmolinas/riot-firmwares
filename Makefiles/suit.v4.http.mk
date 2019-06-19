@@ -3,7 +3,8 @@
 SUIT_PUBLISH_ID ?= $(BOARD)_$(APPLICATION)
 
 # Some requirements to publish and notify updates to the server
-SUIT_OTA_SERVER_URL ?= http://localhost:8080
+SUIT_COAP_SERVER ?= localhost
+SUIT_OTA_SERVER_URL ?= http://$(SUIT_COAP_SERVER):8080
 SUIT_OTA_SERVER_COAP_URL_EP ?= coap/url
 
 # The OTA server knows where the device can fetch the slots and manifest
