@@ -24,7 +24,6 @@ COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
 
 OTA_SERVER_MAKEFILE = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
-START_APP = 'node/empty'
 BIN_FILE = 'samr21-xpro/node_empty-slot0-extended.bin'
 
 def wait_for_update(child):

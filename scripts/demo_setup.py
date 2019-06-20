@@ -5,6 +5,7 @@ import os
 import logging
 import subprocess
 import argparse
+import glob
 import time
 
 
@@ -19,15 +20,6 @@ COAPROOT  = os.path.join(BASE_DIR, 'firmwares/ota')
 BIN_DIR   = os.path.join(BASE_DIR, 'firmwares/setup')
 OTASERVER = os.path.join(BASE_DIR, '../ota-server')
 OTA_SERVER_MAKEFILE = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
-
-def get_make_args(jobs, args):
-    if jobs is not None:
-        make_args = ['-j' + str(jobs)]
-    else:
-        make_args = ['-j1']
-    if args is not None:
-        make_args.extend(args)
-    return make_args
 
 
 def list_from_string(list_str=None):
@@ -73,20 +65,26 @@ def make_genkey(cwd_dir):
     subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
                     stdout=subprocess.DEVNULL)
 
-def make_flash(board, cwd_dir, make_args):
-    logger.info('Initial Flash of {}'.format(board))
-    cmd = ['make', 'FLASHFILE=$(RIOTBOOT_COMBINED_BIN)', 'clean', 'flash',
+def make_flash(board, start_app, make_args):
+    logger.info('Initial build of {}'.format(board))
+    cmd = ['make', 'FLASHFILE=$(RIOTBOOT_EXTENDED_BIN)', 'clean', 'flash',
            'BOARD={}'.format(board)]
     cmd.extend(make_args)
-    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, start_app))
 
 
-def make_start_bin(board, cwd_dir):
+def start_bin(board, start_app, start_bin):
     cmd = ['mkdir', '-p', '{}/{}/'.format(BIN_DIR, board)]
-    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
-    cmd = ['cp', 'bin/{}/node_empty-slot0-extended.bin'.format(board),
-           '{}/{}/'.format(BIN_DIR, board)]
-    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+    subprocess.call(cmd)
+    files = glob.glob('{}/{}/bin/{}/*-slot0-extended.bin'.format(BASE_DIR,
+                                                                 start_app,
+                                                                 board))
+    if files:
+        cmd = ['cp', files[0], '{}/{}/'.format(BIN_DIR, board)]
+        subprocess.call(cmd)
+    if start_bin:
+        cmd = ['mv', os.path.basename(files[0]), '{}.bin'.format(start_bin)]
+        subprocess.call(cmd, cwd='{}/{}/'.format(BIN_DIR, board))
 
 
 def update_pi(rpi):
@@ -123,8 +121,6 @@ PARSER = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 PARSER.add_argument('--applications', default='apps/node_leds',
                     help='List of applications publish', type=list_from_string)
-PARSER.add_argument('--app-base', default='apps/node_empty',
-                    help='List of applications publish')
 PARSER.add_argument('--board-node', default='samr21-xpro',
                     help='Board to test')
 PARSER.add_argument('--board-ethos', default='iotlab-m3',
@@ -135,13 +131,11 @@ PARSER.add_argument('--http', default=False, action='store_true',
                     help='Use http server')
 PARSER.add_argument('--fileserver', default=False, action='store_true',
                     help='Start fileserver, Default=True')
-PARSER.add_argument('--jobs', '-j', type=int, default=None,
-                    help="Parallel building (0 means no limit, like '--jobs')")
 PARSER.add_argument('--keys', default=False, action='store_true',
                     help='Remove old keys and generate new ones, Default False')
 PARSER.add_argument('--loglevel', choices=LOG_LEVELS, default='info',
                     help='Python logger log level')
-PARSER.add_argument('--make', type=list_from_string, default=None,
+PARSER.add_argument('--make', type=list_from_string, default='-j1',
                     help='Additional make arguments')
 PARSER.add_argument('--port-ethos', default='/dev/ttyUSB1',
                     help='Ethos serial port.')
@@ -151,16 +145,21 @@ PARSER.add_argument('--prefix', default='2001:db8::1/64',
                     help='Prefix to propagate over ethos.')
 PARSER.add_argument('--publish', default=False, action='store_true',
                     help='Published new Firmware , Default=False')
-PARSER.add_argument('--rpi', default=None,
-                    help='update Rpi files')
 PARSER.add_argument('--riot_dir', default=RIOT_DIR,
                     help='Base Directory for RIOT')
+PARSER.add_argument('--rpi', default=None,
+                    help='update Rpi files')
 PARSER.add_argument('--server', default='[fd00:dead:beef::1]',
                     help='Server url.')
+PARSER.add_argument('--start-app', default='apps/node_empty',
+                    help='Initial application')
 PARSER.add_argument('--start-bin', default=False, action='store_true',
-                    help='Makes and copies the start bin to firmwares/setup/')
+                    help='Save new start bin, Default=False')
+PARSER.add_argument('--start-bin-nm', default=None,
+                    help='Makes binary file \"<start_bin>.bin\" and copies it to'
+                         ' firmwares/setup/<board-node>')
 PARSER.add_argument('--tags', type=list_from_string, default='latest',
-                    help='List of manifest tags to publish')
+                    help='List of tag tags to publish')
 
 
 if __name__ == "__main__":
@@ -174,7 +173,6 @@ if __name__ == "__main__":
     logger.addHandler(LOG_HANDLER)
 
     app_dirs    = args.applications
-    app_base    = args.app_base
     riot_dir    = args.riot_dir
     board_node  = args.board_node
     board_ethos = args.board_ethos
@@ -183,15 +181,16 @@ if __name__ == "__main__":
     port_ethos  = args.port_ethos
     port_node   = args.port_node
     prefix      = args.prefix
-    make_args   = get_make_args(args.jobs, args.make)
+    make_args   = args.make
     tags        = args.tags
+    start_app   = args.start_app
 
     childs = []
 
     try:
         # Setup Ethos
         if args.ethos is True:
-            make_reset(board_ethos, app_base, port_ethos, make_args)
+            make_reset(board_ethos, start_app, port_ethos, make_args)
             ethos = setup_ethos(port_ethos, prefix, riot_dir)
             childs.append(ethos)
             time.sleep(1)
@@ -211,11 +210,10 @@ if __name__ == "__main__":
                 make_delkeys(app_dir)
                 make_genkey(app_dir)
 
-        # Provide node, initial flash
+        # Make new base
         if args.start_bin is True:
-            make_flash(board_node, app_base, make_args)
-            make_start_bin(board_node, app_base)
-            make_reset(board_node, app_base, port_node, make_args)
+            make_flash(board_node, start_app, make_args)
+            start_bin(board_node, start_app, args.start_bin_nm)
 
         # Publish firmware(s)
         if args.publish is True:
