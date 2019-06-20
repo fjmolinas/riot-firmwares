@@ -95,9 +95,10 @@ def update_pi(rpi):
     subprocess.call(cmd, cwd=BASE_DIR)
 
 
-def make_reset(board, cwd_dir, port):
+def make_reset(board, cwd_dir, port, make_args):
     logger.info('Reseting board {}'.format(board))
     cmd = ['make', 'reset', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
+    cmd.extend(make_args)
     subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
                     stdout=subprocess.DEVNULL)
 
@@ -190,7 +191,7 @@ if __name__ == "__main__":
     try:
         # Setup Ethos
         if args.ethos is True:
-            make_reset(board_ethos, app_base, port_ethos)
+            make_reset(board_ethos, app_base, port_ethos, make_args)
             ethos = setup_ethos(port_ethos, prefix, riot_dir)
             childs.append(ethos)
             time.sleep(1)
@@ -214,7 +215,7 @@ if __name__ == "__main__":
         if args.start_bin is True:
             make_flash(board_node, app_base, make_args)
             make_start_bin(board_node, app_base)
-            make_reset(board_node, app_base, port_node)
+            make_reset(board_node, app_base, port_node, make_args)
 
         # Publish firmware(s)
         if args.publish is True:
