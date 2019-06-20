@@ -82,17 +82,17 @@ def make_flash_bin(board, cwd_dir, binfile, make_args):
     cmd.extend(make_args)
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
-def notify(board, server_url, client_url, cwd_dir, mode, tag):
+def notify(board, server_url, client_url, cwd_dir, mode, manifest):
 
     if mode is True:
         cmd = ['make','suit/notify', 'BOARD={}'.format(board),
-            'APPLICATION={}'.format(tag),
+            'APPLICATION={}'.format(manifest),
             'SUIT_OTA_SERVER_URL={}'.format(server_url),
             'SUIT_CLIENT={}'.format(client_url),
             'SUIT_MAKEFILE={}'.format(OTA_SERVER_MAKEFILE)]
     else:
         cmd = ['make', 'suit/notify', 'BOARD={}'.format(board),
-            'SUIT_MANIFEST_SIGNED_LATEST={}'.format(tag),
+            'SUIT_MANIFEST_SIGNED_LATEST={}'.format(manifest),
             'SUIT_COAP_SERVER={}'.format(server_url),
             'SUIT_COAP_FSROOT={}'.format(COAPROOT),
             'SUIT_CLIENT={}'.format(client_url)]
@@ -101,7 +101,7 @@ def notify(board, server_url, client_url, cwd_dir, mode, tag):
 
 PARSER = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-PARSER.add_argument('tags', type=list_from_string,
+PARSER.add_argument('manifests', type=list_from_string,
                     help='List of firmwares to loop over')
 PARSER.add_argument('--app-base', default='apps/node_empty',
                     help='List of applications publish')
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     host        = args.server
     port        = args.port
     make_args   = args.make
-    tags        = args.tags
+    manifests   = args.manifests
     http        = args.http
 
     if args.serial is not None:
@@ -173,10 +173,10 @@ if __name__ == "__main__":
             # Leave some time for discovery discovery
             time.sleep(3)
 
-            for tag in tags:
+            for manifest in manifests:
                 time.sleep(DEMO_PERIOD)
                 term.expect_exact('suit_coap: started.', timeout=TIMEOUT)
-                notify(board, host, client, app_base, http, tag)
+                notify(board, host, client, app_base, http, manifest)
                 wait_for_update(term)
 
             time.sleep(DEMO_RESET)

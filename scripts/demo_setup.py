@@ -101,16 +101,16 @@ def make_reset(board, cwd_dir, port, make_args):
                     stdout=subprocess.DEVNULL)
 
 
-def make_publish(board, server_url, cwd_dir, make_args, mode, tag):
+def make_publish(board, server_url, cwd_dir, make_args, mode, manifest):
     logger.info('Publishing  %s Firmware to %s', cwd_dir, server_url)
     if mode is True:
         cmd = ['make','suit/publish', 'BOARD={}'.format(board),
-            'APPLICATION={}'.format(tag),
+            'APPLICATION={}'.format(manifest),
             'SUIT_OTA_SERVER_URL={}'.format(server_url),
             'SUIT_MAKEFILE={}'.format(OTA_SERVER_MAKEFILE)]
     else:
         cmd = ['make','suit/publish', 'BOARD={}'.format(board),
-            'SUIT_MANIFEST_SIGNED_LATEST={}'.format(tag),
+            'SUIT_MANIFEST_SIGNED_LATEST={}'.format(manifest),
             'SUIT_COAP_SERVER={}'.format(server_url),
             'SUIT_COAP_FSROOT={}'.format(COAPROOT)]
     cmd.extend(make_args)
@@ -158,8 +158,8 @@ PARSER.add_argument('--start-bin', default=False, action='store_true',
 PARSER.add_argument('--start-bin-nm', default=None,
                     help='Makes binary file \"<start_bin>.bin\" and copies it to'
                          ' firmwares/setup/<board-node>')
-PARSER.add_argument('--tags', type=list_from_string, default='latest',
-                    help='List of tag tags to publish')
+PARSER.add_argument('--manifests', type=list_from_string, default='latest',
+                    help='List of manifest manifests to publish')
 
 
 if __name__ == "__main__":
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     port_node   = args.port_node
     prefix      = args.prefix
     make_args   = args.make
-    tags        = args.tags
+    manifests   = args.manifests
     start_app   = args.start_app
 
     childs = []
@@ -217,10 +217,10 @@ if __name__ == "__main__":
 
         # Publish firmware(s)
         if args.publish is True:
-            if len(tags) == len(app_dirs):
+            if len(manifests) == len(app_dirs):
                 for i in range(0, len(app_dirs)):
                     make_publish(board_node, host, app_dirs[i], make_args, http,
-                                 tags[i].format(i))
+                                 manifests[i].format(i))
             else:
                 for i in range(0, len(app_dirs)):
                     make_publish(board_node, host, app_dirs[i], make_args, http,
