@@ -296,6 +296,7 @@ void *tft_display_thread(void *args)
                 xtimer_set_msg(&timer, SUIT_ERROR_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_REBOOT:
+                _clear_logo_area(tft_get_ptr());
                 ucg_SetFont(tft_get_ptr(), ucg_font_profont12_mr);
                 tft_puts(tft_get_ptr(), "UPDATE", NULL, NULL,  63, 24, 1);
                 tft_puts(tft_get_ptr(), "FINALIZED", NULL, NULL,  63, 38, 1);
