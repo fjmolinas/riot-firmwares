@@ -94,14 +94,20 @@ int main(void)
     puts("Configured network interfaces:");
     _gnrc_netif_config(0, NULL);
 
+    /* start coap server loop */
+    gcoap_register_listener(&_listener);
+
+#ifdef MODULE_COAP_SUIT
+    printf("running from slot %u\n", riotboot_slot_current());
+    /* start suit coap updater thread */
+    suit_coap_run();
+#endif
+
 #ifdef MODULE_TFT_DISPLAY
     ucg_t ucg;
     /* start tft displays*/
     init_st7735_printer(&ucg);
 #endif
-
-    /* start coap server loop */
-    gcoap_register_listener(&_listener);
 
     /* init schedreg thread */
     kernel_pid_t sched_pid = init_schedreg_thread();
@@ -121,12 +127,6 @@ int main(void)
     schedreg_t bmx280_reg = SCHEDREG_INIT(bmx280_handler, NULL, &bmx280_msg,
                                           &bmx280_xtimer, BMX280_SEND_INTERVAL);
     schedreg_register(&bmx280_reg, sched_pid);
-
-#ifdef MODULE_COAP_SUIT
-    printf("running from slot %u\n", riotboot_slot_current());
-    /* start suit coap updater thread */
-    suit_coap_run();
-#endif
 
     puts("All up, running the shell now");
     char line_buf[SHELL_DEFAULT_BUFSIZE];

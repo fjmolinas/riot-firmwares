@@ -102,12 +102,6 @@ int main(void)
     puts("Configured network interfaces:");
     _gnrc_netif_config(0, NULL);
 
-#ifdef MODULE_TFT_DISPLAY
-    ucg_t ucg;
-    /* start tft displays*/
-    init_st7735_printer(&ucg);
-#endif
-
     /* start coap server loop */
     gcoap_register_listener(&_listener);
 
@@ -115,6 +109,12 @@ int main(void)
     printf("running from slot %u\n", riotboot_slot_current());
     /* start suit coap updater thread */
     suit_coap_run();
+#endif
+
+#ifdef MODULE_TFT_DISPLAY
+    ucg_t ucg;
+    /* start tft displays*/
+    init_st7735_printer(&ucg);
 #endif
 
     /* init schedreg thread */
