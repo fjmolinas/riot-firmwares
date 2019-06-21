@@ -98,7 +98,7 @@ def notify(board, server_url, client_url, cwd_dir, mode, manifest):
             'SUIT_COAP_SERVER={}'.format(server_url),
             'SUIT_COAP_FSROOT={}'.format(COAPROOT),
             'SUIT_CLIENT={}'.format(client_url)]
-    assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+    subprocess.Popen(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
 PARSER = argparse.ArgumentParser(
