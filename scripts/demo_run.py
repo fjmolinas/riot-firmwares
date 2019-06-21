@@ -83,7 +83,7 @@ def make_flash_bin(board, cwd_dir, binfile, make_args):
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 def notify(board, server_url, client_url, cwd_dir, mode, manifest):
-
+    logger.info('Notifying {}'.format(client_url))
     if mode is True:
         cmd = ['make','suit/notify', 'BOARD={}'.format(board),
             'APPLICATION={}'.format(manifest),
@@ -163,6 +163,7 @@ if __name__ == "__main__":
                 make_flash_only(board, app_base, make_args)
 
             # Open terminal
+            logger.info('Opening terminal on {}'.format(port))
             term = make_term(board, app_base, port)
             make_reset(board, app_base, port, make_args)
 
@@ -170,6 +171,7 @@ if __name__ == "__main__":
             term.expect(r'inet6 addr: (?P<gladdr>[0-9a-fA-F:]+:[A-Fa-f:0-9]+)'
                         '  scope: global', timeout=TIMEOUT)
             client = '[{}]'.format(term.match.group("gladdr").lower())
+            logger.info('Node address {}'.format(client))
             # Leave some time for discovery discovery
             time.sleep(3)
 
