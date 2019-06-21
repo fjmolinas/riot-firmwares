@@ -36,6 +36,8 @@ def wait_for_update(child):
         child.expect_exact(
             "riotboot_flashwrite: riotboot flashing completed successfully",
             timeout=TIMEOUT)
+        logger.debug(child.after)
+
 
 def list_from_string(list_str=None):
     value = (list_str or '').split(' ')
@@ -113,7 +115,7 @@ PARSER.add_argument('--http', default=False, action='store_true',
                     help='Use http server')
 PARSER.add_argument('--loglevel', choices=LOG_LEVELS, default='info',
                     help='Python logger log level')
-PARSER.add_argument('--make', type=list_from_string, default=None,
+PARSER.add_argument('--make', type=list_from_string, default='-j1',
                     help='Additional make arguments')
 PARSER.add_argument('--flash', default=False, action='store_true',
                     help='Flashes target node with new firmware, Default False')
@@ -171,16 +173,20 @@ if __name__ == "__main__":
             term.expect(r'inet6 addr: (?P<gladdr>[0-9a-fA-F:]+:[A-Fa-f:0-9]+)'
                         '  scope: global', timeout=TIMEOUT)
             client = '[{}]'.format(term.match.group("gladdr").lower())
+            term.expect(r'running from slot (\d+)')
+            logger.debug('Running from slot {}'.format(term.match.group(1)))
             logger.info('Node address {}'.format(client))
             # Leave some time for discovery discovery
             time.sleep(3)
 
             for manifest in manifests:
+                logger.info('Updating every {} s'.format(DEMO_PERIOD))
                 time.sleep(DEMO_PERIOD)
                 term.expect_exact('suit_coap: started.', timeout=TIMEOUT)
                 notify(board, host, client, app_base, http, manifest)
                 wait_for_update(term)
 
+            logger.info('Demo ended, delaying reboot by {} s'.format(DEMO_RESET))
             time.sleep(DEMO_RESET)
 
     except SystemExit as e:
