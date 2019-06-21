@@ -27,9 +27,6 @@ QUIET ?= 1
 # Application specific definitions and includes
 NODE_ID ?= "mqtt-2"
 APPLICATION_NAME ?= "Node\ BME280\ MQTT-SN\ -\ SIDO"
-# CoAP broker server information
-BROKER_ADDR ?= fd00:dead:beef::1
-BROKER_PORT ?= 5688
 
 include $(CURDIR)/../Makefile.dep
 include $(CURDIR)/../Makefile.include

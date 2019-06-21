@@ -34,10 +34,6 @@ DEVELHELP ?= 1
 APPLICATION_NAME ?= "IoT-Lab\ A8\ Node\ -\ SIDO"
 NODE_LAT ?= 48.714784
 NODE_LNG ?= 2.205502
-# CoAP broker server information
-BROKER_ADDR ?= fd00:dead:beef::1
-BROKER_PORT ?= 5688
-
 
 include $(CURDIR)/../Makefile.dep
 include $(CURDIR)/../Makefile.include

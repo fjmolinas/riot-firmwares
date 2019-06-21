@@ -33,9 +33,6 @@ QUIET ?= 1
 
 # Application specific definitions and includes
 APPLICATION_NAME ?= "Air\ Quality\ Monitor"
-# CoAP broker server information
-BROKER_ADDR ?= fd00:dead:beef::1
-BROKER_PORT ?= 5688
 
 # Partial sensor support flags
 USE_TEMP ?= true
@@ -55,7 +52,7 @@ include $(CURDIR)/../Makefile.include
 
 include $(RIOTBASE)/Makefile.include
 
-# Change default address for sparkfun CCS811 BMX280 combo board
+# Change default address for CCS811
 CFLAGS += -DCCS811_PARAM_I2C_ADDR=CCS811_I2C_ADDRESS_2
 
 CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"

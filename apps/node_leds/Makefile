@@ -31,9 +31,6 @@ QUIET ?= 1
 
 # Application specific definitions and includes
 APPLICATION_NAME ?= "Node\ LED\ -\ SIDO"
-# CoAP broker server information
-BROKER_ADDR ?= fd00:dead:beef::1
-BROKER_PORT ?= 5688
 
 include $(CURDIR)/../Makefile.dep
 include $(CURDIR)/../Makefile.include
