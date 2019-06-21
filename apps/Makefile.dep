@@ -3,7 +3,7 @@ PSEUDOMODULES += shell_common
 ifeq (1, $(RPI))
   DEFAULT_CHANNEL ?= 16
   BROKER_ADDR ?= fd00:ab:ad:1e::1
-  BROKER_PORT ?= 5684
+  BROKER_PORT ?= 5683
 else
   # CoAP broker server information
   BROKER_ADDR ?= fd00:dead:beef::1
@@ -35,9 +35,6 @@ ifneq (,$(filter coap_% mqtt_%,$(USEMODULE)))
 
   # Add echo module, can be removed
   USEMODULE += gnrc_icmpv6_echo
-
-  # lower pktbuf size a little
-  CFLAGS += -DGNRC_PKTBUF_SIZE=2000
 
   ifeq (1,$(USE_ETHOS))
     TAP ?= tap0
