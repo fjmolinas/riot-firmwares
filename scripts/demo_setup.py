@@ -55,14 +55,14 @@ def setup_ethos(port, prefix, cwd_dir):
 def make_delkeys(cwd_dir):
     logger.info('Removing old Keys in {}'.format(cwd_dir))
     cmd = ['rm', '-f', 'public.key', 'public_key.h', 'secret.key']
-    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, start_app),
+    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, cwd_dir),
                     stdout=subprocess.DEVNULL)
 
 
 def make_genkey(cwd_dir):
     logger.info('Generating keys at {}'.format(cwd_dir))
     cmd = ['make', 'suit/genkey']
-    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, start_app),
+    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, cwd_dir),
                     stdout=subprocess.DEVNULL)
 
 def make_flash(board, start_app, make_args):
@@ -114,7 +114,7 @@ def make_publish(board, server_url, cwd_dir, make_args, mode, manifest):
             'SUIT_COAP_SERVER={}'.format(server_url),
             'SUIT_COAP_FSROOT={}'.format(COAPROOT)]
     cmd.extend(make_args)
-    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, start_app))
+    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, cwd_dir))
 
 
 PARSER = argparse.ArgumentParser(
