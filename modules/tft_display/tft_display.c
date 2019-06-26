@@ -253,6 +253,7 @@ void *tft_display_thread(void *args)
                 tft_puts(tft_get_ptr(), "W O R L D !!", NULL, NULL,  63, 90, 1);
                 break;
             case TFT_DISPLAY_LOGO:
+                _clear_logo_area(tft_get_ptr());
                 _draw_riot_logo(tft_get_ptr(), 16, 14);
                 break;
 #ifdef MODULE_SUITREG
