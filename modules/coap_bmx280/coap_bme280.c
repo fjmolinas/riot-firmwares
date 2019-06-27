@@ -103,7 +103,7 @@ void bmx280_handler(void *args)
                         temp / 100, (temp % 100) /10);
         response[p1 + p2] = '\0';
 #ifdef MODULE_TFT_DISPLAY
-        display_send_str(TFT_DISPLAY_TEMP, (char*) response + p1, p2);
+        display_send_buf(TFT_DISPLAY_TEMP, (uint8_t*) response + p1, p2);
 #endif
         send_coap_post((uint8_t*)"/server", response);
     }
@@ -118,7 +118,7 @@ void bmx280_handler(void *args)
                         (int)pres % 100);
         response[p1 + p2] = '\0';
 #ifdef MODULE_TFT_DISPLAY
-        display_send_str(TFT_DISPLAY_PRES, (char*) response + p1, p2);
+        display_send_buf(TFT_DISPLAY_PRES, (uint8_t*) response + p1, p2);
 #endif
         send_coap_post((uint8_t*)"/server", response);
     }
@@ -134,7 +134,7 @@ void bmx280_handler(void *args)
                         (unsigned int)(hum % 100));
         response[p1 + p2] = '\0';
 #ifdef MODULE_TFT_DISPLAY
-        display_send_str(TFT_DISPLAY_HUM, (char*) response + p1, p2);
+        display_send_buf(TFT_DISPLAY_HUM, (uint8_t*) response + p1, p2);
 #endif
         send_coap_post((uint8_t*)"/server", response);
     }
