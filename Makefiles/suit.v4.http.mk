@@ -27,11 +27,3 @@ suit/notify:
 		-F 'publish_id=$(SUIT_PUBLISH_ID)' \
 		-F 'urls=$(SUIT_CLIENT)' \
 		$(SUIT_OTA_SERVER_URL)/notifyv4
-
-$(SUIT_KEY) $(SUIT_PUB):
-	@$(RIOTBASE)/dist/tools/suit_v4/gen_key.py
-
-$(SUIT_PUB_HDR): $(SUIT_PUB)
-	@xxd -i $(SUIT_PUB) > $@
-
-suit/genkey: $(SUIT_KEY) $(SUIT_PUB) $(SUIT_PUB_HDR)

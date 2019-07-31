@@ -2,7 +2,7 @@
 APPLICATION = node_ccs811
 
 # If no BOARD is found in the environment, use this default:
-BOARD = samr21-xpro
+BOARD = nrf52840-mdk
 
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../../RIOT

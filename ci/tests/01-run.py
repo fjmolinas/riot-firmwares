@@ -7,47 +7,53 @@
 # directory for more details.
 
 import os
-import pexpect
 import subprocess
 import sys
-import time
 
 from testrunner import run
 
 # Custom Timeouts
-TIMEOUT = 10
+UPDATING_TIMEOUT = 10
 MANIFEST_TIMEOUT = 15
 
-# If available use user defined tags for latest, Default: latest-1/2
-MANIFESTS = os.getenv('MANIFESTS', 'latest-1 latest-2').split(' ')
+# If available use user defined tags for manifests, Default: manifests-1/2
+MANIFESTS = os.getenv('MANIFESTS', 'manifest-1 manifest-2').split(' ')
+
 # Get external makefile
 SUIT_MAKEFILE = os.getenv('SUIT_MAKEFILE', 'local')
+
 # Default don't use ethos, doesn't fit in samr21-xpro.
 USE_ETHOS = int(os.getenv('USE_ETHOS', '0'))
 TAP = os.getenv('TAP', 'tap0')
-# Default test over loopback interface
+
+# Default test over localhost
 SUIT_COAP_SERVER = os.getenv('SUIT_COAP_SERVER', 'localhost')
 
 
 def wait_for_update(child):
-    try:
-        while True:
-            child.expect(r"riotboot_flashwrite: processing bytes (\d+)-(\d+)",
-                         timeout=TIMEOUT)
-    except pexpect.TIMEOUT:
-        child.expect_exact(
-            "riotboot_flashwrite: riotboot flashing completed successfully",
-            timeout=TIMEOUT)
+    return child.expect([r"riotboot_flashwrite: processing bytes (\d+)-(\d+)",
+                            "riotboot_flashwrite: riotboot flashing "
+                            "completed successfully"],
+                            timeout=UPDATING_TIMEOUT)
+
 
 def notify(server_url, client_url, manifest):
     if SUIT_MAKEFILE == 'local':
-        cmd = ['make', 'SUIT_MANIFEST_SIGNED_LATEST={}'.format(manifest), 'suit/notify',
+        cmd = [
+            'make',
+            'suit/notify',
+            'SUIT_MANIFEST_SIGNED_LATEST={}'.format(manifest),
             'SUIT_COAP_SERVER={}'.format(server_url),
-            'SUIT_CLIENT={}'.format(client_url)]
+            'SUIT_CLIENT={}'.format(client_url)
+        ]
     else:
-        cmd = ['make','suit/notify', 'APPLICATION={}'.format(manifest),
+        cmd = [
+            'make',
+            'suit/notify',
+            'APPLICATION={}'.format(manifest),
             'SUIT_COAP_SERVER={}'.format(server_url),
-            'SUIT_CLIENT={}'.format(client_url)]
+            'SUIT_CLIENT={}'.format(client_url)
+        ]
 
     assert not subprocess.call(cmd)
 
@@ -61,14 +67,11 @@ def testfunc(child):
     if USE_ETHOS is 0:
         # Get device global address
         child.expect(r'inet6 addr: (?P<gladdr>[0-9a-fA-F:]+:[A-Fa-f:0-9]+)'
-                    '  scope: global', timeout=TIMEOUT)
+                    '  scope: global')
         client = "[{}]".format(child.match.group("gladdr").lower())
     else:
         # Get device local address
         client = "[fe80::2%{}]".format(TAP)
-
-    # Leave some time for discovery discovery
-    time.sleep(3)
 
     for manifest in MANIFESTS:
         # Wait for suit_coap thread to start
@@ -82,12 +85,15 @@ def testfunc(child):
             timeout=MANIFEST_TIMEOUT)
         target_slot = int(child.match.group(1))
         # Wait for update to complete
-        wait_for_update(child)
+        # Wait for update to complete
+        while wait_for_update(child) == 0:
+            pass
         # Verify running slot
         child.expect(r'running from slot (\d+)')
         assert target_slot == int(child.match.group(1)), "BOOTED FROM SAME SLOT"
 
     print("TEST PASSED")
+
 
 if __name__ == "__main__":
     sys.exit(run(testfunc, echo=True))

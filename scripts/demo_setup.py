@@ -13,13 +13,14 @@ LOG_HANDLER = logging.StreamHandler()
 LOG_HANDLER.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
 LOG_LEVELS = ('debug', 'info', 'warning', 'error')
 
-SUIT_DIR  = os.path.dirname(sys.argv[0])
-RIOT_DIR  = os.path.abspath(os.path.join(SUIT_DIR, '../../RIOT'))
-BASE_DIR  = os.path.abspath(os.path.join(SUIT_DIR, '..'))
-COAPROOT  = os.path.join(BASE_DIR, 'firmwares/ota')
-BIN_DIR   = os.path.join(BASE_DIR, 'firmwares/setup')
+SUIT_DIR = os.path.dirname(sys.argv[0])
+RIOT_DIR = os.path.abspath(os.path.join(SUIT_DIR, '../../RIOT'))
+BASE_DIR = os.path.abspath(os.path.join(SUIT_DIR, '..'))
+COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
+SETUP_DIR = os.path.join(BASE_DIR, 'firmwares/setup')
+os.environ['SUIT_MAKEFILE'] = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
+
 OTASERVER = os.path.join(BASE_DIR, '../ota-server')
-OTA_SERVER_MAKEFILE = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
 
 def list_from_string(list_str=None):
@@ -27,92 +28,93 @@ def list_from_string(list_str=None):
     return [v for v in value if v]
 
 
-def setup_aiocoap(cwd_dir):
+def setup_aiocoap():
     logger.info('Setting up aiocoap-fileserver')
-    cmd = ['./aiocoap/aiocoap-fileserver', COAPROOT]
-    process = subprocess.Popen(cmd, cwd=os.path.expanduser(cwd_dir),
-                               stdout=subprocess.DEVNULL)
+    cmd = ['aiocoap-fileserver', COAPROOT]
+    process = subprocess.Popen(cmd)
     return process
 
 
-def setup_otaserver(cwd_dir, server_url):
+def setup_otaserver():
     logger.info('Setting up ota-server')
-    cmd = ['python3', 'otaserver/main.py', '--http-port=8080', '--coap-port=5683',
-           '--coap-host={}'.format(server_url)]
-    process = subprocess.Popen(cmd, cwd=os.path.expanduser(cwd_dir),
-                               stdout=subprocess.DEVNULL)
+    cmd = ['python3', 'otaserver/main.py', '--coap-host=[fd00:dead:beef::1]']
+    process = subprocess.Popen(cmd, cwd=os.path.expanduser(OTASERVER))
     return process
 
 
 def setup_ethos(port, prefix, cwd_dir):
     cmd = ['sudo', './dist/tools/ethos/start_network.sh', port, 'suit0', prefix]
-    process = subprocess.Popen(cmd, cwd=os.path.expanduser(cwd_dir),
+    process = subprocess.Popen(cmd,
+                               cwd=os.path.expanduser(cwd_dir),
                                preexec_fn=os.setpgrp,
                                stdout=subprocess.DEVNULL)
     return process
 
 
-def make_delkeys(cwd_dir):
-    logger.info('Removing old Keys in {}'.format(cwd_dir))
-    cmd = ['rm', '-f', 'public.key', 'public_key.h', 'secret.key']
-    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, cwd_dir),
-                    stdout=subprocess.DEVNULL)
-
-
-def make_genkey(cwd_dir):
-    logger.info('Generating keys at {}'.format(cwd_dir))
-    cmd = ['make', 'suit/genkey']
-    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, cwd_dir),
-                    stdout=subprocess.DEVNULL)
-
-def make_flash(board, start_app, make_args):
-    logger.info('Initial build of {}'.format(board))
-    cmd = ['make', 'FLASHFILE=$(RIOTBOOT_EXTENDED_BIN)', 'clean', 'flash',
-           'BOARD={}'.format(board)]
-    cmd.extend(make_args)
-    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, start_app))
-
-
 def start_bin(board, start_app, start_bin):
-    cmd = ['mkdir', '-p', '{}/{}/'.format(BIN_DIR, board)]
+    cmd = ['mkdir', '-p', '{}/{}/'.format(SETUP_DIR, board)]
     subprocess.call(cmd)
     files = glob.glob('{}/{}/bin/{}/*-slot0-extended.bin'.format(BASE_DIR,
                                                                  start_app,
                                                                  board))
     if files:
-        cmd = ['cp', files[0], '{}/{}/'.format(BIN_DIR, board)]
+        cmd = ['cp', files[0], '{}/{}/'.format(SETUP_DIR, board)]
         subprocess.call(cmd)
     if start_bin:
         cmd = ['mv', os.path.basename(files[0]), '{}.bin'.format(start_bin)]
-        subprocess.call(cmd, cwd='{}/{}/'.format(BIN_DIR, board))
+        subprocess.call(cmd, cwd='{}/{}/'.format(SETUP_DIR, board))
 
 
 def update_pi(rpi):
-    cmd = ['scp', '-r', '{}/'.format(BIN_DIR),
-           'pi@{}:/opt/src/riot-firmwares/firmwares'.format(rpi)]
+    cmd = [
+        'scp',
+        '-r',
+        '{}/'.format(SETUP_DIR),
+        'pi@{}:/opt/src/riot-firmwares/firmwares'.format(rpi)
+        ]
     subprocess.call(cmd, cwd=BASE_DIR)
+
+
+def make_all(board, start_app, make_args):
+    logger.info('Initial build of {}'.format(board))
+    cmd = ['make', 'clean', 'all', 'BOARD={}'.format(board)]
+    cmd.extend(make_args)
+    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, start_app))
+
+
+def make_flash(board, start_app, make_args):
+    logger.info('Flashing {}'.format(board))
+    cmd = ['make', 'flash', 'BOARD={}'.format(board)]
+    cmd.extend(make_args)
+    subprocess.call(cmd, cwd=os.path.join(BASE_DIR, start_app))
 
 
 def make_reset(board, cwd_dir, port, make_args):
     logger.info('Reseting board {}'.format(board))
     cmd = ['make', 'reset', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
     cmd.extend(make_args)
-    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
-                    stdout=subprocess.DEVNULL)
+    subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
 def make_publish(board, server_url, cwd_dir, make_args, mode, manifest):
     logger.info('Publishing  %s Firmware to %s', cwd_dir, server_url)
     if mode is True:
-        cmd = ['make','suit/publish', 'BOARD={}'.format(board),
+        cmd = [
+            'make',
+            'suit/publish',
+            'BOARD={}'.format(board),
             'APPLICATION={}'.format(manifest),
             'SUIT_OTA_SERVER_URL={}'.format(server_url),
-            'SUIT_MAKEFILE={}'.format(OTA_SERVER_MAKEFILE)]
+        ]
     else:
-        cmd = ['make','suit/publish', 'BOARD={}'.format(board),
+        cmd = [
+            'make',
+            'suit/publish',
+            'BOARD={}'.format(board),
             'SUIT_MANIFEST_SIGNED_LATEST={}'.format(manifest),
             'SUIT_COAP_SERVER={}'.format(server_url),
-            'SUIT_COAP_FSROOT={}'.format(COAPROOT)]
+            'SUIT_COAP_FSROOT={}'.format(COAPROOT),
+        ]
     cmd.extend(make_args)
     subprocess.call(cmd, cwd=os.path.join(BASE_DIR, cwd_dir))
 
@@ -131,8 +133,13 @@ PARSER.add_argument('--http', default=False, action='store_true',
                     help='Use http server')
 PARSER.add_argument('--coapserver', default=False, action='store_true',
                     help='Start coapserver, Default=True')
-PARSER.add_argument('--keys', default=False, action='store_true',
-                    help='Remove old keys and generate new ones, Default False')
+
+PARSER.add_argument('--flash', default=False, action='store_true',
+                    help='Flashes target node , Default False')
+PARSER.add_argument('--keys', default=None,
+                    help='Name for sec and pub keys')
+PARSER.add_argument('--key-dir', default=None,
+                    help='Directory to save keys to')
 PARSER.add_argument('--loglevel', choices=LOG_LEVELS, default='info',
                     help='Python logger log level')
 PARSER.add_argument('--make', type=list_from_string, default='-j1',
@@ -182,14 +189,14 @@ if __name__ == "__main__":
     manifests   = args.manifests
     start_app   = args.start_app
 
-    childs = []
+    coap_server = None
+    ethos = None
 
     try:
         # Setup Ethos
         if args.ethos is True:
             make_reset(board_ethos, start_app, port_ethos, make_args)
             ethos = setup_ethos(port_ethos, prefix, riot_dir)
-            childs.append(ethos)
             time.sleep(1)
             logger.info("Ethos pid {} and group pid {}".format(ethos.pid,
                         os.getpgid(ethos.pid)))
@@ -197,20 +204,24 @@ if __name__ == "__main__":
         # Setup File Sever
         if args.coapserver is True:
             if args.http is False:
-                childs.append(setup_aiocoap(BASE_DIR))
+                coap_server = setup_aiocoap()
             else:
-                childs.append(setup_otaserver(OTASERVER, host ))
+                coap_server = setup_otaserver()
 
-        # Delete old key and generate new ones
-        if args.keys is True:
-            for app_dir in app_dirs:
-                make_delkeys(app_dir)
-                make_genkey(app_dir)
+        # Set keys and key-dir to use
+        if args.keys is not None:
+            os.environ['SUIT_KEY'] = args.keys 
+        if args.key_dir is not None:
+            os.environ['SUIT_KEY_DIR'] = args.key_dir 
 
-        # Make new base
+        # Make start binaries
         if args.start_bin is True:
-            make_flash(board_node, start_app, make_args)
+            make_all(board_node, start_app, make_args)
             start_bin(board_node, start_app, args.start_bin_nm)
+
+        # Flashes new start binaries to the board
+        if args.flash is True:
+            make_flash(board_node, start_app, make_args)
 
         # Publish firmware(s)
         if args.publish is True:
@@ -236,13 +247,16 @@ if __name__ == "__main__":
         sys.exit(e)
 
     finally:
-        if childs:
-            for process in childs:
-                try:
-                    gpid = os.getpgid(process.pid)
-                    logger.info("Killing group {}".format(gpid))
-                    subprocess.check_call(["sudo", "kill", '-{}'.format(gpid)])
-                except:
-                    logger.info("Failed to stop process {}".format(process.pid))
+        # If ethos cleanup with sudo
+        if ethos is not None:
+            try:
+                gpid = os.getpgid(ethos.pid)
+                logger.info("Killing group {}".format(gpid))
+                subprocess.check_call(["sudo", "kill", '-{}'.format(gpid)])
+            except:
+                logger.info("Failed to stop process {}".format(ethos.pid))
             cmd = ['fuser', '-k', port_ethos]
             subprocess.call(cmd)
+        # Kill server process
+        if coap_server is not None:
+            coap_server.kill()

@@ -61,7 +61,7 @@ enum {
 #ifndef TFT_PIN_RESET
 #define TFT_PIN_RESET          (GPIO_PIN(PORT_C,7))
 #endif
-#else
+#elif defined(BOARD_SAMR21_XPRO)
 #ifndef TFT_DEV_SPI
 #define TFT_DEV_SPI            (1U)
 #endif
@@ -73,6 +73,19 @@ enum {
 #endif
 #ifndef TFT_PIN_RESET
 #define TFT_PIN_RESET          (GPIO_PIN(PA,8))
+#endif
+#elif defined(BOARD_NRF52840_MDK)
+#ifndef TFT_DEV_SPI
+#define TFT_DEV_SPI            (0U)
+#endif
+#ifndef TFT_PIN_CS
+#define TFT_PIN_CS             (GPIO_PIN(0, 31))
+#endif
+#ifndef TFT_PIN_CD
+#define TFT_PIN_CD             (GPIO_PIN(0, 3))
+#endif
+#ifndef TFT_PIN_RESET
+#define TFT_PIN_RESET          (GPIO_PIN(0, 2))
 #endif
 #endif
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# TODO: add tox.ini tests
+
 import argparse
 import logging
 import os
@@ -9,9 +11,10 @@ import subprocess
 import sys
 import time
 
-DEMO_RESET     = 5*60
-DEMO_PERIOD    = 1
-TIMEOUT        = 15
+DEMO_RESET = 1
+DEMO_PERIOD = 1
+UPDATING_TIMEOUT = 10
+MANIFEST_TIMEOUT = 15
 
 LOG_HANDLER = logging.StreamHandler()
 LOG_HANDLER.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
@@ -19,24 +22,19 @@ LOG_LEVELS = ('debug', 'info', 'warning', 'error')
 
 SUIT_DIR = os.path.dirname(sys.argv[0])
 BASE_DIR = os.path.abspath(os.path.join(SUIT_DIR, '..'))
-BIN_DIR   = os.path.join(BASE_DIR, 'firmwares/setup')
+BIN_DIR = os.path.join(BASE_DIR, 'firmwares/setup')
 COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
 
-OTA_SERVER_MAKEFILE = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
+os.environ['SUIT_MAKEFILE'] = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
 BIN_FILE = 'samr21-xpro/node_empty-slot0-extended.bin'
 
+
 def wait_for_update(child):
-    try:
-        while True:
-            child.expect(r"riotboot_flashwrite: processing bytes (\d+)-(\d+)",
-                         timeout=TIMEOUT)
-            logger.debug(child.after)
-    except pexpect.TIMEOUT:
-        child.expect_exact(
-            "riotboot_flashwrite: riotboot flashing completed successfully",
-            timeout=TIMEOUT)
-        logger.debug(child.after)
+        return child.expect([r"riotboot_flashwrite: processing bytes (\d+)-(\d+)",
+                             "riotboot_flashwrite: riotboot flashing "
+                             "completed successfully"],
+                             timeout=UPDATING_TIMEOUT)
 
 
 def list_from_string(list_str=None):
@@ -44,13 +42,12 @@ def list_from_string(list_str=None):
     return [v for v in value if v]
 
 
+# TODO: create exceptions to handle failures
 def make_reset(board, cwd_dir, port, make_args):
     logger.info('Reseting board {}'.format(board))
     cmd = ['make', 'reset', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
     cmd.extend(make_args)
-    assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir),
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL)
+    assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
 def make_term(board, app_dir, port):
@@ -71,29 +68,39 @@ def make_flash(board, cwd_dir, make_args):
 
 def make_flash_only(board, cwd_dir, make_args):
     logger.info('Initial Flash of {}'.format(board))
-    cmd = ['make', 'FLASHFILE=$(RIOTBOOT_COMBINED_BIN)', 'flash-only',
-           'BOARD={}'.format(board)]
+    cmd = ['make', 'flash-only', 'BOARD={}'.format(board)]
     cmd.extend(make_args)
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
 def make_flash_bin(board, cwd_dir, binfile, make_args):
     logger.info('Initial Flash of {}'.format(board))
-    cmd = ['make', 'BINFILE={}'.format(binfile), 'flash-only',
-           'BOARD={}'.format(board)]
+    cmd = [
+        'make',
+        'BINFILE={}'.format(binfile),
+        'flash-only',
+        'BOARD={}'.format(board)
+        ]
     cmd.extend(make_args)
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
+
 
 def notify(board, server_url, client_url, cwd_dir, mode, manifest):
     logger.info('Notifying {}'.format(client_url))
     if mode is True:
-        cmd = ['make','suit/notify', 'BOARD={}'.format(board),
+        cmd = [
+            'make',
+            'suit/notify',
+            'BOARD={}'.format(board),
             'APPLICATION={}'.format(manifest),
             'SUIT_OTA_SERVER_URL={}'.format(server_url),
             'SUIT_CLIENT={}'.format(client_url),
-            'SUIT_MAKEFILE={}'.format(OTA_SERVER_MAKEFILE)]
+        ]
     else:
-        cmd = ['make', 'suit/notify', 'BOARD={}'.format(board),
+        cmd = [
+            'make',
+            'suit/notify',
+            'BOARD={}'.format(board),
             'SUIT_MANIFEST_SIGNED_LATEST={}'.format(manifest),
             'SUIT_COAP_SERVER={}'.format(server_url),
             'SUIT_COAP_FSROOT={}'.format(COAPROOT),
@@ -101,6 +108,7 @@ def notify(board, server_url, client_url, cwd_dir, mode, manifest):
     subprocess.Popen(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
+# TODO function that returns the parser
 PARSER = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 PARSER.add_argument('manifests', type=list_from_string,
@@ -128,6 +136,8 @@ PARSER.add_argument('--debug-id',
 PARSER.add_argument('--server', default='[fd00:dead:beef::1]',
                     help='Server url.')
 
+
+# TODO: def_main
 
 if __name__ == "__main__":
     """For one board test if specified application is updatable"""
@@ -169,7 +179,7 @@ if __name__ == "__main__":
 
             # Get device global address
             term.expect(r'inet6 addr: (?P<gladdr>[0-9a-fA-F:]+:[A-Fa-f:0-9]+)'
-                        '  scope: global', timeout=TIMEOUT)
+                        '  scope: global')
             client = '[{}]'.format(term.match.group("gladdr").lower())
             term.expect(r'running from slot (\d+)')
             logger.debug('Running from slot {}'.format(term.match.group(1)))
@@ -180,9 +190,15 @@ if __name__ == "__main__":
             for manifest in manifests:
                 logger.info('Updating every {} s'.format(DEMO_PERIOD))
                 time.sleep(DEMO_PERIOD)
-                term.expect_exact('suit_coap: started.', timeout=TIMEOUT)
+                term.expect_exact('suit_coap: started.')
                 notify(board, host, client, app_base, http, manifest)
-                wait_for_update(term)
+                term.expect_exact('suit: verifying manifest signature...')
+                term.expect(
+                    r'riotboot_flashwrite: initializing update to target slot (\d+)',
+                    timeout=MANIFEST_TIMEOUT)
+                # Wait for update to complete
+                while wait_for_update(term) == 0:
+                    print(term.after)
 
             logger.info('Demo ended, delaying reboot by {} s'.format(DEMO_RESET))
             time.sleep(DEMO_RESET)
