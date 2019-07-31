@@ -82,7 +82,7 @@ void ccs811_handler(void *args)
         response[p1 + p2] = '\0';
         send_coap_post((uint8_t*)"/server", response);
 #ifdef MODULE_TFT_DISPLAY
-        display_send_str(TFT_DISPLAY_ECO2, (char*) (response + p1), p2);
+        display_send_buf(TFT_DISPLAY_ECO2, (uint8_t*) (response + p1), p2);
 #endif
     }
 
@@ -96,7 +96,7 @@ void ccs811_handler(void *args)
         response[p1 + p2] = '\0';
         send_coap_post((uint8_t*)"/server", response);
 #ifdef MODULE_TFT_DISPLAY
-        display_send_str(TFT_DISPLAY_TVOC, (char*) (response + p1), p2);
+        display_send_buf(TFT_DISPLAY_TVOC, (uint8_t*) (response + p1), p2);
 #endif
     }
 }

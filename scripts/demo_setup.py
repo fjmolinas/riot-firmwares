@@ -35,10 +35,10 @@ def setup_aiocoap(cwd_dir):
     return process
 
 
-def setup_otaserver(cwd_dir):
+def setup_otaserver(cwd_dir, server_url):
     logger.info('Setting up ota-server')
     cmd = ['python3', 'otaserver/main.py', '--http-port=8080', '--coap-port=5683',
-           '--coap-host=[fd00:dead:beef::1]']
+           '--coap-host={}'.format(server_url)]
     process = subprocess.Popen(cmd, cwd=os.path.expanduser(cwd_dir),
                                stdout=subprocess.DEVNULL)
     return process
@@ -129,8 +129,8 @@ PARSER.add_argument('--ethos', default=False, action='store_true',
                     help='True if test is to be setup locally over ethos.')
 PARSER.add_argument('--http', default=False, action='store_true',
                     help='Use http server')
-PARSER.add_argument('--fileserver', default=False, action='store_true',
-                    help='Start fileserver, Default=True')
+PARSER.add_argument('--coapserver', default=False, action='store_true',
+                    help='Start coapserver, Default=True')
 PARSER.add_argument('--keys', default=False, action='store_true',
                     help='Remove old keys and generate new ones, Default False')
 PARSER.add_argument('--loglevel', choices=LOG_LEVELS, default='info',
@@ -139,8 +139,6 @@ PARSER.add_argument('--make', type=list_from_string, default='-j1',
                     help='Additional make arguments')
 PARSER.add_argument('--port-ethos', default='/dev/ttyUSB1',
                     help='Ethos serial port.')
-PARSER.add_argument('--port-node', default='/dev/ttyACM0',
-                    help='Node serial port.')
 PARSER.add_argument('--prefix', default='2001:db8::1/64',
                     help='Prefix to propagate over ethos.')
 PARSER.add_argument('--publish', default=False, action='store_true',
@@ -179,7 +177,6 @@ if __name__ == "__main__":
     host        = args.server
     http        = args.http
     port_ethos  = args.port_ethos
-    port_node   = args.port_node
     prefix      = args.prefix
     make_args   = args.make
     manifests   = args.manifests
@@ -198,11 +195,11 @@ if __name__ == "__main__":
                         os.getpgid(ethos.pid)))
 
         # Setup File Sever
-        if args.fileserver is True:
+        if args.coapserver is True:
             if args.http is False:
                 childs.append(setup_aiocoap(BASE_DIR))
             else:
-                childs.append(setup_otaserver(OTASERVER))
+                childs.append(setup_otaserver(OTASERVER, host ))
 
         # Delete old key and generate new ones
         if args.keys is True:
@@ -230,8 +227,8 @@ if __name__ == "__main__":
         if args.rpi is not None:
             update_pi(args.rpi)
 
-        # Run tests and keep running if fileserver or ethos were setup
-        if args.ethos is True or args.fileserver is True:
+        # Run tests and keep running if coapserver or ethos were setup
+        if args.ethos is True or args.coapserver is True:
             while True:
                 time.sleep(1)
 
@@ -247,5 +244,5 @@ if __name__ == "__main__":
                     subprocess.check_call(["sudo", "kill", '-{}'.format(gpid)])
                 except:
                     logger.info("Failed to stop process {}".format(process.pid))
-            cmd = ['fuser', '-k', port_ethos, port_node]
+            cmd = ['fuser', '-k', port_ethos]
             subprocess.call(cmd)

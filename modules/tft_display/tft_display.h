@@ -8,8 +8,10 @@
 extern "C" {
 #endif
 
+/**
+ * @brief   Message codes for demo display messages
+ */
 enum {
-/* application related display messages */
     TFT_DISPLAY_LOGO  = 0xA0,
     TFT_DISPLAY_LED   = 0xA1,
     TFT_DISPLAY_TEMP  = 0xA2,
@@ -20,14 +22,22 @@ enum {
     TFT_DISPLAY_ECO2  = 0xA7,
 };
 
+/**
+ * @brief   Message to be displayed on top of the display, application name
+ */
 #ifndef APPLICATION_NAME
 #define APPLICATION_NAME       "TFT DISPLAY"
 #endif
-
+/**
+ * @brief   Version of the application, if APP_VER is not defined
+ */
 #ifndef NODE_SUIT_VERSION
 #define NODE_SUIT_VERSION      "XXXXXXXX"
 #endif
 
+/**
+ * @brief   ucglib display definitions
+ */
 #ifndef TFT_DISPLAY
 #define TFT_DISPLAY            (ucg_dev_st7735_18x128x128)
 #endif
@@ -35,6 +45,9 @@ enum {
 #define TFT_DISPLAY_EXT        (ucg_ext_st7735_18)
 #endif
 
+/**
+ * @brief   ucglib abstraction layer pin definition
+ */
 #ifdef BOARD_NUCLEO_L476RG
 #ifndef TFT_DEV_SPI
 #define TFT_DEV_SPI            (0U)
@@ -63,14 +76,39 @@ enum {
 #endif
 #endif
 
+/**
+ * @brief   Setups the display, starts the thread.
+ *
+ * @param[in] ucg    pointer to ucg device descriptor
+ */
 void init_st7735_printer(ucg_t* ucg);
 
-ucg_t* tft_get_ptr(void);
-
+/**
+ * @brief   Utility function that returns the tft display thread pid
+ *
+ * @param[out] pid    pid of thread
+ */
 int tft_get_pid(void);
 
-void display_send_str(uint16_t type, char* str, uint8_t len);
+/**
+ * @brief   Utility function that sends a message (msg_t) copying the content
+ *          of the msg_ptr before hand. Internally a mutex impeds multiple
+ *          access to the buffer.
+ *
+ * @param[in] type   the type of the msg to send
+ * @param[in] buf    pointer to the buffer, msg.content.ptr
+ * @param[in] len    the length of the buffer to send
+ *
+ */
+void display_send_buf(uint16_t type, uint8_t* buf, uint8_t len);
 
+/**
+ * @brief   Utility function that sends a message (msg_t)
+ *
+ * @param[in] type   the type of the msg to send
+ * @param[in] value  content of the msg msg.content.value.
+ *
+ */
 void display_send_val(uint16_t type, uint32_t value);
 
 #ifdef __cplusplus

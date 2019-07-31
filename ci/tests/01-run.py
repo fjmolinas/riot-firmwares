@@ -11,6 +11,7 @@ import pexpect
 import subprocess
 import sys
 import time
+
 from testrunner import run
 
 # Custom Timeouts
@@ -26,6 +27,7 @@ USE_ETHOS = int(os.getenv('USE_ETHOS', '0'))
 TAP = os.getenv('TAP', 'tap0')
 # Default test over loopback interface
 SUIT_COAP_SERVER = os.getenv('SUIT_COAP_SERVER', 'localhost')
+
 
 def wait_for_update(child):
     try:

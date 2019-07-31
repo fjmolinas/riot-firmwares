@@ -117,15 +117,13 @@ PARSER.add_argument('--loglevel', choices=LOG_LEVELS, default='info',
                     help='Python logger log level')
 PARSER.add_argument('--make', type=list_from_string, default='-j1',
                     help='Additional make arguments')
-PARSER.add_argument('--flash', default=False, action='store_true',
-                    help='Flashes target node with new firmware, Default False')
 PARSER.add_argument('--flash-only', default=False, action='store_true',
                     help='Flashes target node , Default False')
 PARSER.add_argument('--flash-bin', default=False, action='store_true',
                     help='Flashes specific bin file, Default False')
 PARSER.add_argument('--port', default='/dev/ttyACM0',
                     help='Node serial port.')
-PARSER.add_argument('--serial',
+PARSER.add_argument('--debug-id',
                     help='device DEBUG_ADAPTER_ID.')
 PARSER.add_argument('--server', default='[fd00:dead:beef::1]',
                     help='Server url.')
@@ -150,8 +148,8 @@ if __name__ == "__main__":
     manifests   = args.manifests
     http        = args.http
 
-    if args.serial is not None:
-        make_args.append("DEBUG_ADAPTER_ID={}".format(args.serial))
+    if args.debug_id is not None:
+        make_args.append("DEBUG_ADAPTER_ID={}".format(args.debug_id))
 
     term = None
 
