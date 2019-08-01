@@ -18,6 +18,7 @@ RIOT_DIR = os.path.abspath(os.path.join(SUIT_DIR, '../../RIOT'))
 BASE_DIR = os.path.abspath(os.path.join(SUIT_DIR, '..'))
 COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
 SETUP_DIR = os.path.join(BASE_DIR, 'firmwares/setup')
+
 os.environ['SUIT_MAKEFILE'] = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
 OTASERVER = os.path.join(BASE_DIR, '../ota-server')
@@ -44,6 +45,15 @@ def setup_otaserver():
 
 def setup_ethos(port, prefix, cwd_dir):
     cmd = ['sudo', './dist/tools/ethos/start_network.sh', port, 'suit0', prefix]
+    process = subprocess.Popen(cmd,
+                               cwd=os.path.expanduser(cwd_dir),
+                               preexec_fn=os.setpgrp,
+                               stdout=subprocess.DEVNULL)
+    return process
+
+
+def setup_network(prefix, cwd_dir):
+    cmd = ['sudo', './dist/tools/ethos/setup_network.sh', 'suit1', prefix]
     process = subprocess.Popen(cmd,
                                cwd=os.path.expanduser(cwd_dir),
                                preexec_fn=os.setpgrp,
@@ -82,9 +92,9 @@ def make_all(board, start_app, make_args):
     subprocess.call(cmd, cwd=os.path.join(BASE_DIR, start_app))
 
 
-def make_flash(board, start_app, make_args):
+def make_flash(board, start_app, flash_cmd, make_args):
     logger.info('Flashing {}'.format(board))
-    cmd = ['make', 'flash', 'BOARD={}'.format(board)]
+    cmd = ['make', flash_cmd, 'BOARD={}'.format(board)]
     cmd.extend(make_args)
     subprocess.call(cmd, cwd=os.path.join(BASE_DIR, start_app))
 
@@ -123,17 +133,18 @@ PARSER = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 PARSER.add_argument('--applications', default='apps/node_leds',
                     help='List of applications publish', type=list_from_string)
-PARSER.add_argument('--board-node', default='samr21-xpro',
+PARSER.add_argument('--board-node', default='nrf52840-mdk',
                     help='Board to test')
 PARSER.add_argument('--board-ethos', default='iotlab-m3',
                     help='Board to test')
-PARSER.add_argument('--ethos', default=False, action='store_true',
+PARSER.add_argument('--ethos-br', default=False, action='store_true',
                     help='True if test is to be setup locally over ethos.')
+PARSER.add_argument('--setup-nwk', default=False, action='store_true',
+                    help='Setups uhcp, tap device and propagate prefix.')
 PARSER.add_argument('--http', default=False, action='store_true',
                     help='Use http server')
 PARSER.add_argument('--coapserver', default=False, action='store_true',
                     help='Start coapserver, Default=True')
-
 PARSER.add_argument('--flash', default=False, action='store_true',
                     help='Flashes target node , Default False')
 PARSER.add_argument('--keys', default=None,
@@ -190,16 +201,23 @@ if __name__ == "__main__":
     start_app   = args.start_app
 
     coap_server = None
-    ethos = None
+    ethos_br = None
+    setup_nwk = None
 
     try:
         # Setup Ethos
-        if args.ethos is True:
+        if args.ethos_br is True:
             make_reset(board_ethos, start_app, port_ethos, make_args)
-            ethos = setup_ethos(port_ethos, prefix, riot_dir)
+            ethos_br = setup_ethos(port_ethos, prefix, riot_dir)
             time.sleep(1)
-            logger.info("Ethos pid {} and group pid {}".format(ethos.pid,
-                        os.getpgid(ethos.pid)))
+            logger.info("Ethos pid {} and group pid {}".format(ethos_br.pid,
+                        os.getpgid(ethos_br.pid)))
+
+        # Setup Nwk
+        if args.setup_nwk is True:
+            setup_nwk = setup_network(prefix, riot_dir)
+            logger.info("setup_nwk.sh pid {} and group pid {}".format(setup_nwk.pid,
+                        os.getpgid(setup_nwk.pid)))
 
         # Setup File Sever
         if args.coapserver is True:
@@ -221,14 +239,15 @@ if __name__ == "__main__":
 
         # Flashes new start binaries to the board
         if args.flash is True:
-            make_flash(board_node, start_app, make_args)
+            flash_cmd = 'flash-only' if args.start_bin is True else 'flash'
+            make_flash(board_node, start_app, flash_cmd, make_args)
 
         # Publish firmware(s)
         if args.publish is True:
             if len(manifests) == len(app_dirs):
                 for i in range(0, len(app_dirs)):
                     make_publish(board_node, host, app_dirs[i], make_args, http,
-                                 manifests[i].format(i))
+                                 manifests[i])
             else:
                 for i in range(0, len(app_dirs)):
                     make_publish(board_node, host, app_dirs[i], make_args, http,
@@ -239,7 +258,7 @@ if __name__ == "__main__":
             update_pi(args.rpi)
 
         # Run tests and keep running if coapserver or ethos were setup
-        if args.ethos is True or args.coapserver is True:
+        if args.ethos_br is True or args.coapserver is True or args.setup_nwk is True:
             while True:
                 time.sleep(1)
 
@@ -248,15 +267,23 @@ if __name__ == "__main__":
 
     finally:
         # If ethos cleanup with sudo
-        if ethos is not None:
+        if ethos_br is not None:
             try:
-                gpid = os.getpgid(ethos.pid)
+                gpid = os.getpgid(ethos_br.pid)
                 logger.info("Killing group {}".format(gpid))
                 subprocess.check_call(["sudo", "kill", '-{}'.format(gpid)])
             except:
-                logger.info("Failed to stop process {}".format(ethos.pid))
+                logger.info("Failed to stop process {}".format(ethos_br.pid))
             cmd = ['fuser', '-k', port_ethos]
             subprocess.call(cmd)
+        # If setup_nwk cleanup with sudo
+        if setup_nwk is not None:
+            try:
+                gpid = os.getpgid(setup_nwk.pid)
+                logger.info("Killing group {}".format(gpid))
+                subprocess.check_call(["sudo", "kill", '-{}'.format(gpid)])
+            except:
+                logger.info("Failed to stop process {}".format(setup_nwk.pid))
         # Kill server process
         if coap_server is not None:
             coap_server.kill()
