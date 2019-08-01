@@ -37,21 +37,18 @@ ifneq (,$(filter coap_% mqtt_%,$(USEMODULE)))
   USEMODULE += gnrc_icmpv6_echo
 
   ifeq (1,$(USE_ETHOS))
-    TAP ?= tap0
-    IPV6_PREFIX ?= 2001:db8::/64
-
     GNRC_NETIF_NUMOF := 2
-    USEMODULE += ethos
-    USEMODULE += stdio_uart_rx
+    USEMODULE += stdio_ethos
     USEMODULE += gnrc_uhcpc
 
     # ethos baudrate can be configured from make command
     ETHOS_BAUDRATE ?= 115200
-    CFLAGS += -DETHOS_BAUDRATE=$(ETHOS_BAUDRATE) -DUSE_ETHOS_FOR_STDIO
+    CFLAGS += -DETHOS_BAUDRATE=$(ETHOS_BAUDRATE)
 
     TERMDEPS += host-tools
-    TERMPROG ?= sudo sh $(RIOTTOOLS)/ethos/start_network.sh
-    TERMFLAGS ?= $(PORT) $(TAP) $(IPV6_PREFIX)
+    export TAP ?= riot0
+    TERMPROG = $(RIOTTOOLS)/ethos/ethos
+    TERMFLAGS = $(TAP) $(PORT)
   endif
 endif
 
