@@ -1,6 +1,6 @@
 APPLICATION ?= tests_$(notdir $(patsubst %/,%,$(CURDIR)))
 
-BOARD ?= samr21-xpro
+BOARD ?= nrf52840-mdk
 
 RIOTBASE ?= $(CURDIR)/../RIOT
 
@@ -12,19 +12,26 @@ FEATURES_REQUIRED += riotboot
 USE_ETHOS ?= 0
 
 ifeq (1,$(USE_ETHOS))
-TAP ?= tap0
-IPV6_PREFIX ?= 2001:db8::/64
-ifeq (,$(filter native,$(BOARD)))
   GNRC_NETIF_NUMOF := 2
+  USEMODULE += stdio_ethos
+  USEMODULE += gnrc_uhcpc
 
-# ethos baudrate can be configured from make command
+  # ethos baudrate can be configured from make command
   ETHOS_BAUDRATE ?= 115200
-  CFLAGS += -DETHOS_BAUDRATE=$(ETHOS_BAUDRATE) -DUSE_ETHOS_FOR_STDIO
+  CFLAGS += -DETHOS_BAUDRATE=$(ETHOS_BAUDRATE)
 
   TERMDEPS += host-tools
-  TERMPROG ?= sudo sh $(RIOTTOOLS)/ethos/start_network.sh
-  TERMFLAGS ?= $(PORT) $(TAP) $(IPV6_PREFIX)
+  export TAP ?= riot0
+  TERMPROG = $(RIOTTOOLS)/ethos/ethos
+  TERMFLAGS = $(TAP) $(PORT)
 endif
+
+# riotboot is currently incompatible with the NRF softdevice.
+# That gets automatically selected on boards that support it, unless nrfmin is
+# used.
+# So use that here in order to prevent the softdevice from being used.
+ifeq (nrf52dk,$(BOARD))
+  USEMODULE += nrfmin
 endif
 
 include $(RIOTBASE)/Makefile.include
