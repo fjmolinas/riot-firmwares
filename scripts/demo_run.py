@@ -27,6 +27,10 @@ COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
 
 os.environ['SUIT_MAKEFILE'] = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
+# Default don't use ethos, doesn't fit in samr21-xpro.
+USE_ETHOS = int(os.getenv('USE_ETHOS', '0'))
+TAP = os.getenv('TAP', 'tap0')
+
 BIN_FILE = 'samr21-xpro/node_empty-slot0-extended.bin'
 
 
@@ -50,9 +54,10 @@ def make_reset(board, cwd_dir, port, make_args):
     assert not subprocess.call(cmd, cwd=os.path.expanduser(cwd_dir))
 
 
-def make_term(board, app_dir, port):
+def make_term(board, app_dir, port, make_args):
     logger.info('Setting up Terminal {}'.format(board))
     cmd = ['make', 'term', 'BOARD={}'.format(board), 'PORT={}'.format(port)]
+    cmd.extend(make_args)
     process = pexpect.spawn(' '.join(cmd), cwd=os.path.expanduser(app_dir),
                             encoding='utf-8')
     return process
@@ -117,7 +122,7 @@ PARSER.add_argument('--app-base', default='apps/node_empty',
                     help='List of applications publish')
 PARSER.add_argument('--binfile', default=os.path.join(BIN_DIR, BIN_FILE),
                     help='Start binfile absolute location')
-PARSER.add_argument('--board', default='samr21-xpro',
+PARSER.add_argument('--board', default='nrf52840-mdk',
                     help='Board to test')
 PARSER.add_argument('--http', default=False, action='store_true',
                     help='Use http server')
@@ -174,22 +179,27 @@ if __name__ == "__main__":
 
             # Open terminal
             logger.info('Opening terminal on {}'.format(port))
-            term = make_term(board, app_base, port)
+            term = make_term(board, app_base, port, make_args)
             make_reset(board, app_base, port, make_args)
 
-            # Get device global address
-            term.expect(r'inet6 addr: (?P<gladdr>[0-9a-fA-F:]+:[A-Fa-f:0-9]+)'
-                        '  scope: global')
-            client = '[{}]'.format(term.match.group("gladdr").lower())
+
+            if USE_ETHOS is 0:
+                # Get device global address
+                term.expect(r'inet6 addr: (?P<gladdr>[0-9a-fA-F:]+:[A-Fa-f:0-9]+)'
+                            '  scope: global')
+                client = "[{}]".format(term.match.group("gladdr").lower())
+            else:
+                # Get device local address
+                client = "[fe80::2%{}]".format(TAP)
+
             term.expect(r'running from slot (\d+)')
             logger.debug('Running from slot {}'.format(term.match.group(1)))
             logger.info('Node address {}'.format(client))
-            # Leave some time for discovery discovery
-            time.sleep(3)
 
             for manifest in manifests:
                 logger.info('Updating every {} s'.format(DEMO_PERIOD))
                 time.sleep(DEMO_PERIOD)
+
                 term.expect_exact('suit_coap: started.')
                 notify(board, host, client, app_base, http, manifest)
                 term.expect_exact('suit: verifying manifest signature...')
