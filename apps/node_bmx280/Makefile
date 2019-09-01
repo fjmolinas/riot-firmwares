@@ -2,7 +2,7 @@
 APPLICATION = node_bmx280
 
 # If no BOARD is found in the environment, use this default:
-BOARD = nrf52840-mdk
+BOARD = samr21-xpro
 
 DRIVER ?= bme280
 

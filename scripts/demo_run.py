@@ -122,7 +122,7 @@ PARSER.add_argument('--app-base', default='apps/node_empty',
                     help='List of applications publish')
 PARSER.add_argument('--binfile', default=os.path.join(BIN_DIR, BIN_FILE),
                     help='Start binfile absolute location')
-PARSER.add_argument('--board', default='nrf52840-mdk',
+PARSER.add_argument('--board', default='samr21-xpro',
                     help='Board to test')
 PARSER.add_argument('--http', default=False, action='store_true',
                     help='Use http server')

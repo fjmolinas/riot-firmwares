@@ -1,6 +1,6 @@
 APPLICATION ?= tests_$(notdir $(patsubst %/,%,$(CURDIR)))
 
-BOARD ?= nrf52840-mdk
+BOARD ?= samr21-xpro
 
 RIOTBASE ?= $(CURDIR)/../RIOT
 

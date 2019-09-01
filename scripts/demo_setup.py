@@ -133,7 +133,7 @@ PARSER = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 PARSER.add_argument('--applications', default='apps/node_leds',
                     help='List of applications publish', type=list_from_string)
-PARSER.add_argument('--board-node', default='nrf52840-mdk',
+PARSER.add_argument('--board-node', default='samr21-xpro',
                     help='Board to test')
 PARSER.add_argument('--board-ethos', default='iotlab-m3',
                     help='Board to test')
