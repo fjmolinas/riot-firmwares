@@ -27,6 +27,8 @@ static msg_t _beaconing_msg_queue[BEACONING_QUEUE_SIZE];
 static char beaconing_stack[THREAD_STACKSIZE_DEFAULT];
 #endif
 
+static char uid[IEEE802154_LONG_ADDRESS_LEN * 2];
+
 ssize_t name_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 {
     (void)ctx;
@@ -77,10 +79,6 @@ ssize_t os_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 void beacon_handler(void *arg)
 {
     (void) arg;
-    uint8_t addr[IEEE802154_LONG_ADDRESS_LEN];
-    char uid[IEEE802154_LONG_ADDRESS_LEN * 2];
-    luid_get(addr, IEEE802154_LONG_ADDRESS_LEN);
-    fmt_bytes_hex(uid, addr, IEEE802154_LONG_ADDRESS_LEN);
     size_t msg_len = strlen("alive:") + (IEEE802154_LONG_ADDRESS_LEN * 2);
     char alive_msg[msg_len];
     snprintf(alive_msg, msg_len, "alive:%s", uid);
@@ -111,7 +109,6 @@ void *beaconing_thread(void *args)
 void init_beacon_sender(void)
 {
     uint8_t addr[IEEE802154_LONG_ADDRESS_LEN];
-    char uid[IEEE802154_LONG_ADDRESS_LEN * 2];
     luid_get(addr, IEEE802154_LONG_ADDRESS_LEN);
     fmt_bytes_hex(uid, addr, IEEE802154_LONG_ADDRESS_LEN);
     size_t msg_len = strlen("reset:") + (IEEE802154_LONG_ADDRESS_LEN * 2);
