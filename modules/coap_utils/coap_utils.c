@@ -7,8 +7,6 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-static sock_udp_t coap_sock;
-
 void send_coap_post(uint8_t* uri_path, uint8_t *data)
 {
     /* format destination address from string */
@@ -31,10 +29,19 @@ void send_coap_post(uint8_t* uri_path, uint8_t *data)
     coap_pkt_t pdu;
     size_t len;
     gcoap_req_init(&pdu, &buf[0], GCOAP_PDU_BUF_SIZE, COAP_METHOD_POST, (char*)uri_path);
-    memcpy(pdu.payload, (char*)data, strlen((char*)data));
-    len = gcoap_finish(&pdu, strlen((char*)data) , COAP_FORMAT_TEXT);
+    coap_hdr_set_type(pdu.hdr, COAP_TYPE_NON);
+    coap_opt_add_format(&pdu, COAP_FORMAT_TEXT);
+    len = coap_opt_finish(&pdu, COAP_OPT_FINISH_PAYLOAD);
+
+    if (pdu.payload_len >= strlen((char*)data)) {
+        memcpy(pdu.payload, (char*)data, strlen((char*)data));
+        len += strlen((char*)data);
+    }
+    else {
+        puts("gcoap_cli: msg buffer too small");
+    }
 
     DEBUG("[INFO] Sending '%s' to '%s:%i%s'\n", data, BROKER_ADDR, BROKER_PORT, uri_path);
 
-    sock_udp_send(&coap_sock, buf, len, &remote);
+    gcoap_req_send(&buf[0], len, &remote, NULL);
 }
