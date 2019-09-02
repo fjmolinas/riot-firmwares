@@ -190,10 +190,6 @@ void *tft_display_thread(void *args)
 
     msg_init_queue(_tft_display_msg_queue, TFT_DISPLAY_QUEUE_SIZE);
 
-#ifdef MODULE_SUITREG
-    uint32_t fw_size = 0;
-#endif
-
     msg_t m;
 #ifdef MODULE_SUITREG
     msg_t m_tx;
@@ -202,6 +198,7 @@ void *tft_display_thread(void *args)
                                        thread_getpid());
     suitreg_register(&entry);
     uint8_t count = 0;
+    uint32_t fw_size = 0;
 #endif
 
     while (1) {
@@ -332,7 +329,7 @@ void *tft_display_thread(void *args)
     return NULL;
 }
 
-void init_st7735_printer(ucg_t * ucg)
+int init_st7735_printer(ucg_t * ucg)
 {
     _init_st7735(ucg);
 
@@ -344,4 +341,12 @@ void init_st7735_printer(ucg_t * ucg)
                                          THREAD_PRIORITY_MAIN - 1,
                                          THREAD_CREATE_STACKTEST, tft_display_thread,
                                          ucg, "tft_display thread");
+    if (tft_display_pid == -EINVAL || tft_display_pid == -EOVERFLOW) {
+        puts("Error: failed to create tft display thread, exiting\n");
+        return tft_display_pid;
+    }
+    else {
+        puts("Successfully created tft display thread !\n");
+        return tft_display_pid;
+    }
 }

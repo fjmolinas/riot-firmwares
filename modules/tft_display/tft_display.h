@@ -93,8 +93,9 @@ enum {
  * @brief   Setups the display, starts the thread.
  *
  * @param[in] ucg    pointer to ucg device descriptor
+ * @param[out] pid    pid of thread
  */
-void init_st7735_printer(ucg_t* ucg);
+int init_st7735_printer(ucg_t* ucg);
 
 /**
  * @brief   Utility function that returns the tft display thread pid
