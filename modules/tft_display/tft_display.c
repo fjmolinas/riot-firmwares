@@ -271,6 +271,7 @@ void *tft_display_thread(void *args)
                 xtimer_set_msg(&timer, SUIT_ERROR_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_SEQ_NR_ERROR:
+                _clear_logo_area(ucg);
                 ucg_SetFont(ucg, ucg_font_profont12_mr);
                 tft_puts(ucg, "  INVALID  ", NULL, NULL,  63, 24, 1);
                 tft_puts(ucg, "SEQUENCE NUMBER", NULL, NULL,  63, 38, 1);
@@ -285,6 +286,7 @@ void *tft_display_thread(void *args)
                 xtimer_set_msg(&timer, SUIT_ERROR_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_DIGEST_ERROR:
+                _clear_logo_area(ucg);
                 ucg_SetFont(ucg, ucg_font_profont12_mr);
                 tft_puts(ucg, "INVALID", NULL, NULL,  63, 24, 1);
                 tft_puts(ucg, " DIGEST ", NULL, NULL,  63, 38, 1);
@@ -315,6 +317,7 @@ void *tft_display_thread(void *args)
                 count = count % SUIT_FW_PROGRESS_CYCLE;
                 break;
             case SUIT_DOWNLOAD_ERROR:
+                _clear_logo_area(ucg);
                 ucg_SetFont(ucg, ucg_font_profont12_mr);
                 tft_puts(ucg, "FAILED", NULL, NULL,  63, 24, 1);
                 tft_puts(ucg, "DOWNLOAD", NULL, NULL,  63, 38, 1);
