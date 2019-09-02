@@ -12,15 +12,13 @@ endif
 
 ifeq (1, $(USE_SUIT))
   USEMODULE += coap_suit
+  USEMODULE += suitreg
 endif
 
 ifeq (1, $(USE_TFT))
   CFLAGS += -DSUIT_STATUS_SUBS
   USEMODULE += tft_display
   FEATURES_REQUIRED += periph_gpio periph_spi
-ifeq (1, $(USE_SUIT))
-  USEMODULE += suitreg
-endif
 endif
 
 ifneq (,$(filter coap_% mqtt_%,$(USEMODULE)))
