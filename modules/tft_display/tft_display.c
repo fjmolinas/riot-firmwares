@@ -259,6 +259,7 @@ void *tft_display_thread(void *args)
                 tft_puts(ucg, "STARTING", NULL, NULL,  63, 38, 1);
                 break;
             case SUIT_SIGNATURE_START:
+                _clear_logo_area(ucg);
                 ucg_SetFont(ucg, ucg_font_profont12_mr);
                 tft_puts(ucg, "VERIFYING", NULL, NULL,  63, 24, 1);
                 tft_puts(ucg, "SIGNATURE", NULL, NULL,  63, 38, 1);
