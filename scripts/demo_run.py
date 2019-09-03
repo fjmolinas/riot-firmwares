@@ -82,7 +82,7 @@ def make_flash_bin(board, cwd_dir, binfile, make_args):
     logger.info('Initial Flash of {}'.format(board))
     cmd = [
         'make',
-        'BINFILE={}'.format(binfile),
+        'FLASHFILE={}'.format(binfile),
         'flash-only',
         'BOARD={}'.format(board)
         ]
