@@ -52,6 +52,9 @@ endif
 
 ifneq (,$(filter coap_%,$(USEMODULE)))
   USEMODULE += gcoap
+  ifneq (,$(filter samr21-xpro,$(BOARD)))
+    USEMODULE += puf_sram
+  endif
 endif
 
 ifneq (,$(filter mqtt_%,$(USEMODULE)))
