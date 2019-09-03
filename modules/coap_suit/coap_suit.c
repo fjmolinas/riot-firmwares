@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "net/gcoap.h"
+#include "xtimer.h"
 
 #include "coap_suit.h"
 #include "coap_utils.h"
@@ -23,7 +24,7 @@
 #define NODE_SUIT_VENDOR        "Unknown"
 #endif
 
-#define SUIT_FW_PROGRESS_CYCLE    (16U)
+#define SUIT_FW_PROGRESS_CYCLE      (16U)
 
 #define SUIT_COAP_MSG_QUEUE_SIZE    (4)
 
@@ -86,7 +87,8 @@ void *suit_coap_thread(void *args)
 {
     (void) args;
     msg_init_queue(_suit_coap_thread_msg_queue, SUIT_COAP_MSG_QUEUE_SIZE);
-    msg_t m;
+    xtimer_t timer;
+    msg_t m, m_tx;
     size_t p = 0;
     uint8_t response[64];
     uint8_t count = 0;
