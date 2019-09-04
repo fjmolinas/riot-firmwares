@@ -51,6 +51,7 @@ static const coap_resource_t _resources[] = {
 #ifdef MODULE_COAP_SUIT
     /* this line adds the whole "/suit"-subtree */
     SUIT_COAP_SUBTREE,
+    { "/suit_state", COAP_GET, suit_state_handler, NULL },
 #endif
     { "/tvoc", COAP_GET, ccs811_tvoc_handler, NULL },
 #ifdef MODULE_COAP_SUIT
@@ -88,6 +89,7 @@ int main(void)
     riotboot_slot_print_hdr(riotboot_slot_current());
     /* start suit coap updater thread */
     suit_coap_run();
+    init_suit_coap_msg_handler();
 #endif
 
 #ifdef MODULE_TFT_DISPLAY
