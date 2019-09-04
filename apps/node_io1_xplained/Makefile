@@ -24,6 +24,7 @@ FEATURES_REQUIRED += periph_i2c
 USEMODULE += coap_common
 USEMODULE += coap_utils
 USEMODULE += coap_io1_xplained
+USEMODULE += schedreg
 
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1

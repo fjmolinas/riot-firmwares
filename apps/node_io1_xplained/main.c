@@ -15,6 +15,7 @@
 /* RIOT firmware libraries */
 #include "coap_common.h"
 #include "coap_io1_xplained.h"
+#include "schedreg.h"
 
 #ifdef MODULE_TFT_DISPLAY
 #include "tft_display.h"
@@ -25,6 +26,9 @@
 #include "riotboot/slot.h"
 #include "coap_suit.h"
 #endif
+
+#define IO1_XPLAINED_SEND_INTERVAL  (5*US_PER_SEC)
+#define BEACON_SEND_INTERVAL        (30*US_PER_SEC)
 
 static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
@@ -74,16 +78,8 @@ int main(void)
     puts("Configured network interfaces:");
     _gnrc_netif_config(0, NULL);
 
-#ifdef MODULE_TFT_DISPLAY
-    ucg_t ucg;
-    /* start tft displays*/
-    init_st7735_printer(&ucg);
-#endif
-
     /* start coap server loop */
     gcoap_register_listener(&_listener);
-    init_beacon_sender();
-    init_io1_xplained_temperature_sender();
 
 #ifdef MODULE_COAP_SUIT
     printf("running from slot %u\n", riotboot_slot_current());
@@ -91,6 +87,32 @@ int main(void)
     /* start suit coap updater thread */
     suit_coap_run();
 #endif
+
+#ifdef MODULE_TFT_DISPLAY
+    ucg_t ucg;
+    /* start tft displays*/
+    init_st7735_printer(&ucg);
+#endif
+
+    /* init schedreg thread */
+    kernel_pid_t sched_pid = init_schedreg_thread();
+
+    /* start beacon and register */
+    init_beacon_sender();
+    xtimer_t beacon_xtimer;
+    msg_t beacon_msg;
+    schedreg_t beacon_reg = SCHEDREG_INIT(beacon_handler, NULL, &beacon_msg,
+                                          &beacon_xtimer, BEACON_SEND_INTERVAL);
+    schedreg_register(&beacon_reg, sched_pid);
+
+    /* register iot_xplained */
+    xtimer_t io1_xplained_xtimer;
+    msg_t io1_xplained_msg;
+    schedreg_t io1_xplained_reg = SCHEDREG_INIT(io1_xplained_handler, NULL,
+                                                &io1_xplained_msg,
+                                                &io1_xplained_xtimer,
+                                                IO1_XPLAINED_SEND_INTERVAL);
+    schedreg_register(&io1_xplained_reg, sched_pid);
 
     puts("All up, running the shell now");
     char line_buf[SHELL_DEFAULT_BUFSIZE];
