@@ -20,6 +20,7 @@ USEMODULE += shell_common
 USEMODULE += coap_common
 USEMODULE += coap_utils
 USEMODULE += coap_position
+USEMODULE += schedreg
 
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1
