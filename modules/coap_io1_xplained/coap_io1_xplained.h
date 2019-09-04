@@ -15,8 +15,6 @@ void read_io1_xplained_temperature(int16_t* temperature);
 
 void io1_xplained_handler(void *args);
 
-void init_io1_xplained_temperature_sender(void);
-
 #ifdef __cplusplus
 }
 #endif

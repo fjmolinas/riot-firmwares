@@ -22,15 +22,6 @@
 #define I2C_INTERFACE              I2C_DEV(0)    /* I2C interface number */
 #define SENSOR_ADDR                (0x48 | 0x07) /* I2C temperature address on sensor */
 
-#ifndef MODULE_SCHEDREG
-#define TEMPERATURE_INTERVAL       (5000000U)     /* set temperature updates interval to 5 seconds */
-
-#define IO1_XPLAINED_QUEUE_SIZE    (8)
-
-static msg_t _io1_xplained_msg_queue[IO1_XPLAINED_QUEUE_SIZE];
-static char io1_xplained_stack[THREAD_STACKSIZE_DEFAULT];
-#endif
-
 static uint8_t response[64] = { 0 };
 
 ssize_t io1_xplained_temperature_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
@@ -88,50 +79,4 @@ void io1_xplained_handler(void *args)
     display_send_buf(TFT_DISPLAY_TEMP, (uint8_t*) response + p1, p2);
 #endif
     send_coap_post((uint8_t*)"/server", response);
-}
-
-#ifndef MODULE_SCHEDREG
-void *io1_xplained_thread(void *args)
-{
-    (void)args;
-    msg_init_queue(_io1_xplained_msg_queue, IO1_XPLAINED_QUEUE_SIZE);
-
-#ifdef MODULE_TFT_DISPLAY
-    msg_t m;
-#endif
-
-    for(;;) {
-        int16_t temperature;
-        read_io1_xplained_temperature(&temperature);
-        size_t p = 0;
-        p += sprintf((char*)&response[p], "temperature:%i°C",
-                     temperature);
-#ifdef MODULE_TFT_DISPLAY
-        display_send_buf(TFT_DISPLAY_TEMP, (uint8_t*) response , p);
-#endif
-        response[p] = '\0';
-        send_coap_post((uint8_t*)"/server", (uint8_t*)response);
-        /* wait 3 seconds */
-        xtimer_usleep(TEMPERATURE_INTERVAL);
-    }
-    return NULL;
-}
-#endif
-
-void init_io1_xplained_temperature_sender(void)
-{
-#ifndef MODULE_SCHEDREG
-    /* create the sensors thread that will send periodic updates to
-       the server */
-    int io1_xplained_pid = thread_create(io1_xplained_stack, sizeof(io1_xplained_stack),
-                                         THREAD_PRIORITY_MAIN - 1,
-                                         THREAD_CREATE_STACKTEST, io1_xplained_thread,
-                                         NULL, "io1_xplained thread");
-    if (io1_xplained_pid == -EINVAL || io1_xplained_pid == -EOVERFLOW) {
-        puts("Error: failed to create io1_xplained thread, exiting");
-    }
-    else {
-        puts("Successfuly created io1_xplained thread !");
-    }
-#endif
 }
