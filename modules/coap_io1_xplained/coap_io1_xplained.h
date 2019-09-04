@@ -13,6 +13,8 @@ ssize_t io1_xplained_temperature_handler(coap_pkt_t* pdu, uint8_t *buf, size_t l
 
 void read_io1_xplained_temperature(int16_t* temperature);
 
+void io1_xplained_handler(void *args);
+
 void init_io1_xplained_temperature_sender(void);
 
 #ifdef __cplusplus

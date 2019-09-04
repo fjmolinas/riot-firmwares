@@ -22,14 +22,16 @@
 #define I2C_INTERFACE              I2C_DEV(0)    /* I2C interface number */
 #define SENSOR_ADDR                (0x48 | 0x07) /* I2C temperature address on sensor */
 
+#ifndef MODULE_SCHEDREG
 #define TEMPERATURE_INTERVAL       (5000000U)     /* set temperature updates interval to 5 seconds */
 
 #define IO1_XPLAINED_QUEUE_SIZE    (8)
 
 static msg_t _io1_xplained_msg_queue[IO1_XPLAINED_QUEUE_SIZE];
 static char io1_xplained_stack[THREAD_STACKSIZE_DEFAULT];
+#endif
 
-static char response[64];
+static uint8_t response[64] = { 0 };
 
 ssize_t io1_xplained_temperature_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 {
@@ -39,13 +41,11 @@ ssize_t io1_xplained_temperature_handler(coap_pkt_t* pdu, uint8_t *buf, size_t l
     int16_t temperature;
     read_io1_xplained_temperature(&temperature);
     size_t p = 0;
-    p += sprintf(&response[p], "%i°C", temperature);
+    p += sprintf((char*)&response[p], "%i°C", temperature);
     response[p] = '\0';
+    memcpy(pdu->payload, response, p);
 
-    size_t payload_len = strlen(response);
-    memcpy(pdu->payload, response, payload_len);
-
-    return gcoap_finish(pdu, payload_len, COAP_FORMAT_TEXT);
+    return gcoap_finish(pdu, p, COAP_FORMAT_TEXT);
 }
 
 void read_io1_xplained_temperature(int16_t *temperature)
@@ -72,6 +72,25 @@ void read_io1_xplained_temperature(int16_t *temperature)
     return;
 }
 
+void io1_xplained_handler(void *args)
+{
+    (void) args;
+
+    int16_t temperature;
+    read_io1_xplained_temperature(&temperature);
+    ssize_t p1 = 0;
+    ssize_t p2 = 0;
+    p1 = sprintf((char*)&response[p1], "temperature:");
+    p2 = sprintf((char*)&response[p1], "%i°C",
+                    temperature);
+    response[p1 + p2] = '\0';
+#ifdef MODULE_TFT_DISPLAY
+    display_send_buf(TFT_DISPLAY_TEMP, (uint8_t*) response + p1, p2);
+#endif
+    send_coap_post((uint8_t*)"/server", response);
+}
+
+#ifndef MODULE_SCHEDREG
 void *io1_xplained_thread(void *args)
 {
     (void)args;
@@ -97,9 +116,11 @@ void *io1_xplained_thread(void *args)
     }
     return NULL;
 }
+#endif
 
 void init_io1_xplained_temperature_sender(void)
 {
+#ifndef MODULE_SCHEDREG
     /* create the sensors thread that will send periodic updates to
        the server */
     int io1_xplained_pid = thread_create(io1_xplained_stack, sizeof(io1_xplained_stack),
@@ -112,4 +133,5 @@ void init_io1_xplained_temperature_sender(void)
     else {
         puts("Successfuly created io1_xplained thread !");
     }
+#endif
 }
