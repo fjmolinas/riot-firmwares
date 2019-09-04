@@ -25,6 +25,7 @@ FEATURES_REQUIRED += periph_gpio
 USEMODULE += coap_common
 USEMODULE += coap_utils
 USEMODULE += coap_led
+USEMODULE += schedreg
 
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1
