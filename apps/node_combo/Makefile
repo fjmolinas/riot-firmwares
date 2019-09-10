@@ -34,6 +34,10 @@ QUIET ?= 1
 # Application specific definitions and includes
 APPLICATION_NAME ?= "Air\ Quality\ Monitor"
 
+# CoAP broker server information
+NODE_LAT ?= 45.7832415
+NODE_LNG ?= 4.8488309
+
 # Partial sensor support flags
 USE_TEMP ?= true
 USE_PRES ?= true
@@ -58,6 +62,9 @@ CFLAGS += -DCCS811_PARAM_I2C_ADDR=CCS811_I2C_ADDRESS_2
 CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"
 CFLAGS += -DBROKER_PORT=$(BROKER_PORT)
 CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
+
+CFLAGS += -DNODE_LAT=\"$(NODE_LAT)\"
+CFLAGS += -DNODE_LNG=\"$(NODE_LNG)\"
 
 CFLAGS += -DNODE_SUIT_VENDOR="\"$(SUIT_VENDOR)\""
 CFLAGS += -DNODE_SUIT_VERSION="\"$(APP_VER)\""
