@@ -1,5 +1,5 @@
 # name of your application
-APPLICATION = node_leds
+APPLICATION ?= node_leds
 
 # If no BOARD is found in the environment, use this default:
 BOARD ?= samr21-xpro

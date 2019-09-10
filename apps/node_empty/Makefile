@@ -1,5 +1,5 @@
 # Name of your application
-APPLICATION = node_empty
+APPLICATION ?= node_empty
 
 # If no BOARD is found in the environment, use this default:
 BOARD ?= samr21-xpro
@@ -27,6 +27,7 @@ QUIET ?= 1
 
 # Application specific definitions and includes
 APPLICATION_NAME ?= "Suit\ Device"
+
 # CoAP broker server information
 NODE_LAT ?= 45.7832415
 NODE_LNG ?= 4.8488309

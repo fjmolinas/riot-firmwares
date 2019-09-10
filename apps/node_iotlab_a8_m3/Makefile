@@ -1,5 +1,5 @@
 # name of your application
-APPLICATION = dashboard_riot_a8_m3
+APPLICATION ?= dashboard_riot_a8_m3
 
 # Use IoT-LAB board:
 BOARD = iotlab-a8-m3

@@ -1,5 +1,5 @@
 # Name of your application
-APPLICATION = node_imu
+APPLICATION ?= node_imu
 
 # If no BOARD is found in the environment, use this default:
 BOARD = iotlab-m3

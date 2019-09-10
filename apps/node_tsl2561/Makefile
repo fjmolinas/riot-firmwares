@@ -1,5 +1,5 @@
 # Name of your application
-APPLICATION = node_tsl2561
+APPLICATION ?= node_tsl2561
 
 # If no BOARD is found in the environment, use this default:
 BOARD = samr21-xpro

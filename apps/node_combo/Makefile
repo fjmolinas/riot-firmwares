@@ -1,5 +1,5 @@
 # Name of your application
-APPLICATION = node_combo
+APPLICATION ?= node_combo
 
 # If no BOARD is found in the environment, use this default:
 BOARD = samr21-xpro

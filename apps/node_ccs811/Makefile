@@ -1,5 +1,5 @@
 # Name of your application
-APPLICATION = node_ccs811
+APPLICATION ?= node_ccs811
 
 # If no BOARD is found in the environment, use this default:
 BOARD = samr21-xpro
