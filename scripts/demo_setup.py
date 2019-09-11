@@ -38,7 +38,7 @@ def setup_aiocoap():
 
 def setup_otaserver():
     logger.info('Setting up ota-server')
-    cmd = ['python3', 'otaserver/main.py', '--coap-host=[fd00:dead:beef::1]']
+    cmd = ['python3', 'otaserver/main.py', '--coap-host=[fd00:dead:beef::1]', '--debug']
     process = subprocess.Popen(cmd, cwd=os.path.expanduser(OTASERVER))
     return process
 
