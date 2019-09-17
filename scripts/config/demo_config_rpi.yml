@@ -1,0 +1,40 @@
+cors:
+    allowed:
+        - http://localhost:8080
+        - http://riot-demo.local:8080
+
+devices:
+    - uid: DF52AA4E1A097C7
+      debug_id: ATML2127031800011523
+      board: samr21-xpro
+      name: air-monitor-0
+      port: /dev/riotfp/tty-air-monitor-0
+      demo:
+          binfile: /opt/src/riot-firmwares/firmwares/setup/samr21-xpro/node_empty-slot0-extended.bin
+          manifests:
+              - air_monitor
+          demo_reset: 1
+          demo_period: 1
+          coap:
+              server: http
+              address: http://riot-demo.local:8080
+          ethos: False
+          tap: tap0
+          make: [-j1]
+    - uid: 968D131355327E7
+      debug_id: ATML2127031800011458
+      board: samr21-xpro
+      name: air-monitor-1
+      port: /dev/riotfp/tty-air-monitor-1
+      demo:
+          binfile: /opt/src/riot-firmwares/firmwares/setup/samr21-xpro/node_empty-slot0-extended.bin
+          manifests:
+              - combo
+          demo_reset: 1
+          demo_period: 1
+          coap:
+              server: http
+              address: http://riot-demo.local:8080
+          ethos: False
+          tap: tap0
+          make: [-j1]
