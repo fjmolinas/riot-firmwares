@@ -84,6 +84,12 @@ DIRS += $(CURDIR)/../../modules/tft_display
 INCLUDES += -I$(CURDIR)/../../modules/tft_display
 endif
 
+ifneq (,$(filter sm_pwm_01c,$(USEMODULE)))
+  DIRS += $(CURDIR)/../../modules/sm_pwm_01c
+  INCLUDES += -I$(CURDIR)/../../modules/sm_pwm_01c
+  INCLUDES += -I$(CURDIR)/../../modules/sm_pwm_01c/include
+endif
+
 .PHONY: host-tools
 
 host-tools:
