@@ -36,3 +36,8 @@ RIOT-Fw.*
 
 # Ignore demo firmwares folder
 firmwares/
+
+# Ignore yml files
+*.yml
+# Except an example config
+!demo_config.yml
