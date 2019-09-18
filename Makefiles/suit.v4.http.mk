@@ -7,6 +7,8 @@ SUIT_COAP_SERVER ?= localhost
 SUIT_OTA_SERVER_URL ?= http://$(SUIT_COAP_SERVER):8080
 SUIT_OTA_SERVER_COAP_URL_EP ?= coap/url
 
+SUIT_NOTIFY_VERSION ?= latest
+
 # The OTA server knows where the device can fetch the slots and manifest
 SUIT_COAP_ROOT := $(shell curl -X GET \
       $(SUIT_OTA_SERVER_URL)/$(SUIT_OTA_SERVER_COAP_URL_EP)/$(SUIT_PUBLISH_ID))
@@ -24,4 +26,5 @@ suit/notify: | $(filter suit/publish, $(MAKECMDGOALS))
 	$(Q)curl -X POST \
 		-F 'publish_id=$(SUIT_PUBLISH_ID)' \
 		-F 'urls=$(SUIT_CLIENT)' \
+		-F 'version=$(SUIT_NOTIFY_VERSION)' \
 		$(SUIT_OTA_SERVER_URL)/notifyv4
