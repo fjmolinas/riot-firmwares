@@ -18,8 +18,9 @@ logger = logging.getLogger("demoreset")
 
 BASE_DIR = os.path.dirname(sys.argv[0])
 MAKE_DIR = os.path.join(BASE_DIR, 'reset')
+CONFIG_DIR = os.path.join(BASE_DIR, 'config')
 
-DEFAULT_CONFIG =  os.path.join(BASE_DIR, 'demo_config.yml')
+DEFAULT_CONFIG =  os.path.join(CONFIG_DIR, 'demo_config.yml')
 
 class BaseHandler(tornado.web.RequestHandler):
 
@@ -105,7 +106,7 @@ def parse_command_line():
 def read_config(filename):
     global config
     with open(filename, 'r') as ymlfile:
-        config = yaml.load(ymlfile)
+        config = yaml.load(ymlfile, Loader=yaml.Loader)
 
 
 def run(arguments=[]):

@@ -7,15 +7,33 @@ devices:
       debug_id: ATML2127031800011523
       board: samr21-xpro
       name: air-monitor-0
+      port: /dev/riotfp/tty-air-monitor-0
       demo:
           binfile: /home/francisco/workspace/riot-firmwares/firmwares/setup/samr21-xpro/node_empty-slot0-extended.bin
           manifests:
-              - combo
+              - air_monitor
+          demo_reset: 1
+          demo_period: 1
+          coap:
+              server: http
+              address: http://localhost:8080
+          ethos: False
+          tap: tap0
+          make: [-j1]
     - uid: 968D131355327E7
       debug_id: ATML2127031800011458
       board: samr21-xpro
       name: air-monitor-0
+      port: /dev/tty-air-monitor-1
       demo:
         - binfile: /home/francisco/workspace/riot-firmwares/firmwares/setup/samr21-xpro/node_empty-slot0-extended.bin
           manifests:
-              - air_monitor
+              - combo
+          demo_reset: 1
+          demo_period: 1
+          coap:
+              server: http
+              address: http://localhost:8080
+          ethos: False
+          tap: tap0
+          make: [-j1]
