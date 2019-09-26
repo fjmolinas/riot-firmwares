@@ -52,7 +52,8 @@ class DemoResetHandler(BaseHandler):
     def match_uid(self, uid):
         devices = config["devices"]
         for device in devices:
-            if device['uid'] == uid:
+            if device['uid'] == uid or device['name'] == uid or \
+               device['debug_id'] == uid:
                 logger.debug("Found matching device {}".format(device))
                 return device
         else:
