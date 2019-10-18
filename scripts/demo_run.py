@@ -25,11 +25,11 @@ BASE_DIR = os.path.abspath(os.path.join(SUIT_DIR, '..'))
 BIN_DIR = os.path.join(BASE_DIR, 'firmwares/setup')
 COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
 
-os.environ['SUIT_MAKEFILE'] = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
-
 # Default don't use ethos, doesn't fit in samr21-xpro.
 USE_ETHOS = int(os.getenv('USE_ETHOS', '0'))
 TAP = os.getenv('TAP', 'tap0')
+
+SUIT_MAKEFILE_HTTP = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
 BIN_FILE = 'samr21-xpro/node_empty-slot0-extended.bin'
 
@@ -165,6 +165,10 @@ if __name__ == "__main__":
 
     if args.debug_id is not None:
         make_args.append("DEBUG_ADAPTER_ID={}".format(args.debug_id))
+
+    # Override default suit/notify and suit/publish
+    if args.http is True:
+        os.environ['RIOT_MAKEFILES_GLOBAL_POST'] = SUIT_MAKEFILE_HTTP
 
     term = None
 

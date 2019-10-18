@@ -8,10 +8,8 @@ SUIT_OTA_SERVER_URL ?= http://$(SUIT_COAP_SERVER):8080
 SUIT_OTA_SERVER_COAP_URL_EP ?= coap/url
 
 # The OTA server knows where the device can fetch the slots and manifest
-SUIT_COAP_ROOT ?= $(shell curl -X GET \
+SUIT_COAP_ROOT := $(shell curl -X GET \
       $(SUIT_OTA_SERVER_URL)/$(SUIT_OTA_SERVER_COAP_URL_EP)/$(SUIT_PUBLISH_ID))
-
-suit/manifest: $(SUIT_MANIFEST)
 
 suit/publish: $(SUIT_MANIFEST) $(SUIT_MANIFEST_SIGNED) $(SLOT0_RIOT_BIN) $(SLOT1_RIOT_BIN)
 	$(Q)curl -X POST \
@@ -22,7 +20,7 @@ suit/publish: $(SUIT_MANIFEST) $(SUIT_MANIFEST_SIGNED) $(SLOT0_RIOT_BIN) $(SLOT1
 		-F $(SLOT1_RIOT_BIN)=@$(SLOT1_RIOT_BIN) \
 		$(SUIT_OTA_SERVER_URL)/publish
 
-suit/notify:
+suit/notify: | $(filter suit/publish, $(MAKECMDGOALS))
 	$(Q)curl -X POST \
 		-F 'publish_id=$(SUIT_PUBLISH_ID)' \
 		-F 'urls=$(SUIT_CLIENT)' \

@@ -19,7 +19,7 @@ BASE_DIR = os.path.abspath(os.path.join(SUIT_DIR, '..'))
 COAPROOT = os.path.join(BASE_DIR, 'firmwares/ota')
 SETUP_DIR = os.path.join(BASE_DIR, 'firmwares/setup')
 
-os.environ['SUIT_MAKEFILE'] = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
+SUIT_MAKEFILE_HTTP = os.path.join(BASE_DIR, 'Makefiles/suit.v4.http.mk')
 
 OTASERVER = os.path.join(BASE_DIR, '../ota-server')
 
@@ -225,6 +225,10 @@ if __name__ == "__main__":
                 coap_server = setup_aiocoap()
             else:
                 coap_server = setup_otaserver()
+
+        # Override default suit/notify and suit/publish
+        if args.http is True:
+            os.environ['RIOT_MAKEFILES_GLOBAL_POST'] = SUIT_MAKEFILE_HTTP
 
         # Set keys and key-dir to use
         if args.keys is not None:
