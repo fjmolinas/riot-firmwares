@@ -1,0 +1,7 @@
+export SUIT_OTA_SERVER_URL="http://127.0.0.1:8080"
+export RIOT_MAKEFILES_GLOBAL_POST=${SUIT_MAKEFILE_HTTP}
+export APPLICATION=air_monitor
+export SUIT_CLIENT="air-monitor-0"
+export NODE_LAT="48.837832"
+export NODE_LNG="2.102920"
+export DISABLE_LOCAL_BOARDS=1
