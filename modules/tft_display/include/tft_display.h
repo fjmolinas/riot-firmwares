@@ -30,12 +30,6 @@ enum {
 #ifndef APPLICATION_NAME
 #define APPLICATION_NAME       "TFT DISPLAY"
 #endif
-/**
- * @brief   Version of the application, if APP_VER is not defined
- */
-#ifndef NODE_SUIT_VERSION
-#define NODE_SUIT_VERSION      "XXXXXXXX"
-#endif
 
 /**
  * @brief   ucglib display definitions

@@ -55,7 +55,6 @@ CFLAGS += -DNODE_LAT=\"$(NODE_LAT)\"
 CFLAGS += -DNODE_LNG=\"$(NODE_LNG)\"
 
 CFLAGS += -DNODE_SUIT_VENDOR="\"$(SUIT_VENDOR)\""
-CFLAGS += -DNODE_SUIT_VERSION="\"$(APP_VER)\""
 
 # Set a custom channel if needed
 ifneq (,$(filter cc110x,$(USEMODULE)))          # radio is cc110x sub-GHz

@@ -39,7 +39,6 @@ CFLAGS += -DBROKER_PORT=$(BROKER_PORT)
 CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
 
 CFLAGS += -DNODE_SUIT_VENDOR="\"$(SUIT_VENDOR)\""
-CFLAGS += -DNODE_SUIT_VERSION="\"$(APP_VER)\""
 
 # Set a custom channel if needed
 ifneq (,$(filter cc110x,$(USEMODULE)))          # radio is cc110x sub-GHz

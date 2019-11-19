@@ -120,7 +120,8 @@ static void _draw_riotboot(ucg_t* ucg)
     ucg_SetFont(ucg, ucg_font_profont12_mr);
     ucg_SetFontPosTop(ucg);
     char buffer [32];
-    sprintf(buffer, "VER: %s", NODE_SUIT_VERSION);
+    const riotboot_hdr_t* hdr = riotboot_slot_get_hdr(riotboot_slot_current());
+    sprintf(buffer, "VER: %"PRIu32"", hdr->version);
     tft_puts(ucg, buffer, NULL, NULL, 52, 112, 1);
 #else
     (void) ucg;
