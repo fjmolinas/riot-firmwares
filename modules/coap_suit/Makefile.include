@@ -1,13 +1,5 @@
-# SUIT update specific stuff
-USEMODULE += nanocoap_sock sock_util
-USEMODULE += suit suit_coap
-
-# v4:
-USEMODULE += suit_v4
-INCLUDES += -I$(CURDIR) # Include public_key.h in the path
-
-FEATURES_REQUIRED += riotboot
-USEMODULE += riotboot_slot riotboot_flashwrite riotboot_flashwrite_verify_sha256
+USEMODULE_INCLUDES_coap_suit := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/include
+USEMODULE_INCLUDES += $(USEMODULE_INCLUDES_coap_suit)
 
 # Required for SUIT updates to work with gcoap
 CFLAGS += -DGCOAP_PDU_BUF_SIZE=256

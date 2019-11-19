@@ -1,0 +1,2 @@
+USEMODULE_INCLUDES_mqtt_utils := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/include
+USEMODULE_INCLUDES += $(USEMODULE_INCLUDES_mqtt_utils)
