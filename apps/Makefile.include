@@ -1,3 +1,5 @@
+SUIT_KEY_DIR ?= $(CURDIR)/../keys
+
 ifneq (,$(filter coap_bmp180, $(USEMODULE)))
   EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_bmp180
 endif

@@ -33,6 +33,7 @@ RIOT-Fw.*
 # Ignore keys
 *.key
 *_key.h
+*/keys/
 
 # Ignore demo firmwares folder
 firmwares/
