@@ -1,2 +1,4 @@
 USEMODULE_INCLUDES_sm_pwm_01c := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/include
 USEMODULE_INCLUDES += $(USEMODULE_INCLUDES_sm_pwm_01c)
+
+PSEUDOMODULES += sm_pwm_01c_ma

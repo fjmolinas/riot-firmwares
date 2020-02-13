@@ -73,6 +73,7 @@ endif
 
 ifneq (,$(filter coap_sm_pwm_01c,$(USEMODULE)))
   USEMODULE += sm_pwm_01c
+  USEMODULE += sm_pwm_01c_ma
 endif
 
 ifneq (,$(filter sm_pwm_01c,$(USEMODULE)))
