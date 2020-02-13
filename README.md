@@ -46,6 +46,9 @@ The available firmwares are:
 
 All firmwares source codes are based on [RIOT](https://github.com/RIOT-OS/RIOT).
 
+Some of the firmware applications can perform OTA (over the air) updates. More
+on this below.
+
 #### Initializing the repository:
 
 RIOT is included as a submodule of this repository. We provide a `make` helper
@@ -77,9 +80,16 @@ From the root directory of this repository, issue the following command:
 
     $ make clean
 
-#### Running suit capable applications
+### Over-the-air (OTA) support
 
-Applications supporting suit:
+If you haven't already take a look at [pyaiot](https://github.com/pyaiot/pyaiot)
+to get an overview of the project and its building blocks.
+
+Multiple applications are able to perform over the air updates using riot `suit`
+module.
+
+For a detailed suit walkthrough refer to [examples/suit_update](https://github.com/RIOT-OS/RIOT/tree/master//examples/suit_update/README.md). These applications will follow the
+same approach so you can think of `examples/suit_update` as any of these `apps`:
 
     - node_air_monitor
     - node_bmp180
@@ -92,31 +102,47 @@ Applications supporting suit:
     - node_sm_pwm_01c
     - node_tsl2561
 
-One can as follow the setup in [examples/suit_update](https://github.com/RIOT-OS/RIOT/tree/master//examples/suit_update/README.md) and replace all `make -C examples/suit_update`
-by the application of your choice.
-
 For better interaction with `pyaiot` we use [otaserver](https://github.com/aabadie/ota-server),
-the following setup will require ota-server to work.
+instead of `aiocoap-fileserver` as is done in `examples/suit_update`, but this
+only changes the firmware updates backed.
 
-##### Application boot - strapping
+#### Over-the-air (OTA) setup overview
 
-You will require a border router, to setup a RIOT border router you can follow
-instructions in:
-[examples/gnrc_border_router](https://github.com/RIOT-OS/RIOT/tree/master/examples/gnrc_border_router)
+The following guide will detail how to setup over the air updates between a Node
+running one of the above listed applications and the `ota-server` backend. The
+server will store new firmware updates.
 
-You can as well run the following command on a BOARD with a 802.15.4 radio:
+##### Gateway
+
+Instead of a Linux Gateway we will use a RIOT node as a border router (more
+details in [examples/gnrc_border_router](https://github.com/RIOT-OS/RIOT/tree/master/examples/gnrc_border_router)).
+
+This will be the bridge between the node and the rest of the `pyaiot` applications
+as well as the `ota-server`.
+
+Pick any RIOT supported BOARD with 802.15.4 support and flash `gnrc_border_router`
+aplications:
 
     $ BOARD=iotlab-m3 make -C RIOT/examples/gnrc_border_router/ flash
 
-Then start the border router running:
+Then start the border router by running:
 
-    $ sudo RIOT/dist/tools/ethos/start_network.sh /dev/riot/tty-iotlab-m3 riot0 ${LOCAL_IP6_PREFIX}::1/64
+    $ sudo RIOT/dist/tools/ethos/start_network.sh /dev/ttyUSB0 riot0 2001:db8::/64
 
-Bootstrap your device of choice with one of the enabled applications:
+Make sure the port (/dev/ttyUSB0) matches the serial port of your border router
+node. 
+
+##### Node
+
+We need to first enable a node to perform OTA updates by flashing an OTA capable
+firmware. We will also need to know the ipv6 address of the node we want to update.
+
+So first flash one of the above listed applications
 
     $ make -C apps/node_air_monitor flash term
 
-If the Border Router is already set up when opening the terminal you should get
+If the Border Router is already set up your device should get a global ipv6 address.
+On the opened terminal use `ifconfig` to find this out.
 
     ...
 
@@ -136,68 +162,124 @@ If the Border Router is already set up when opening the terminal you should get
 
     suit_coap: started.
 
-Here the global IPv6 is `2001:6d6f:6c69:6e61:7b7e:3255:1313:8d96`.
+I this case the address is `SUIT_CLIENT=[2001:6d6f:6c69:6e61:7b7e:3255:1313:8d96]`
 
-**The address will be different according to your device and the chosen prefix**.
-In this case the RIOT node can be reached from the host using its global address:
+Your device should now be reachable from your host.
 
     $ ping6 2001:db8::7b7e:3255:1313:8d96
 
-##### Launch the ota-server
+##### ota-server
 
-For documentation ans installation details refer to https://github.com/aabadie/ota-server.
+The new firmware we publish needs to be stored in a backed server. For this
+scenario we also want to be able to notify a device of a new update and trigger
+it.
+
+We will use [otaserver](https://github.com/aabadie/ota-server). Please follow the
+setup instructions in [otaserver](https://github.com/aabadie/ota-server) before
+proceeding.
 
 To run locally:
 
     $ python3 otaserver/main.py --http-port=8888 --coap-port=5683 --coap-host=[fd00:dead:beef::1] --debug
 
-We use `[fd00:dead:beef::1]` since this address is configure for the `lo` interface
-when using `start_network.sh`. You can use any value for `--http-port` as long
-as you don't have conflicts with other applications e.g.: `pyaiot`
+We use `[fd00:dead:beef::1]` since this address that will be automatically configure
+for the  `lo` interface when using `start_network.sh`. If the `ota-server` is
+running on a publicly reachable address you ca use that one instead of your host
+`lo` address, or configure routing yourself.
 
-##### Publish new FW
+You can use any value for `--http-port` as long as you don't have conflicts with
+other applications e.g.: `pyaiot`
 
-`ota-server` does not use the same targets for `suit/publish` or `suit/notify`.
-To override the default targets we add `suit.v4.http.mk` as a `RIOT_MAKEFILES_GLOBAL_POST`,
-eg:
+There is also a web interface now running at `http://localhost:8888` where you
+can visualize the published firmware as well as trigger updates for specific
+version.
 
-    $ export RIOT_MAKEFILES_GLOBAL_POST=/home/riot-firmwares/Makefiles/suit.v4.http.mk
+##### Updating the device
 
-You can either export this or prefix every `suit/publish` or `suit/notify` call.
+Everything is now in place to publish new updates and trigger the device to fetch
+the new firmware.
 
-You can now publish new firmware:
+`ota-server` does not use the same `make` targets for `suit/publish` or `suit/notify`
+than the default ones in RIOT.
 
-    $ SUIT_OTA_SERVER_URL="http://127.0.0.1:8888" RIOT_MAKEFILES_GLOBAL_POST=/home/riot-firmwares/Makefiles/suit.v4.http.mk make -C apps/node_air_monitor/ suit/publish
+To override the default targets we add `suit.v4.http.mk` as a
+[RIOT_MAKEFILES_GLOBAL_POST](http://riot-os.org/api/advanced-build-system-tricks.html)
 
-##### Notify the device
+This is done by default when any `suit/%` target is called, to not use this then
+set `OTASERVER=0`
+
+Lets publish firmware! For this you will also need to specify the url where the
+ota-server is running, assuming it is running locally, it would be:
+`SUIT_OTA_SERVER_URL="http://127.0.0.1:8888`, so:
+
+    $ SUIT_OTA_SERVER_URL="http://127.0.0.1:8888" make -C apps/node_air_monitor/ suit/publish
+
+Now that the new firmware is published we can tell the device about this new
+update. For this we will need to specify the device ipv6 address (which we
+found out in previous steps):
 
 To notify a device you need to specify the address of the client as well as the
 server url. Optionally you can also specify the manifest version (SUIT_NOTIFY_VERSION).
 
-    $ SUIT_CLIENT=[2001:6d6f:6c69:6e61:7b7e:3255:1313:8d96] SUIT_OTA_SERVER_URL="http://127.0.0.1:8888" RIOT_MAKEFILES_GLOBAL_POST=/home/riot-firmwares/Makefiles/suit.v4.http.mk
+    $ SUIT_CLIENT=[2001:6d6f:6c69:6e61:7b7e:3255:1313:8d96] SUIT_OTA_SERVER_URL="http://127.0.0.1:8888" make -C apps/node_air_monitor/ suit/notify
+
+This will trigger an update of the new firmware on the device. The application
+will keep running while the device is updating and when the update completes the
+device will reboot and run the new firmware.
 
 ##### Making it easier
 
-You can save `SUIT_OTA_SERVER_URL`, `SUIT_CLIENT`, `RIOT_MAKEFILES_GLOBAL_POST` in
-`demo_config.sh` and source this file so bootstrap, publishing and notifying new
-firmware is reduced to:
+To avoid setting all the command line variables you can save them to `demo_config.sh`
+and source this file `flash`, and `suit/publish`, `suit/notify`. This the commands
+will as simple as:
 
     $ make -C apps/node_air_monitor flash
     $ make -C apps/node_air_monitor suit/publish
     $ make -C apps/node_air_monitor suit/notify
 
-#### Complete setup summary example
+##### Troubleshooting
 
-This will setup everything needed for local updates and visualizing on a local
-dashboard. `pyaiot` and `ota-server` will need to be installed. To keep things
-orderly should use [virtualenv](https://virtualenv.pypa.io/en/latest/),
-[virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/install.html)
-is a nice tools for this. For details on the tools used here refer to:
+OTA updates implement [suit](https://datatracker.ietf.org/wg/suit/about/) IETF
+working standard. In short, this insures end-to-end security for the update
+process.
 
-- [Pyaiot](https://github.com/pyaiot/pyaiot),
-- [ota-server](https://github.com/aabadie/ota-server)
-- [examples/gnrc_border_router](https://github.com/RIOT-OS/RIOT/tree/master/examples/gnrc_border_router)
-- [examples/suit_update](https://github.com/RIOT-OS/RIOT/tree/master//examples/suit_update/README.md)
+Every update will be signed with keys generated under `apps/keys` if these keys
+change the device might reject an update and will need to be flashed again with
+the correct keys.
+
+The OTA mechanism will reject older updates, so a Node will reject a firmware
+older than the one it is running.
+
+A `suit` device will check some parameters validity before updating, among these
+the application and device it was built for. These means a `samr21-xpro` will
+reject a firmware built for `nrf52dk`. This also means that different applications
+will also be rejected. In RIOT we specify the application with the `APPLICATION`
+variable in the applications `Makefile` (e.g.:
+[apps/node_air_monitor/Makefile](apps/node_air_monitor/Makefile))
+
+To be able to perform OTA updates of different applications on the same device
+this variable must be set you can do this by prefixing your commands with
+the `APPLICATION` name or exporting it, so:
+
+    $ APPLICATION=foo make suit/publish
+
+    $ export APPLICATION=foo
+    $ make suit/publish
+
+If using the configuration file you can set your desired `APPLICATION` name there
+as well.
+
+#### riot-firmware + pyaiot + ota-server
+
+The following steps will specify commands to setup the whole `pyaiot` ecosystem
+as well as the `ota-server` and with this be able to perform over the air updates
+on a Node, while at the same time visualizing the process and the updates on
+the `pyaiot` dashboard.
+
+This assumes that setup for [Pyaiot](https://github.com/pyaiot/pyaiot) and
+[ota-server](https://github.com/aabadie/ota-server) has already been completed.
+As good practice install the in separate [virtualenv](https://virtualenv.pypa.io/en/latest/),
+to avoid conflictts (checkout out [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/install.html) as well)
 
 1. Launch the broker:
 
@@ -226,6 +308,8 @@ The dashboard web page will be in: http://localhost:8080
     ```
     $ python3 otaserver/main.py --http-port=8888 --coap-port=5683 --coap-host=[fd00:dead:beef::1] --debug
     ```
+
+The ota-server web page will be in: http://localhost:8888
 
 5. Flash the device with an coap application and recover EUI64, first 64 bytes of
    its link local IpV6 address:
