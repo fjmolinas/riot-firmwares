@@ -76,6 +76,15 @@ ifneq (,$(filter sm_pwm_01c, $(USEMODULE)))
   EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/sm_pwm_01c
 endif
 
+# Use ota-server (https://github.com/aabadie/ota-server) by default
+
+ifneq (,$(filter suit/%,$(MAKECMDGOALS)))
+  OTASERVER ?= 1
+endif
+
+ifeq (1,$(OTASERVER)))
+  RIOT_MAKEFILES_GLOBAL_POST += $(CURDIR)/../../Makefiles/suit.v4.http.mk
+endif
 
 .PHONY: host-tools
 
