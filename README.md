@@ -185,3 +185,97 @@ firmware is reduced to:
     $ make -C apps/node_air_monitor flash
     $ make -C apps/node_air_monitor suit/publish
     $ make -C apps/node_air_monitor suit/notify
+
+#### Complete setup summary example
+
+This will setup everything needed for local updates and visualizing on a local
+dashboard. `pyaiot` and `ota-server` will need to be installed. To keep things
+orderly should use [virtualenv](https://virtualenv.pypa.io/en/latest/),
+[virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/install.html)
+is a nice tools for this. For details on the tools used here refer to:
+
+- [Pyaiot](https://github.com/pyaiot/pyaiot),
+- [ota-server](https://github.com/aabadie/ota-server)
+- [examples/gnrc_border_router](https://github.com/RIOT-OS/RIOT/tree/master/examples/gnrc_border_router)
+- [examples/suit_update](https://github.com/RIOT-OS/RIOT/tree/master//examples/suit_update/README.md)
+
+1. Launch the broker:
+
+    ```
+    $ aiot-broker --debug
+    ```
+
+2. Launch the coap gateway
+
+    ```
+    $  aiot-coap-gateway --coap-port=5688 --debug
+    ```
+
+3. Launch the dashboard, 'static-path' must be replaced with your path
+
+    ```
+    $ aiot-dashboard --static-path=/home/pyaiot/dashboard/static --map-api-key=<APP-KEY> debug
+    ```
+
+For the `APP-KEY` ask pyaiot maintainers.
+
+The dashboard web page will be in: http://localhost:8080
+
+4. Launch the ota-server (important to not use default 8080, used by dashboard)
+
+    ```
+    $ python3 otaserver/main.py --http-port=8888 --coap-port=5683 --coap-host=[fd00:dead:beef::1] --debug
+    ```
+
+5. Flash the device with an coap application and recover EUI64, first 64 bytes of
+   its link local IpV6 address:
+
+    ```
+    $ make -C apps/node_air_monitor flash term
+    ...
+    > ifconfig
+    ...
+        inet6 addr: fe80::7b7e:3255:1313:8d96  scope: link  VAL
+    ...
+    ```
+
+    Here it would be `7b7e:3255:1313:8d96`
+
+6. Modify `demo_config.sh` to set `SUIT_CLIENT` and `LOCAL_IPV6_PREFIX` for your
+   network, e.g.:
+
+   ```
+   export LOCAL_IP6_PREFIX="2001:6d6f:6c69:6e61"
+   export SUIT_CLIENT="[${LOCAL_IP6_PREFIX}:7b7e:3255:1313:8d96]"
+   ```
+
+7. Source your configuration file (you can of course skip this and pass required
+   parameters via the command line as detailed in previous steps)
+
+    ```
+    $ source demo_config.sh
+    ```
+
+8. Flash and start the border router
+
+    ```
+    $ make BOARD=iotlab-m3 -C examples/gnrc_border_router/ flash
+    $ sudo RIOT/dist/tools/ethos/start_network.sh /dev/riot/tty-iotlab-m3 riot0 ${LOCAL_IP6_PREFIX}::1/64
+    ```
+
+    You might need to wait a bit for address configuration, you can check this
+    with the `ifconfig` command in your nodes terminal.
+
+9. Publish new firmware:
+
+    ```
+    $ make -C apps/node_air_monitor suit/publish
+    ```
+
+10. Trigger the update process on the device
+
+    ```
+    $ make -C apps/node_air_monitor suit/notify
+    ```
+
+Repeat 9 and 10 as you want.
