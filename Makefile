@@ -12,4 +12,5 @@ build:
 	for fw in `ls apps`; do make -C apps/$$fw all; done
 
 init_submodules:
-	git submodule update --init --recursive
+	git submodule sync --quiet
+	git submodule update --init --recursive --quiet
