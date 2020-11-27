@@ -1,0 +1,3 @@
+USEMODULE += saul_default
+USEMODULE += gcoap
+USEMODULE += fmt
