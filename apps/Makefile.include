@@ -1,31 +1,7 @@
 SUIT_KEY_DIR ?= $(CURDIR)/../keys
 
-ifneq (,$(filter coap_bmp180, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_bmp180
-endif
-
-ifneq (,$(filter coap_bmx280, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_bmx280
-endif
-
-ifneq (,$(filter coap_ccs811, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_ccs811
-endif
-
 ifneq (,$(filter coap_common, $(USEMODULE)))
   EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_common
-endif
-
-ifneq (,$(filter coap_imu, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_imu
-endif
-
-ifneq (,$(filter coap_iotlab_a8_m3, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_iotlab_a8_m3
-endif
-
-ifneq (,$(filter coap_io1_xplained, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_io1_xplained
 endif
 
 ifneq (,$(filter coap_led, $(USEMODULE)))
@@ -40,8 +16,8 @@ ifneq (,$(filter coap_suit, $(USEMODULE)))
   EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_suit
 endif
 
-ifneq (,$(filter coap_tsl2561, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_tsl2561
+ifneq (,$(filter coap_saul, $(USEMODULE)))
+  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_saul
 endif
 
 ifneq (,$(filter coap_sm_pwm_01c, $(USEMODULE)))
@@ -52,39 +28,24 @@ ifneq (,$(filter coap_utils, $(USEMODULE)))
   EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_utils
 endif
 
-ifneq (,$(filter mqtt_common, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/mqtt_common
-endif
-
-ifneq (,$(filter mqtt_bmx280, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/mqtt_bmx280
-endif
-
-ifneq (,$(filter mqtt_utils, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/mqtt_utils
-endif
-
 ifneq (,$(filter schedreg, $(USEMODULE)))
   EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/schedreg
 endif
-
-ifneq (,$(filter tft_display, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/tft_display
-endif
-
 ifneq (,$(filter sm_pwm_01c, $(USEMODULE)))
   EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/sm_pwm_01c
 endif
 
 # Use ota-server (https://github.com/aabadie/ota-server) by default
-
 ifneq (,$(filter suit/%,$(MAKECMDGOALS)))
   OTASERVER ?= 1
 endif
 
-ifeq (1,$(OTASERVER)))
+ifeq (1,$(OTASERVER))
   RIOT_MAKEFILES_GLOBAL_POST += $(CURDIR)/../../Makefiles/suit.v4.http.mk
 endif
+
+# Application Name
+CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
 
 .PHONY: host-tools
 

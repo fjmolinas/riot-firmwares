@@ -34,10 +34,18 @@ ssize_t name_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     (void)ctx;
     DEBUG("[DEBUG] common: replying to 'name' request\n");
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
-    size_t payload_len = strlen(APPLICATION_NAME);
-    memcpy(pdu->payload, APPLICATION_NAME, payload_len);
+    coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
+    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
+    size_t p = strlen(APPLICATION_NAME);
 
-    return gcoap_finish(pdu, payload_len, COAP_FORMAT_TEXT);
+    if (pdu->payload_len >= p) {
+        memcpy(pdu->payload, APPLICATION_NAME, p);
+        return resp_len + p;
+    }
+    else {
+        puts("ERROR: msg buffer too small");
+        return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
+    }
 }
 
 ssize_t board_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
@@ -45,11 +53,18 @@ ssize_t board_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     (void)ctx;
     DEBUG("[DEBUG] common: replying to 'board' request\n");
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
-    const char *board = RIOT_BOARD;
-    size_t payload_len = strlen(RIOT_BOARD);
-    memcpy(pdu->payload, board, payload_len);
+    coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
+    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
+    size_t p = strlen(RIOT_BOARD);
 
-    return gcoap_finish(pdu, payload_len, COAP_FORMAT_TEXT);
+    if (pdu->payload_len >= p) {
+        memcpy(pdu->payload, RIOT_BOARD, p);
+        return resp_len + p;
+    }
+    else {
+        puts("ERROR: msg buffer too small");
+        return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
+    }
 }
 
 ssize_t mcu_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
@@ -57,11 +72,20 @@ ssize_t mcu_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     (void)ctx;
     DEBUG("[DEBUG] common: replying to 'mcu' request\n");
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
+    coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
+    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
     const char *mcu = RIOT_MCU;
-    size_t payload_len = strlen(RIOT_MCU);
-    memcpy(pdu->payload, mcu, payload_len);
+    size_t p = strlen(RIOT_MCU);
 
-    return gcoap_finish(pdu, payload_len, COAP_FORMAT_TEXT);
+
+    if (pdu->payload_len >= p) {
+        memcpy(pdu->payload, mcu, p);
+        return resp_len + p;
+    }
+    else {
+        puts("ERROR: msg buffer too small");
+        return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
+    }
 }
 
 ssize_t os_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
@@ -69,11 +93,19 @@ ssize_t os_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     (void)ctx;
     DEBUG("[DEBUG] common: replying to 'os' request\n");
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
+    coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
+    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
     const char *os = "riot";
-    size_t payload_len = strlen("riot");
-    memcpy(pdu->payload, os, payload_len);
+    size_t p = strlen("riot");
 
-    return gcoap_finish(pdu, payload_len, COAP_FORMAT_TEXT);
+    if (pdu->payload_len >= p) {
+        memcpy(pdu->payload, os, p);
+        return resp_len + p;
+    }
+    else {
+        puts("ERROR: msg buffer too small");
+        return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
+    }
 }
 
 void beacon_handler(void *arg)

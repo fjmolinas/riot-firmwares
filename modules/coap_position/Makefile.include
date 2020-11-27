@@ -1,2 +1,10 @@
 USEMODULE_INCLUDES_coap_position := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/include
 USEMODULE_INCLUDES += $(USEMODULE_INCLUDES_coap_position)
+
+# CoAP broker server information
+ifneq (,$(NODE_LNG))
+  CFLAGS += -DNODE_LNG=\"$(NODE_LNG)\"
+endif
+ifneq (,$(NODE_LAT))
+  CFLAGS += -DNODE_LAT=\"$(NODE_LAT)\"
+endif

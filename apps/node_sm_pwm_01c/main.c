@@ -25,7 +25,7 @@
 #endif
 
 #ifdef MODULE_COAP_SUIT
-#include "suit/coap.h"
+#include "suit/transport/coap.h"
 #include "riotboot/slot.h"
 #include "coap_suit.h"
 #endif
@@ -63,6 +63,7 @@ static const coap_resource_t _resources[] = {
 static gcoap_listener_t _listener = {
     (coap_resource_t *)&_resources[0],
     sizeof(_resources) / sizeof(_resources[0]),
+    NULL,
     NULL,
     NULL
 };

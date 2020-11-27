@@ -25,10 +25,10 @@ void send_coap_post(uint8_t* uri_path, uint8_t *data)
 
     memcpy(&remote.addr.ipv6[0], &remote_addr.u8[0], sizeof(remote_addr.u8));
 
-    uint8_t buf[GCOAP_PDU_BUF_SIZE];
+    uint8_t buf[CONFIG_GCOAP_PDU_BUF_SIZE];
     coap_pkt_t pdu;
     size_t len;
-    gcoap_req_init(&pdu, &buf[0], GCOAP_PDU_BUF_SIZE, COAP_METHOD_POST, (char*)uri_path);
+    gcoap_req_init(&pdu, &buf[0], CONFIG_GCOAP_PDU_BUF_SIZE, COAP_METHOD_POST, (char*)uri_path);
     coap_hdr_set_type(pdu.hdr, COAP_TYPE_NON);
     coap_opt_add_format(&pdu, COAP_FORMAT_TEXT);
     len = coap_opt_finish(&pdu, COAP_OPT_FINISH_PAYLOAD);
@@ -43,5 +43,5 @@ void send_coap_post(uint8_t* uri_path, uint8_t *data)
 
     DEBUG("[INFO] Sending '%s' to '%s:%i%s'\n", data, BROKER_ADDR, BROKER_PORT, uri_path);
 
-    gcoap_req_send(&buf[0], len, &remote, NULL);
+    gcoap_req_send(&buf[0], len, &remote, NULL, NULL);
 }

@@ -13,10 +13,6 @@
 #include "coap_common.h"
 #include "coap_led.h"
 
-#ifdef MODULE_TFT_DISPLAY
-#include "tft_display.h"
-#endif
-
 
 #define ENABLE_DEBUG (0)
 #include "debug.h"
@@ -53,9 +49,6 @@ ssize_t led_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
             gpio_write(LED0_PIN, 1 - val);
             code = COAP_CODE_CHANGED;
             p += sprintf(rsp, "led:%i", val);
-#ifdef MODULE_TFT_DISPLAY
-            display_send_val(TFT_DISPLAY_LED, val);
-#endif
         }
         else {
             DEBUG("[ERROR] Wrong LED value given '%i'\n", val);

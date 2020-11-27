@@ -1,15 +1,5 @@
 PSEUDOMODULES += shell_common
 
-ifeq (1, $(RPI))
-  DEFAULT_CHANNEL ?= 16
-  BROKER_ADDR ?= fd00:ab:ad:1e::1
-  BROKER_PORT ?= 5683
-else
-  # CoAP broker server information
-  BROKER_ADDR ?= fd00:dead:beef::1
-  BROKER_PORT ?= 5688
-endif
-
 ifeq (1, $(USE_SUIT))
   USEMODULE += coap_suit
   USEMODULE += suitreg

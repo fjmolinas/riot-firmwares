@@ -10,7 +10,7 @@
 #include "riotboot/slot.h"
 
 #ifdef MODULE_COAP_SUIT
-#include "suit/v4/suit.h"
+#include "suit.h"
 #endif
 
 #ifdef MODULE_SUITREG
@@ -33,17 +33,13 @@ static char tft_display_stack[THREAD_STACKSIZE_DEFAULT];
 static mutex_t lock = MUTEX_INIT;
 static char msg_data_buffer[16];
 
-static gpio_t pins[] = {
-    [UCG_PIN_CS]  = TFT_PIN_CS,
-    [UCG_PIN_CD]  = TFT_PIN_CD,
-    [UCG_PIN_RST] = TFT_PIN_RESET
+static ucg_riotos_t _user_data =
+{
+    .device_index = SPI_DEV(0),
+    .pin_cs = TFT_PIN_CS,
+    .pin_cd = TFT_PIN_CD,
+    .pin_reset = TFT_PIN_RESET
 };
-
-static uint32_t pins_enabled = (
-    (1 << UCG_PIN_CS) +
-    (1 << UCG_PIN_CD) +
-    (1 << UCG_PIN_RST)
-    );
 
 /* keep a reference to the threads pid */
 static volatile int tft_display_pid;
@@ -52,12 +48,11 @@ static void _init_st7735(ucg_t * ucg)
 {
     /* Initialize to SPI */
     DEBUG("Initializing to SPI.\n");
-    ucg_SetPins(ucg, pins, pins_enabled);
-    ucg_SetDevice(ucg, SPI_DEV(TFT_DEV_SPI));
+    ucg_SetUserPtr(ucg, &_user_data);
 
     /* Initialize the display */
     DEBUG("Initializing display.\n");
-    ucg_Init(ucg, TFT_DISPLAY, TFT_DISPLAY_EXT, ucg_com_riotos_hw_spi);
+    ucg_Init(ucg, TFT_DISPLAY, TFT_DISPLAY_EXT, ucg_com_hw_spi_riotos);
     ucg_SetRotate90(ucg);
     /* Initial Screen Setup*/
     ucg_ClearScreen(ucg);
@@ -206,17 +201,6 @@ void *tft_display_thread(void *args)
     while (1) {
         msg_receive(&m);
         switch(m.type) {
-            case TFT_DISPLAY_LED:
-                ucg_SetFontPosCenter(ucg);
-                ucg_SetFont(ucg, ucg_font_profont17_mr);
-                if (m.content.value) {
-                    tft_puts(ucg, "LED ON ", NULL, NULL, 64, 86, 1);
-                }
-                else {
-                    tft_puts(ucg, "LED OFF", NULL, NULL, 64, 86, 1);
-                }
-                ucg_SetFontPosTop(ucg);
-                break;
             case TFT_DISPLAY_TEMP:
                 _clear_data_area(ucg);
                 ucg_SetFont(ucg, ucg_font_profont15_mr);

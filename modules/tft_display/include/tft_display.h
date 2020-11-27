@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "ucg.h"
+#include "ucg_riotos.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,16 +13,15 @@ extern "C" {
  * @brief   Message codes for demo display messages
  */
 enum {
-    TFT_DISPLAY_LOGO  = 0xA0,
-    TFT_DISPLAY_LED   = 0xA1,
-    TFT_DISPLAY_TEMP  = 0xA2,
-    TFT_DISPLAY_PRES  = 0xA3,
-    TFT_DISPLAY_HUM   = 0xA4,
-    TFT_DISPLAY_HELLO = 0xA5,
-    TFT_DISPLAY_TVOC  = 0xA6,
-    TFT_DISPLAY_ECO2  = 0xA7,
-    TFT_DISPLAY_TSP   = 0xA8,
-    TFT_DISPLAY_TLP   = 0xA9,
+    TFT_DISPLAY_LOGO = 0xA0,
+    TFT_DISPLAY_TEMP,
+    TFT_DISPLAY_PRES,
+    TFT_DISPLAY_HUM,
+    TFT_DISPLAY_HELLO,
+    TFT_DISPLAY_TVOC,
+    TFT_DISPLAY_ECO2,
+    TFT_DISPLAY_TSP,
+    TFT_DISPLAY_TLP,
 };
 
 /**

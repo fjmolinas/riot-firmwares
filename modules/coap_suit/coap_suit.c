@@ -55,9 +55,20 @@ ssize_t version_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     (void)ctx;
     DEBUG("[DEBUG] common: replying to 'version' request\n");
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
+    coap_opt_add_format(pdu, COAP_FORMAT_OCTET);
+    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
     const riotboot_hdr_t* hdr = riotboot_slot_get_hdr(riotboot_slot_current());
-    size_t payload_len = sprintf((char*) pdu->payload, "%"PRIu32"", hdr->version);
-    return gcoap_finish(pdu, payload_len, COAP_FORMAT_OCTET);
+    uint8_t aux[12];
+    size_t p = sprintf((char*) aux, "%"PRIu32"", hdr->version);
+
+    if (pdu->payload_len >= p) {
+        memcpy(pdu->payload, aux, p);
+        return resp_len + p;
+    }
+    else {
+        puts("ERROR: msg buffer too small");
+        return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
+    }
 }
 
 ssize_t vendor_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
@@ -65,10 +76,18 @@ ssize_t vendor_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     (void)ctx;
     DEBUG("[DEBUG] common: replying to 'vendor' request\n");
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
-    size_t payload_len = strlen(NODE_SUIT_VENDOR);
-    memcpy(pdu->payload, NODE_SUIT_VENDOR, payload_len);
+    coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
+    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
+    size_t p = strlen(NODE_SUIT_VENDOR);
 
-    return gcoap_finish(pdu, payload_len, COAP_FORMAT_TEXT);
+    if (pdu->payload_len >= p) {
+        memcpy(pdu->payload, NODE_SUIT_VENDOR, p);
+        return resp_len + p;
+    }
+    else {
+        puts("ERROR: msg buffer too small");
+        return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
+    }
 }
 
 ssize_t suit_state_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
@@ -76,8 +95,19 @@ ssize_t suit_state_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     (void)ctx;
     DEBUG("[DEBUG] common: replying to 'suit_state' request\n");
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
-    size_t payload_len = sprintf((char*) pdu->payload, "%d", suit_state);
-    return gcoap_finish(pdu, payload_len, COAP_FORMAT_OCTET);
+    coap_opt_add_format(pdu, COAP_FORMAT_OCTET);
+    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
+    uint8_t aux[12];
+    size_t p = sprintf((char*) aux, "%d", suit_state);
+
+    if (pdu->payload_len >= p) {
+        memcpy(pdu->payload, aux, p);
+        return resp_len + p;
+    }
+    else {
+        puts("ERROR: msg buffer too small");
+        return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
+    }
 }
 
 void *suit_coap_thread(void *args)
