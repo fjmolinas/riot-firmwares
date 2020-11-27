@@ -5,7 +5,7 @@
 #include <inttypes.h>
 
 #include "msg.h"
-#include "xtimer.h"
+#include "ztimer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,7 +14,7 @@ extern "C" {
 /**
  * @brief Message offset for schedreg msg.type
  */
-#define SCHEDREG_TYPE           (0xC00)          
+#define SCHEDREG_TYPE           (0xC00)
 
 /**
  * @brief Signature for the sched callback
@@ -28,12 +28,12 @@ typedef void (*sched_cb_t)(void *arg);
  * @brief   Schedule entry
  */
 typedef struct schedreg {
-    struct schedreg* next;         /**< pointer to next entry */
-    sched_cb_t cb;                 /**< cb to execute upon message*/
-    void* arg;                     /**< cb args */
-    msg_t* msg;                    /**< msg to send */
-    xtimer_t* xtimer;              /**< xtimer to schedule msg send */
-    uint32_t period;               /**< message period */
+    struct schedreg* next;  /**< pointer to next entry */
+    sched_cb_t cb;          /**< cb to execute upon message*/
+    void* arg;              /**< cb args */
+    msg_t* msg;             /**< msg to send */
+    ztimer_t* timer;        /**< ztimer to schedule msg send */
+    uint32_t period;        /**< message period */
 } schedreg_t;
 
 /**
@@ -71,7 +71,7 @@ void schedreg_unregister(schedreg_t *entry);
  *
  * @return  An initialized schedreg entry
  */
-#define SCHEDREG_INIT(cb, arg, msg, xtimer, period)  { NULL, cb, arg, msg, xtimer, period}
+#define SCHEDREG_INIT(cb, arg, msg, timer, period)  { NULL, cb, arg, msg, timer, period}
 
 /**
  * @name    Dynamic entry initialization functions
@@ -85,22 +85,22 @@ void schedreg_unregister(schedreg_t *entry);
  * @param[in] cb        The cb to be executed
  * @param[in] arg       The args for the callback
  * @param[in] msg       Pointer to msg_t to send to self
- * @param[in] xtimer    Pointer to xtimer that will handle sheduling msg send
+ * @param[in] ztimer    Pointer to ztimer that will handle sheduling msg send
  * @param[in] period    The time period in us for the cb execution
- * 
+ *
  */
 static inline void schedreg_init_pid(schedreg_t *entry,
                                          sched_cb_t cb,
                                          void* arg,
                                          msg_t* msg,
-                                         xtimer_t* xtimer,
+                                         ztimer_t* timer,
                                          uint32_t period)
 {
     entry->next = NULL;
     entry->cb = cb;
     entry->arg = arg;
     entry->msg = msg;
-    entry->xtimer = xtimer;
+    entry->timer = timer;
     entry->period = period;
 }
 
@@ -115,7 +115,7 @@ int schedreg_resched(int n, kernel_pid_t pid);
 
 /**
  * @brief   Inits schedreg as main thread
- * 
+ *
  * @param[out] pid    pid of thread
  */
 int init_schedreg_thread(void);

@@ -2,10 +2,11 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+#include "thread.h"
+#include "ztimer.h"
 #include "utlist.h"
 
 #include "schedreg.h"
-#include "thread.h"
 
 #define ENABLE_DEBUG (0)
 #include "debug.h"
@@ -47,7 +48,7 @@ static void _schedreg_update(void)
     int count = _schedreg_num();
 
     for (int i = 0; (i < count); i++) {
-        tmp->msg->type = i + SCHEDREG_TYPE; 
+        tmp->msg->type = i + SCHEDREG_TYPE;
         tmp = tmp->next;
     }
 }
@@ -56,7 +57,7 @@ int schedreg_register(schedreg_t *entry, kernel_pid_t pid)
 {
     int count = _schedreg_num();
     if( count >= 0xFF) {
-        DEBUG("[DEBUG] schedreg: registry full \n");        
+        DEBUG("[DEBUG] schedreg: registry full \n");
         return 1;
     }
     entry->msg->type = SCHEDREG_TYPE + count;
@@ -75,13 +76,13 @@ int schedreg_resched(int n, kernel_pid_t pid)
 {
     schedreg_t *tmp = _schedreg_find_nth(n);
     if(tmp) {
-        DEBUG("[DEBUG] schedreg: re-scheduling entry %d in %lu \n", n, tmp->period);        
-        xtimer_set_msg (tmp->xtimer, tmp->period, tmp->msg, pid);
+        DEBUG("[DEBUG] schedreg: re-scheduling entry %d in %lu \n", n, tmp->period);
+        ztimer_set_msg(ZTIMER_MSEC, tmp->timer, tmp->period, tmp->msg, pid);
         tmp->cb(tmp->arg);
         return 0;
     }
     else {
-        DEBUG("[DEBUG] schedreg:  entry %d not found\n", n);        
+        DEBUG("[DEBUG] schedreg:  entry %d not found\n", n);
         return 1;
     }
 }
@@ -99,7 +100,7 @@ static void *schedreg_thread(void *args)
             schedreg_resched(msg.type - SCHEDREG_TYPE, thread_getpid());
         }
         else {
-            DEBUG("[DEBUG] schedreg: unknown msg typereceived\n");        
+            DEBUG("[DEBUG] schedreg: unknown msg typereceived\n");
         }
     }
 

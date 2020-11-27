@@ -12,7 +12,6 @@ USE_SUIT ?= 0
 
 # Riot Application modules
 USEMODULE += shell_common
-USEMODULE += xtimer
 
 # Include pyaiot modules
 USEMODULE += coap_common

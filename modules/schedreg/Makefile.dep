@@ -1,0 +1,5 @@
+USEMODULE += ztimer_msec
+FEATURES_OPTIONAL += periph_rtt
+ifneq (,$(filter periph_rtt,$(FEATURES_USED)))
+  USEMODULE += ztimer_periph_rtt
+endif

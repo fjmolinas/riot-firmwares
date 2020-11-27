@@ -13,6 +13,7 @@
 #include "net/gcoap.h"
 #include "saul.h"
 #include "saul_reg.h"
+#include "ztimer.h"
 
 /* RIOT firmware libraries */
 #include "coap_common.h"
@@ -26,13 +27,13 @@
 #include "coap_suit.h"
 #endif
 
-#define TEMP_SEND_INTERVAL          (5*US_PER_SEC)
-#define HUM_SEND_INTERVAL           (5*US_PER_SEC)
-#define PRESS_SEND_INTERVAL         (5*US_PER_SEC)
-#define LIGHT_SEND_INTERVAL         (10*US_PER_SEC)
-#define ECO2_SEND_INTERVAL          (6*US_PER_SEC)
-#define TVOC_SEND_INTERVAL          (6*US_PER_SEC)
-#define BEACON_SEND_INTERVAL        (30*US_PER_SEC)
+#define TEMP_SEND_INTERVAL          (5*MS_PER_SEC)
+#define HUM_SEND_INTERVAL           (5*MS_PER_SEC)
+#define PRESS_SEND_INTERVAL         (5*MS_PER_SEC)
+#define LIGHT_SEND_INTERVAL         (10*MS_PER_SEC)
+#define ECO2_SEND_INTERVAL          (6*MS_PER_SEC)
+#define TVOC_SEND_INTERVAL          (6*MS_PER_SEC)
+#define BEACON_SEND_INTERVAL        (30*MS_PER_SEC)
 
 #define MAIN_QUEUE_SIZE       (8)
 static msg_t _main_msg_queue[MAIN_QUEUE_SIZE];
@@ -101,63 +102,63 @@ int main(void)
 
     /* start beacon and register */
     init_beacon_sender();
-    xtimer_t beacon_xtimer;
+    ztimer_t beacon_ztimer;
     msg_t beacon_msg;
     schedreg_t beacon_reg = SCHEDREG_INIT(beacon_handler, NULL, &beacon_msg,
-                                          &beacon_xtimer, BEACON_SEND_INTERVAL);
+                                          &beacon_ztimer, BEACON_SEND_INTERVAL);
     schedreg_register(&beacon_reg, sched_pid);
 
     /* register saul sensors if there is one */
     /* TODO: a lot of wasted memory if no saul device is present... */
-    xtimer_t saul_eco2_xtimer;
+    ztimer_t saul_eco2_ztimer;
     msg_t saul_eco2_msg;
     schedreg_t saul_eco2_reg = SCHEDREG_INIT(saul_coap_send,
-        &_saul_list[0], &saul_eco2_msg, &saul_eco2_xtimer,
+        &_saul_list[0], &saul_eco2_msg, &saul_eco2_ztimer,
         ECO2_SEND_INTERVAL);
     if (saul_reg_find_type(SAUL_SENSE_CO2)) {
         schedreg_register(&saul_eco2_reg, sched_pid);
     }
 
-    xtimer_t saul_hum_xtimer;
+    ztimer_t saul_hum_ztimer;
     msg_t saul_hum_msg;
     schedreg_t saul_hum_reg = SCHEDREG_INIT(saul_coap_send,
-        &_saul_list[1], &saul_hum_msg, &saul_hum_xtimer,
+        &_saul_list[1], &saul_hum_msg, &saul_hum_ztimer,
         HUM_SEND_INTERVAL);
     if (saul_reg_find_type(SAUL_SENSE_HUM)) {
         schedreg_register(&saul_hum_reg, sched_pid);
     }
 
-    xtimer_t saul_light_xtimer;
+    ztimer_t saul_light_ztimer;
     msg_t saul_light_msg;
     schedreg_t saul_light_reg = SCHEDREG_INIT(saul_coap_send,
-        &_saul_list[2], &saul_light_msg, &saul_light_xtimer,
+        &_saul_list[2], &saul_light_msg, &saul_light_ztimer,
         LIGHT_SEND_INTERVAL);
     if (saul_reg_find_type(SAUL_SENSE_LIGHT)) {
         schedreg_register(&saul_light_reg, sched_pid);
     }
 
-    xtimer_t saul_press_xtimer;
+    ztimer_t saul_press_ztimer;
     msg_t saul_press_msg;
     schedreg_t saul_press_reg = SCHEDREG_INIT(saul_coap_send,
-        &_saul_list[3], &saul_press_msg, &saul_press_xtimer,
+        &_saul_list[3], &saul_press_msg, &saul_press_ztimer,
         PRESS_SEND_INTERVAL);
     if (saul_reg_find_type(SAUL_SENSE_PRESS)) {
         schedreg_register(&saul_press_reg, sched_pid);
     }
 
-    xtimer_t saul_temp_xtimer;
+    ztimer_t saul_temp_ztimer;
     msg_t saul_temp_msg;
     schedreg_t saul_temp_reg = SCHEDREG_INIT(saul_coap_send,
-        &_saul_list[4], &saul_temp_msg, &saul_temp_xtimer,
+        &_saul_list[4], &saul_temp_msg, &saul_temp_ztimer,
         TEMP_SEND_INTERVAL);
     if (saul_reg_find_type(SAUL_SENSE_TEMP)) {
         schedreg_register(&saul_temp_reg, sched_pid);
     }
 
-    xtimer_t saul_tvoc_xtimer;
+    ztimer_t saul_tvoc_ztimer;
     msg_t saul_tvoc_msg;
     schedreg_t saul_tvoc_reg = SCHEDREG_INIT(saul_coap_send,
-        &_saul_list[5], &saul_tvoc_msg, &saul_tvoc_xtimer,
+        &_saul_list[5], &saul_tvoc_msg, &saul_tvoc_ztimer,
         TVOC_SEND_INTERVAL);
     if (saul_reg_find_type(SAUL_SENSE_TVOC)) {
         schedreg_register(&saul_tvoc_reg, sched_pid);
