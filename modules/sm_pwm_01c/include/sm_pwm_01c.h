@@ -16,13 +16,16 @@
  * @file
  * @brief       SM_PWM_01C Device Driver
  *
- * @author      Francisco Molina <francisco.molina@inria.cl>
+ * @author      Francisco Molina <francois-xavier.molina@inria.fr>
  */
 
 #ifndef SM_PWM_01C_H
 #define SM_PWM_01C_H
 
 #include <inttypes.h>
+
+#include "timex.h"
+#include "periph/gpio.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,7 +56,7 @@ extern "C" {
 #define SM_PWM_01C_WINDOW_TIME           (10*US_PER_SEC)
 #endif
 
-#ifdef MODULE_SM_PWM_01C_MA
+#if defined(MODULE_SM_PWM_01C_MA) || defined(DOXYGEN)
 /*
  * @brief   Length in time of the measuring window
  */
@@ -66,7 +69,7 @@ extern "C" {
  * @brief   Weight of the exponential average filter where:
  *          SM_PWM_01C_EXP_WEIGHT = 1 / (1 - alpha).
  *
- *          Should be chosen wisely, it can be done my minimizing MSE
+ * @note    Should be chosen wisely, it can be done my minimizing MSE
  *          or other algorithms as Marquardt procedure.
  */
 #ifndef SM_PWM_01C_EXP_WEIGHT
@@ -76,25 +79,17 @@ extern "C" {
 
 /** @} */
 
+#if defined(MODULE_SM_PWM_01C_MA) || defined(DOXYGEN)
 /**
  * @brief   Circular buffer holding moving average values
+ * @internal
+ *
  */
-#ifdef MODULE_SM_PWM_01C_MA
 typedef struct {
-    uint16_t * buf;                   /**< pointer to buffer */
-    int head;                         /**< current buffer head */
-    int len;                          /**< buffer len */
+    uint16_t buf[SM_PWM_01C_BUFFER_LEN]; /**< circular buffer memory */
+    size_t head;                         /**< current buffer head */
 } circ_buf_t;
 #endif
-
-/**
- * @brief       Status and error return codes
- */
-enum {
-    SM_PWM_01C_OK            =  0,    /**< everything was fine */
-    SM_PWM_01C_ERR_GPIO      = -1,    /**< error initializing the GPIO's*/
-    SM_PWM_01C_ERR_OTHER     = -99,   /**< fatal error */
-};
 
 /**
  * @brief   Parameters for the SM_PWM_01c sensor
@@ -112,18 +107,22 @@ typedef struct {
  * @brief   LPO and concentration (ug/m3) values for small and large particles
  */
 typedef struct {
+    uint16_t mc_pm_2p5;         /**< Small particle concentration ug/m3 */
+    uint16_t mc_pm_10;          /**< Large particle concentration ug/m3 */
+} sm_pwm_01c_data_t;
+
+/**
+ * @brief   LPO and concentration (ug/m3) values for small and large particles
+ * @internal
+ */
+typedef struct {
     uint32_t tsp_lpo;           /**< Small particle low Pulse active time us */
     uint32_t tlp_lpo;           /**< Large Particle low Pulse active time us */
 #ifdef MODULE_SM_PWM_01C_MA
-                                /**< Small particle concentration buffer in
-                                     ug/m3 */
-    uint16_t tlp_conc_buf[SM_PWM_01C_BUFFER_LEN];
-                                /**< Large particle concentration buffer in
-                                     ug/m3 */
-    uint16_t tsp_conc_buf[SM_PWM_01C_BUFFER_LEN];
+    circ_buf_t tsp_circ_buf;     /**< Small particle moving average values */
+    circ_buf_t tlp_circ_buf;     /**< Large particle moving average values */
 #else
-    uint16_t tsp_conc;          /**< Small particle concentration ug/m3 */
-    uint16_t tlp_conc;          /**< Large particle concentration ug/m3 */
+    sm_pwm_01c_data_t data;
 #endif
 } sm_pwm_01c_values_t;
 
@@ -132,11 +131,7 @@ typedef struct {
  */
 typedef struct {
     sm_pwm_01c_params_t params;  /**< Device driver parameters */
-    sm_pwm_01c_values_t values;  /**< Lpo and concentration values */
-#ifdef MODULE_SM_PWM_01C_MA
-    circ_buf_t tsp_circ_buf;     /**< Small particle moving average values */
-    circ_buf_t tlp_circ_buf;     /**< Large particle moving average values */
-#endif
+    sm_pwm_01c_values_t values;  /**< Internal */
 } sm_pwm_01c_t;
 
 
@@ -146,8 +141,8 @@ typedef struct {
  * @param[out]  dev         Initialized device descriptor of SM_PWM_01C device
  * @param[in]   params      The parameters for the SM_PWM_01C device
  *
- * @return                  SM_PWM_01C_OK on success
- * @return                  SM_PWM_01C_ERR_GPIO GPIO error
+ * @return                  0 on success
+ *                         -EIO GPIO error
  */
 int sm_pwm_01c_init(sm_pwm_01c_t* dev, const sm_pwm_01c_params_t* params);
 
@@ -171,19 +166,10 @@ void sm_pwm_01c_stop(sm_pwm_01c_t* dev);
  * @brief       Reads concentration values for small particle  (1 ~ 2um)
  *
  * @param[in]   dev        Device descriptor of SM_PWM_01C device
+ * @param[out]  data       Pre-allocated memory to measured concentrations
  *
- * @returns                Small particles concentration in ug/m3
  */
-int16_t sm_pwm_01c_read_tsp(sm_pwm_01c_t *dev);
-
-/**
- * @brief       Reads concentration values for large particle (3 ~ 10um)
- *
- * @param[in]   dev        Device descriptor of SM_PWM_01C device
- *
- * @returns                Large particles concentration in ug/m3
- */
-int16_t sm_pwm_01c_read_tlp(sm_pwm_01c_t *dev);
+void sm_pwm_01c_read_data(sm_pwm_01c_t *dev, sm_pwm_01c_data_t* data);
 
 #ifdef __cplusplus
 }
