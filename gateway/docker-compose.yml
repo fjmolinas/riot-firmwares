@@ -1,0 +1,16 @@
+---
+version: "3"
+
+services:
+  coap-gw:
+    image: fjmolinas/coap-gw
+    container_name: coap-gw
+    restart: always
+    ports:
+      - "5688:5684/udp"
+    environment:
+      BROKER_HOST: ${SERVER_URI}
+      BROKER_PORT: "8000"
+      KEY_FILE: "/home/.pyaiot/keys"
+    volumes:
+      - ${PYAIOT_KEYS}:/home/.pyaiot
