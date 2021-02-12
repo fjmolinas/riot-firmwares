@@ -6,13 +6,14 @@ BOARD ?= samr21-xpro
 
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../../RIOT
+# Tree base
+TREEBASE ?= $(CURDIR)/../..
 
 USEMODULE += progress_bar
 USEMODULE += sm_pwm_01c
 
 USEMODULE += test_utils_interactive_sync
 
-EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/sm_pwm_01c
-
-
+RIOT_MAKEFILES_GLOBAL_PRE += $(TREEBASE)/Makefile.pre
+RIOT_MAKEFILES_GLOBAL_PRE += $(TREEBASE)/apps/Makefile.include
 include $(RIOTBASE)/Makefile.include
