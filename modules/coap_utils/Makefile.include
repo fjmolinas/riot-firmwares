@@ -10,5 +10,6 @@ else
   BROKER_ADDR ?= fd00:dead:beef::1
   BROKER_PORT ?= 5688
 endif
+
 CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"
 CFLAGS += -DBROKER_PORT=$(BROKER_PORT)

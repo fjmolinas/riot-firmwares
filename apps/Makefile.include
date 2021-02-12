@@ -1,51 +1,57 @@
 SUIT_KEY_DIR ?= $(CURDIR)/../keys
 
+PSEUDOMODULES += shell_common
+
 ifneq (,$(filter coap_common, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_common
+  EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_common
 endif
 
 ifneq (,$(filter coap_led, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_led
+  EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_led
 endif
 
 ifneq (,$(filter coap_position, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_position
+  EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_position
 endif
 
 ifneq (,$(filter coap_suit, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_suit
+  EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_suit
 endif
 
 ifneq (,$(filter coap_saul, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_saul
-endif
-
-ifneq (,$(filter coap_sm_pwm_01c, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_sm_pwm_01c
+  EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_saul
 endif
 
 ifneq (,$(filter coap_utils, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/coap_utils
+  EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_utils
 endif
 
 ifneq (,$(filter schedreg, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/schedreg
+  EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/schedreg
 endif
+
 ifneq (,$(filter sm_pwm_01c, $(USEMODULE)))
-  EXTERNAL_MODULE_DIRS += $(CURDIR)/../../modules/sm_pwm_01c
+  EXTERNAL_MODULE_DIRS += $(TREEBASE)/drivers/sm_pwm_01c
 endif
 
 # Use ota-server (https://github.com/aabadie/ota-server) by default
 ifneq (,$(filter suit/%,$(MAKECMDGOALS)))
   OTASERVER ?= 1
+  ifeq (1,$(OTASERVER))
+    RIOT_MAKEFILES_GLOBAL_POST += $(TREEBASE)/makefiles/suit.http.mk
+  endif
 endif
 
-ifeq (1,$(OTASERVER))
-  RIOT_MAKEFILES_GLOBAL_POST += $(CURDIR)/../../Makefiles/suit.v4.http.mk
-endif
+# Ethos Configuration
+ifeq (1,$(USE_ETHOS))# ethos baudrate can be configured from make command
+  ETHOS_BAUDRATE ?= 115200
+  CFLAGS += -DETHOS_BAUDRATE=$(ETHOS_BAUDRATE)
 
-# Application Name
-CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
+  TERMDEPS += host-tools
+  export TAP ?= riot0
+  TERMPROG = $(RIOTTOOLS)/ethos/ethos
+  TERMFLAGS = $(TAP) $(PORT)
+endif
 
 .PHONY: host-tools
 
