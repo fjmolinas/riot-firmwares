@@ -85,7 +85,7 @@ void schedreg_unregister(schedreg_t *entry);
  * @param[in] cb        The cb to be executed
  * @param[in] arg       The args for the callback
  * @param[in] msg       Pointer to msg_t to send to self
- * @param[in] ztimer    Pointer to ztimer that will handle sheduling msg send
+ * @param[in] ztimer    Pointer to ztimer that will handle scheduling msg send
  * @param[in] period    The time period in us for the cb execution
  *
  */
