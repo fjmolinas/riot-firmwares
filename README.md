@@ -1,6 +1,6 @@
 ### RIOT firmwares for [Pyaiot](https://github.com/pyaiot/pyaiot)
 
-[![Build Status](https://travis-ci.org/pyaiot/riot-firmwares.svg?branch=master)](https://travis-ci.org/pyaiot/riot-firmwares)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/fjmolinas/riot-firmwares/compile-test)
 
 This repository contains simple firmwares for reading or interacting with
 sensor nodes using CoAP and MQTT-SN procotols.
@@ -130,7 +130,7 @@ Then start the border router by running:
     $ sudo RIOT/dist/tools/ethos/start_network.sh /dev/ttyUSB0 riot0 2001:db8::/64
 
 Make sure the port (/dev/ttyUSB0) matches the serial port of your border router
-node. 
+node.
 
 ##### Node
 
