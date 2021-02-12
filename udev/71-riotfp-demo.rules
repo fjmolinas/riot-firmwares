@@ -1,5 +1,0 @@
-# air-monitor-0
-SUBSYSTEM=="tty", SUBSYSTEMS=="usb", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="2111", ATTRS{manufacturer}=="Atmel Corp.", ATTRS{serial}=="ATML2127031800011523", SYMLINK+="riotfp/tty-air-monitor-0"
-
-# air-monitor-1
-SUBSYSTEM=="tty", SUBSYSTEMS=="usb", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="2111", ATTRS{manufacturer}=="Atmel Corp.", ATTRS{serial}=="ATML2127031800011458", SYMLINK+="riotfp/tty-air-monitor-1"

@@ -1,0 +1,38 @@
+# Name all boards PORT as /dev/riot/tty-board-name
+#
+#     udevadm info  /dev/ttyACM0
+#     ID_VENDOR_ID == ATTRS{idVendor}
+#     ID_MODEL_ID  == ATTRS{idProduct}
+#
+#     udevadm info --attribute-walk --name /dev/ttyACM0
+#     # for more detailed output with `ATTRS`
+
+# If support for more than one board of the same type is needed then each
+# board need is own rule and add a second SYMLINK following the scheme
+# /dev/riot/tty-board-name_NUMBER
+# e.g: /dev/riot/tty-board-samr21-xpro_0 & /dev/riot/tty-board-samr21-xpro_1
+
+# Udev only parses SUBSYSTEM and one parent. For others, we will rely on ENV
+# variables defined by 60-serial.rules
+# So the current filename should be higher than 60-serial.rules
+#
+# Documentation:
+#
+# * The whole documentation from the following and also specifically this part
+#   http://reactivated.net/writing_udev_rules.html#udevinfo
+# * The variables definition in
+#   /lib/udev/rules.d/60-serial.rules
+
+# How to find out about udev attributes of device:
+# Connect J-Link to PC
+# Terminal: cat /var/log/syslog
+# Find path to where J-Link device has been "mounted"
+# sudo udevadm info --query=all --attribute-walk --path=<PathExtractedFromSyslog>
+# sudo udevadm info --attribute-walk /dev/bus/usb/<Bus>/<Device> (extract <Bus> and <Device> from "lsusb")
+# Reload udev rules after rules file change:
+#   sudo udevadm control --reload-rules
+#   sudo udevadm trigger
+
+# enviro-nrf52840
+SUBSYSTEMS=="tty", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="7d00", ATTRS{manufacturer}=="RIOT-os.org", ATTRS{serial}=="RIOTFP4441125307157009", SYMLINK+="riot/tty-enviro-nrf52840"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1366", ATTRS{idProduct}=="0101", ATTRS{manufacturer}=="SEGGER", ATTRS{serial}=="000801014916", SYMLINK+="riot/jlink-enviro-nrf52840"
