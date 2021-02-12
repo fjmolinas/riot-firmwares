@@ -1,0 +1,42 @@
+name: deploy
+
+on:
+  push:
+    branches: master
+
+jobs:
+  deploy:
+    name: Deploy pyaiot dashboard & broker server
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_TLS_VERIFY: "True"
+      DOCKER_HOST: "tcp://${{ secrets.SERVER_URI }}:2376"
+      DOCKER_CERT_PATH: "certs"
+      PYAIOT_KEYS: ${{ secrets.PYAIOT_KEYS }}
+      SERVER_GOOGLE_API_KEYS: ${{ secrets.SERVER_GOOGLE_API_KEYS }}
+      SERVER_URI: "${{ secrets.SERVER_URI }}"
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup certificates
+        run: |
+          mkdir ${DOCKER_CERT_PATH}
+          echo "${{ secrets.CA }}" > ${DOCKER_CERT_PATH}/ca.pem
+          echo "${{ secrets.CLIENT_CERTIFICATE }}" > ${DOCKER_CERT_PATH}/cert.pem
+          echo "${{ secrets.CLIENT_KEY }}" > ${DOCKER_CERT_PATH}/key.pem
+        shell: bash
+
+      - name: pull newest images
+        run: |
+          docker-compose -f server/docker-compose.yml pull
+
+      - name: up/down
+        run: |
+          docker-compose -f server/docker-compose.yml down
+          docker-compose -f server/docker-compose.yml up -d
+
+      - name: cleanup certificates
+        run: |
+          rm -rf ${DOCKER_CERT_PATH}
+        shell: bash
