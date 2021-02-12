@@ -1,0 +1,1 @@
+include $(RIOTBOARD)/feather-nrf52840/Makefile.features

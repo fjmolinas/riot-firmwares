@@ -1,2 +1,4 @@
+# Include external boards directory
+EXTERNAL_BOARD_DIRS ?= $(TREEBASE)/boards
 # Include external driver modules
 INCLUDES += -I$(TREEBASE)/drivers/include/
