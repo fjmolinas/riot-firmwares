@@ -1,0 +1,8 @@
+# We must duplicate the include done by $(RIOTBASE)/Makefile.include
+# to also include the main board header
+INCLUDES += $(addprefix -I,$(wildcard $(RIOTBOARD)/feather-nrf52840/include))
+
+# Write a random serial number to help identify the BOARD
+CFLAGS += -DCONFIG_USB_SERIAL_STR=\"RIOTFP4441125307157009\"
+
+include $(RIOTBOARD)/feather-nrf52840/Makefile.include
