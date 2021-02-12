@@ -1,54 +1,29 @@
-PSEUDOMODULES += shell_common
-
 ifeq (1, $(USE_SUIT))
   USEMODULE += coap_suit
   USEMODULE += suitreg
 endif
 
-ifeq (1, $(USE_TFT))
-  CFLAGS += -DSUIT_STATUS_SUBS
-  USEMODULE += tft_display
-  FEATURES_REQUIRED += periph_gpio periph_spi
+ifeq (1,$(USE_ETHOS))
+  USEMODULE += stdio_ethos
+  USEMODULE += gnrc_uhcpc
 endif
 
-ifneq (,$(filter coap_% mqtt_%,$(USEMODULE)))
+ifneq (,$(filter coap_%,$(USEMODULE)))
   # Include packages that pull up and auto-init the link layer.
   # NOTE: 6LoWPAN will be included if IEEE802.15.4 devices are present
   USEMODULE += gnrc_netdev_default
   USEMODULE += auto_init_gnrc_netif
   # Specify the mandatory networking modules for IPv6 and UDP
-  USEMODULE += gnrc_ipv6_router_default
+  USEMODULE += gnrc_ipv6_default
   # Additional networking modules that can be dropped if not needed
   USEMODULE += gnrc_sock_udp
-
   # Add echo module, can be removed
   USEMODULE += gnrc_icmpv6_echo
-
-  ifeq (1,$(USE_ETHOS))
-    GNRC_NETIF_NUMOF := 2
-    USEMODULE += stdio_ethos
-    USEMODULE += gnrc_uhcpc
-
-    # ethos baudrate can be configured from make command
-    ETHOS_BAUDRATE ?= 115200
-    CFLAGS += -DETHOS_BAUDRATE=$(ETHOS_BAUDRATE)
-
-    TERMDEPS += host-tools
-    export TAP ?= riot0
-    TERMPROG = $(RIOTTOOLS)/ethos/ethos
-    TERMFLAGS = $(TAP) $(PORT)
-  endif
 endif
 
 ifneq (,$(filter coap_%,$(USEMODULE)))
   USEMODULE += gcoap
-  ifneq (,$(filter samr21-xpro,$(BOARD)))
-    USEMODULE += puf_sram
-  endif
-endif
-
-ifneq (,$(filter mqtt_%,$(USEMODULE)))
-  USEMODULE += emcute
+  FEATURES_OPTIONAL += puf_sram
 endif
 
 ifneq (,$(filter shell_common,$(USEMODULE)))
@@ -57,17 +32,3 @@ ifneq (,$(filter shell_common,$(USEMODULE)))
   USEMODULE += ps
 endif
 
-ifneq (,$(filter tft_display,$(USEMODULE)))
-  USEPKG += ucglib
-endif
-
-ifneq (,$(filter coap_sm_pwm_01c,$(USEMODULE)))
-  USEMODULE += sm_pwm_01c
-  USEMODULE += sm_pwm_01c_ma
-endif
-
-ifneq (,$(filter sm_pwm_01c,$(USEMODULE)))
-  USEMODULE += xtimer
-  FEATURES_REQUIRED += periph_gpio
-  FEATURES_REQUIRED += periph_gpio_irq
-endif
