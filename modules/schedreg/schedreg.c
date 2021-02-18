@@ -11,9 +11,7 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-#define SCHEDREG_QUEUE_SIZE  (4U)
-
-static msg_t _schedreg_msg_queue[SCHEDREG_QUEUE_SIZE];
+static msg_t _schedreg_msg_queue[CONFIG_SCHEDREG_QUEUE_SIZE];
 static char schedreg_stack[THREAD_STACKSIZE_DEFAULT];
 
 /**
@@ -90,7 +88,7 @@ int schedreg_resched(int n, kernel_pid_t pid)
 static void *schedreg_thread(void *args)
 {
     (void) args;
-    msg_init_queue(_schedreg_msg_queue, SCHEDREG_QUEUE_SIZE);
+    msg_init_queue(_schedreg_msg_queue, CONFIG_SCHEDREG_QUEUE_SIZE);
     msg_t msg;
 
     while(msg_receive(&msg))

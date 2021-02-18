@@ -1,15 +1,2 @@
 USEMODULE_INCLUDES_coap_utils := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/include
 USEMODULE_INCLUDES += $(USEMODULE_INCLUDES_coap_utils)
-
-# Broker Configuration
-ifeq (1,$(RPI))
-  BROKER_ADDR ?= fd00:ab:ad:1e::1
-  BROKER_PORT ?= 5683
-else
-  # CoAP broker server information
-  BROKER_ADDR ?= fd00:dead:beef::1
-  BROKER_PORT ?= 5688
-endif
-
-CFLAGS += -DBROKER_ADDR=\"$(BROKER_ADDR)\"
-CFLAGS += -DBROKER_PORT=$(BROKER_PORT)

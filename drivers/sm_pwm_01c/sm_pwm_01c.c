@@ -82,7 +82,7 @@ static void _sample_timer_cb(void *arg)
     sm_pwm_01c_t *dev = (sm_pwm_01c_t *)arg;
 
     /* schedule next sample */
-    ztimer_set(ZTIMER_USEC, &_timer, SM_PWM_01C_SAMPLE_TIME);
+    ztimer_set(ZTIMER_USEC, &_timer, CONFIG_SM_PWM_01C_SAMPLE_TIME);
     DEBUG("[sm_pwm_01c] tsp_lpo %" PRIu32 "\n", dev->values.tsp_lpo);
     DEBUG("[sm_pwm_01c] tlp_lpo %" PRIu32 "\n", dev->values.tlp_lpo);
 
@@ -90,10 +90,10 @@ static void _sample_timer_cb(void *arg)
        e.g. 1% -> 100 */
     uint16_t tsp_ratio =
         (uint16_t)((uint64_t)(100 * LPO_SCALING * dev->values.tsp_lpo) /
-                   SM_PWM_01C_SAMPLE_TIME);
+                   CONFIG_SM_PWM_01C_SAMPLE_TIME);
     uint16_t tlp_ratio =
         (uint16_t)((uint64_t)(100 * LPO_SCALING * dev->values.tlp_lpo) /
-                   SM_PWM_01C_SAMPLE_TIME);
+                   CONFIG_SM_PWM_01C_SAMPLE_TIME);
     DEBUG("[sm_pwm_01c] tsp_ratio %" PRIu16 "/%d %%\n", tsp_ratio, LPO_SCALING);
     DEBUG("[sm_pwm_01c] tlp_ratio %" PRIu16 "/%d %%\n", tlp_ratio, LPO_SCALING);
 
@@ -109,11 +109,11 @@ static void _sample_timer_cb(void *arg)
     _circ_buf_push(&dev->values.tlp_circ_buf, tlp);
 #else
     dev->values.data.mc_pm_10 =
-        (uint16_t)((tlp + (uint32_t)(SM_PWM_01C_EXP_WEIGHT - 1) *
-                    dev->values.data.mc_pm_10) / SM_PWM_01C_EXP_WEIGHT);
+        (uint16_t)((tlp + (uint32_t)(CONFIG_SM_PWM_01C_EXP_WEIGHT - 1) *
+                    dev->values.data.mc_pm_10) / CONFIG_SM_PWM_01C_EXP_WEIGHT);
     dev->values.data.mc_pm_2p5 =
-        (uint16_t)((tsp + (uint32_t)(SM_PWM_01C_EXP_WEIGHT - 1) *
-                    dev->values.data.mc_pm_2p5) / SM_PWM_01C_EXP_WEIGHT);
+        (uint16_t)((tsp + (uint32_t)(CONFIG_SM_PWM_01C_EXP_WEIGHT - 1) *
+                    dev->values.data.mc_pm_2p5) / CONFIG_SM_PWM_01C_EXP_WEIGHT);
 #endif
 
     /* reset lpo */
@@ -185,7 +185,7 @@ void sm_pwm_01c_start(sm_pwm_01c_t *dev)
     /* reset old values */
     memset((void *)&dev->values, 0, sizeof(sm_pwm_01c_values_t));
     /* enable irq and set timer */
-    ztimer_set(ZTIMER_USEC, &_timer, SM_PWM_01C_SAMPLE_TIME);
+    ztimer_set(ZTIMER_USEC, &_timer, CONFIG_SM_PWM_01C_SAMPLE_TIME);
     gpio_irq_enable(dev->params.tsp_pin);
     gpio_irq_enable(dev->params.tlp_pin);
     DEBUG("[sm_pwm_01c] started average measurements\n");

@@ -39,41 +39,42 @@ extern "C" {
  */
 
 /**
- * @def     SM_PWM_01C_SAMPLE_TIME
+ * @def     CONFIG_SM_PWM_01C_SAMPLE_TIME
  *
  * @brief   Frequency at witch LPO % is calculated
  */
-#ifndef SM_PWM_01C_SAMPLE_TIME
-#define SM_PWM_01C_SAMPLE_TIME           (100*US_PER_MS)
+#ifndef CONFIG_SM_PWM_01C_SAMPLE_TIME
+#define CONFIG_SM_PWM_01C_SAMPLE_TIME           (100*US_PER_MS)
 #endif
 
 /**
- * @def     SM_PWM_01C_WINDOW_TIME
+ * @def     CONFIG_SM_PWM_01C_WINDOW_TIME
  *
  * @brief   Length in time of the measuring window, recommended 5-30s
  */
-#ifndef SM_PWM_01C_WINDOW_TIME
-#define SM_PWM_01C_WINDOW_TIME           (10*US_PER_SEC)
+#ifndef CONFIG_SM_PWM_01C_WINDOW_TIME
+#define CONFIG_SM_PWM_01C_WINDOW_TIME     (10*US_PER_SEC)
 #endif
 
 #if defined(MODULE_SM_PWM_01C_MA) || defined(DOXYGEN)
 /*
  * @brief   Length in time of the measuring window
  */
-#define SM_PWM_01C_BUFFER_LEN            (SM_PWM_01C_WINDOW_TIME / \
-                                          SM_PWM_01C_SAMPLE_TIME)
+#define SM_PWM_01C_BUFFER_LEN    (CONFIG_SM_PWM_01C_WINDOW_TIME / \
+                                  CONFIG_SM_PWM_01C_SAMPLE_TIME)
 #else
+
 /**
- * @def     SM_PWM_01C_EXP_WEIGHT
+ * @def     CONFIG_SM_PWM_01C_EXP_WEIGHT
  *
  * @brief   Weight of the exponential average filter where:
- *          SM_PWM_01C_EXP_WEIGHT = 1 / (1 - alpha).
+ *          CONFIG_SM_PWM_01C_EXP_WEIGHT = 1 / (1 - alpha).
  *
  * @note    Should be chosen wisely, it can be done my minimizing MSE
  *          or other algorithms as Marquardt procedure.
  */
-#ifndef SM_PWM_01C_EXP_WEIGHT
-#define SM_PWM_01C_EXP_WEIGHT            (5)
+#ifndef CONFIG_SM_PWM_01C_EXP_WEIGHT
+#define CONFIG_SM_PWM_01C_EXP_WEIGHT            (5)
 #endif
 #endif
 

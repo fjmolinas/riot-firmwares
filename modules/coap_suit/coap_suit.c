@@ -18,16 +18,7 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-#ifndef NODE_SUIT_VENDOR
-#define NODE_SUIT_VENDOR        "Unknown"
-#endif
-
-#define SUIT_FW_PROGRESS_CYCLE      (16U)
-
-#define SUIT_COAP_MSG_QUEUE_SIZE    (4)
-
 #define SUIT_IDLE                   (0xFFFF)
-#define SUIT_STALE_DELAY            (10*US_PER_SEC)
 
 enum {
     SUIT_STATE_IDLE = 0x00,            /**< nothing to declare */
@@ -78,10 +69,10 @@ ssize_t vendor_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
     coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
     size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
-    size_t p = strlen(NODE_SUIT_VENDOR);
+    size_t p = strlen(CONFIG_NODE_SUIT_VENDOR);
 
     if (pdu->payload_len >= p) {
-        memcpy(pdu->payload, NODE_SUIT_VENDOR, p);
+        memcpy(pdu->payload, CONFIG_NODE_SUIT_VENDOR, p);
         return resp_len + p;
     }
     else {

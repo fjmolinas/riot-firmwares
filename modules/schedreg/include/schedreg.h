@@ -14,7 +14,16 @@ extern "C" {
 /**
  * @brief Message offset for schedreg msg.type
  */
-#define SCHEDREG_TYPE           (0xC00)
+#ifndef CONFIG_SCHED_REG_TYPE
+#define CONFIG_SCHED_REG_TYPE           (0xC00)
+#endif
+
+/**
+ * @brief Schedreg thread message queue size
+ */
+#ifndef CONFIG_SCHEDREG_QUEUE_SIZE
+#define CONFIG_SCHEDREG_QUEUE_SIZE      (4U)
+#endif
 
 /**
  * @brief Signature for the sched callback

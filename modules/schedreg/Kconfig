@@ -1,0 +1,24 @@
+# Copyright (c) 2021 Inria
+#
+# This file is subject to the terms and conditions of the GNU Lesser
+# General Public License v2.1. See the file LICENSE in the top level
+# directory for more details.
+#
+menuconfig KCONFIG_USEMODULE_SCHEDREG
+    bool "Configure Scheduler Register"
+    depends on USEMODULE_SCHEDREG
+    help
+        Configure Scheduler Register module using kconfig
+
+if KCONFIG_USEMODULE_SCHEDREG
+
+config SCHED_REG_TYPE
+    hex "Sched reg message type offset"
+    default 0xC00
+    range 0x00 0xFFF
+
+config SCHEDREG_QUEUE_SIZE
+    int "Message queue size"
+    default 4
+
+endif # KCONFIG_USEMODULE_SCHEDREG

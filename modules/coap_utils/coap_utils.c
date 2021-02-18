@@ -11,17 +11,17 @@ void send_coap_post(uint8_t* uri_path, uint8_t *data)
 {
     /* format destination address from string */
     ipv6_addr_t remote_addr;
-    if (ipv6_addr_from_str(&remote_addr, BROKER_ADDR) == NULL) {
-        DEBUG("[ERROR]: address not valid '%s'\n", BROKER_ADDR);
+    if (ipv6_addr_from_str(&remote_addr, CONFIG_GATEWAY_ADDR) == NULL) {
+        DEBUG("[ERROR]: address not valid '%s'\n", CONFIG_GATEWAY_ADDR);
         return;
     }
 
-    DEBUG("[DEBUG] utils: sending to '%s'\n", BROKER_ADDR);
+    DEBUG("[DEBUG] utils: sending to '%s'\n", CONFIG_GATEWAY_ADDR);
     sock_udp_ep_t remote;
 
     remote.family = AF_INET6;
     remote.netif  = SOCK_ADDR_ANY_NETIF;
-    remote.port   = BROKER_PORT;
+    remote.port   = CONFIG_GATEWAY_PORT;
 
     memcpy(&remote.addr.ipv6[0], &remote_addr.u8[0], sizeof(remote_addr.u8));
 
@@ -41,7 +41,8 @@ void send_coap_post(uint8_t* uri_path, uint8_t *data)
         puts("gcoap_cli: msg buffer too small");
     }
 
-    DEBUG("[INFO] Sending '%s' to '%s:%i%s'\n", data, BROKER_ADDR, BROKER_PORT, uri_path);
+    DEBUG("[INFO] Sending '%s' to '%s:%i%s'\n", data,
+        CONFIG_GATEWAY_ADDR, CONFIG_GATEWAY_PORT, uri_path);
 
     gcoap_req_send(&buf[0], len, &remote, NULL, NULL);
 }

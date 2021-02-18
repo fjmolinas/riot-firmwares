@@ -1,0 +1,19 @@
+# Copyright (c) 2021 Inria
+#
+# This file is subject to the terms and conditions of the GNU Lesser
+# General Public License v2.1. See the file LICENSE in the top level
+# directory for more details.
+#
+menuconfig KCONFIG_USEMODULE_COAP_COMMON
+    bool "Configure coap common module"
+    depends on USEMODULE_COAP_COMMON
+    help
+        Configuration for the coap_common module
+
+if KCONFIG_USEMODULE_COAP_COMMON
+
+config CONFIG_NAME_RESOURCE_STR
+    string "Name or Application name to expose as the COAP /name resource"
+    default "riotfp"
+
+endif # KCONFIG_USEMODULE_COAP_COMMON

@@ -15,10 +15,6 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-#ifndef APPLICATION_NAME
-#define APPLICATION_NAME "Node"
-#endif
-
 static char uid[IEEE802154_LONG_ADDRESS_LEN * 2];
 
 ssize_t name_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
@@ -28,10 +24,10 @@ ssize_t name_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
     coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
     size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
-    size_t p = strlen(APPLICATION_NAME);
+    size_t p = strlen(CONFIG_NAME_RESOURCE_STR);
 
     if (pdu->payload_len >= p) {
-        memcpy(pdu->payload, APPLICATION_NAME, p);
+        memcpy(pdu->payload, CONFIG_NAME_RESOURCE_STR, p);
         return resp_len + p;
     }
     else {
