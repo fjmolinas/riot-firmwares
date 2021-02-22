@@ -17,11 +17,17 @@ USEMODULE += shell_common
 
 # Include pyaiot modules
 USEMODULE += coap_common
+EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_common
 USEMODULE += coap_utils
+EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_utils
 USEMODULE += coap_saul
+EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_saul
 USEMODULE += coap_led
+EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_led
 USEMODULE += coap_position
+EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/coap_position
 USEMODULE += schedreg
+EXTERNAL_MODULE_DIRS += $(TREEBASE)/modules/schedreg
 
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1

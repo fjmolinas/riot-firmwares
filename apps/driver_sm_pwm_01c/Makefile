@@ -11,6 +11,7 @@ TREEBASE ?= $(CURDIR)/../..
 
 USEMODULE += progress_bar
 USEMODULE += sm_pwm_01c
+EXTERNAL_MODULE_DIRS += $(TREEBASE)/drivers/sm_pwm_01c
 
 USEMODULE += test_utils_interactive_sync
 
