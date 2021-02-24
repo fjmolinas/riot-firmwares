@@ -46,7 +46,7 @@ static void _schedreg_update(void)
     int count = _schedreg_num();
 
     for (int i = 0; (i < count); i++) {
-        tmp->msg->type = i + SCHEDREG_TYPE;
+        tmp->msg->type = i + CONFIG_SCHEDREG_TYPE;
         tmp = tmp->next;
     }
 }
@@ -58,7 +58,7 @@ int schedreg_register(schedreg_t *entry, kernel_pid_t pid)
         DEBUG("[DEBUG] schedreg: registry full \n");
         return 1;
     }
-    entry->msg->type = SCHEDREG_TYPE + count;
+    entry->msg->type = CONFIG_SCHEDREG_TYPE + count;
     LL_APPEND(schedreg, entry);
     schedreg_resched(count, pid);
     return 0;
@@ -94,8 +94,8 @@ static void *schedreg_thread(void *args)
     while(msg_receive(&msg))
     {
         DEBUG("[DEBUG] schedreg: msg received \n");
-        if(msg.type >= SCHEDREG_TYPE ) {
-            schedreg_resched(msg.type - SCHEDREG_TYPE, thread_getpid());
+        if(msg.type >= CONFIG_SCHEDREG_TYPE ) {
+            schedreg_resched(msg.type - CONFIG_SCHEDREG_TYPE, thread_getpid());
         }
         else {
             DEBUG("[DEBUG] schedreg: unknown msg typereceived\n");

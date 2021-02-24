@@ -14,8 +14,8 @@ extern "C" {
 /**
  * @brief Message offset for schedreg msg.type
  */
-#ifndef CONFIG_SCHED_REG_TYPE
-#define CONFIG_SCHED_REG_TYPE           (0xC00)
+#ifndef CONFIG_SCHEDREG_TYPE
+#define CONFIG_SCHEDREG_TYPE           (0xC00)
 #endif
 
 /**
@@ -75,7 +75,7 @@ void schedreg_unregister(schedreg_t *entry);
 /**
  * @brief   Initializes a schedreg entry
  *
- * @param[in] type      The @ref schedreg_type_t for the schedreg entry
+ * @param[in] type      The @ref CONFIG_SCHEDREG_TYPE_t for the schedreg entry
  * @param[in] pid       The PID of the registering thread
  *
  * @return  An initialized schedreg entry

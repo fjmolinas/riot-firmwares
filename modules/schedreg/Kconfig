@@ -12,7 +12,7 @@ menuconfig KCONFIG_USEMODULE_SCHEDREG
 
 if KCONFIG_USEMODULE_SCHEDREG
 
-config SCHED_REG_TYPE
+config SCHEDREG_TYPE
     hex "Sched reg message type offset"
     default 0xC00
     range 0x00 0xFFF
