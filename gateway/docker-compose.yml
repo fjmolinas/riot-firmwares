@@ -7,10 +7,11 @@ services:
     container_name: coap-gw
     restart: always
     ports:
-      - "5688:5684/udp"
+      - "5685:5683/udp"
     environment:
       BROKER_HOST: ${SERVER_URI}
       BROKER_PORT: "8000"
+      COAP_PORT: "5683"
       KEY_FILE: "/home/.pyaiot/keys"
     volumes:
       - ${PYAIOT_KEYS}:/home/.pyaiot
