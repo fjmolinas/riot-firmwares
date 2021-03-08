@@ -22,6 +22,8 @@ USEMODULE += ps
 
 # Change this to 0 to not use ethos
 UPLINK ?= ethos
+# Default prefix
+IPV6_PREFIX ?= 2001:db8::/64
 
 ifeq (ethos,$(UPLINK))
   # ethos baudrate can be configured from make command
@@ -29,6 +31,7 @@ ifeq (ethos,$(UPLINK))
   USEMODULE += stdio_ethos
   include $(CURDIR)/Makefile.ethos.conf
 else ifeq (cdc-ecm,$(UPLINK))
+  USEMODULE += gnrc_uhcpc
   include $(CURDIR)/Makefile.cdc-ecm.conf
 else
   $(error Supported uplinks are `ethos`, `cdc-ecm`)
@@ -40,5 +43,8 @@ include $(RIOTBASE)/Makefile.include
 
 host-tools:
 	$(Q)env -u CC -u CFLAGS $(MAKE) -C $(RIOTTOOLS)
+
+uhcpd-daemon: host-tools
+	$(RIOTTOOLS)/uhcpd/bin/uhcpd $(TAP) $(IPV6_PREFIX) &
 
 include $(RIOTMAKE)/default-radio-settings.inc.mk
