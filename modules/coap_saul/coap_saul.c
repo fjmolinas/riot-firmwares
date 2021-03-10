@@ -30,12 +30,13 @@ ssize_t _saul_gcoap_response(coap_pkt_t* pdu, uint8_t *buf, size_t len,
     }
 }
 
-static ssize_t _read_saul_data_str(uint8_t *buf, uint8_t type)
+static ssize_t _read_saul_data_str(uint8_t *buf, uint8_t type, uint8_t subtype)
 {
     /* get first sensor of <type> */
-    saul_reg_t *saul = saul_reg_find_type(type);
+    saul_reg_t *saul = saul_reg_find_type_and_subtype(type, subtype);
     if ((saul == NULL)) {
-        DEBUG("[ERROR] Unable to find sensors of type %"PRIu8"\n", type);
+        DEBUG("[ERROR] Unable to find sensors of type,subtype %"PRIu8","
+            "%"PRIu8"\n", subtype, type);
         return -1;
     }
 
@@ -60,9 +61,10 @@ static ssize_t _read_saul_data_str(uint8_t *buf, uint8_t type)
 ssize_t saul_coap_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 {
     uint8_t type = *((uint8_t*) ctx);
+    uint8_t subtype = *((uint8_t*) ctx++);
     uint8_t data_str[16];
     DEBUG("%s: %d\n", __FUNCTION__, type);
-    size_t data_len = _read_saul_data_str(data_str, type);
+    size_t data_len = _read_saul_data_str(data_str, type, subtype);
     if (data_len <= 0 ) {
         return -1;
     }
@@ -72,9 +74,11 @@ ssize_t saul_coap_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 
 void saul_coap_send(void *args)
 {
+
     uint8_t type = *((uint8_t*) args);
+    uint8_t subtype = *((uint8_t*) args++);
     uint8_t data_str[16];
-    size_t data_len = _read_saul_data_str(data_str, type);
+    size_t data_len = _read_saul_data_str(data_str, type, subtype);
     if (data_len == 0 ) {
         return;
     }
@@ -99,6 +103,17 @@ void saul_coap_send(void *args)
     }
     else if (type == SAUL_SENSE_TEMP) {
         sprintf((char*)&response, "%s: %s", "temperature", data_str);
+    }
+    else if (type == SAUL_SENSE_PM) {
+        if (subtype == SAUL_SENSE_PM_1) {
+            sprintf((char*)&response, "%s: %s", "pm1", data_str);
+        }
+        else if (subtype == SAUL_SENSE_PM_2p5) {
+            sprintf((char*)&response, "%s: %s", "pm2p5", data_str);
+        }
+        else if (subtype == SAUL_SENSE_PM_10) {
+            sprintf((char*)&response, "%s: %s", "pm10", data_str);
+        }
     }
     send_coap_post((uint8_t*)"/server", response);
 }
