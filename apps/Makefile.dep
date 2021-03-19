@@ -7,6 +7,7 @@ endif
 ifeq (1,$(USE_ETHOS))
   USEMODULE += stdio_ethos
   USEMODULE += gnrc_uhcpc
+  USEMODULE += gnrc_ipv6_router_default
 endif
 
 ifneq (,$(filter coap_%,$(USEMODULE)))

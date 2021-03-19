@@ -9,9 +9,6 @@ RIOTBASE ?= $(CURDIR)/../../RIOT
 # Tree base
 TREEBASE ?= $(CURDIR)/../..
 
-# Include suit Update firmware, default doesn't include
-USE_SUIT ?= 0
-
 # Riot Application modules
 USEMODULE += shell_common
 
