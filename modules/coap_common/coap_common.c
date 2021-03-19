@@ -114,5 +114,6 @@ void init_beacon_sender(void)
     size_t msg_len = strlen("reset:") + (IEEE802154_LONG_ADDRESS_LEN * 2);
     char reset_msg[msg_len];
     snprintf(reset_msg, msg_len, "reset:%s", uid);
-    send_coap_post((uint8_t*)"/alive", (uint8_t*)reset_msg);
+    /* Schedule next transmission */
+    send_coap_post((uint8_t*)"/reset", (uint8_t*)reset_msg);
 }

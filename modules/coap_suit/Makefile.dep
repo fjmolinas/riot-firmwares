@@ -1,2 +1,4 @@
 USEMODULE += nanocoap_sock sock_util
 USEMODULE += suit suit_transport_coap suit_storage_flashwrite
+
+USEMODULE += ztimer_usec

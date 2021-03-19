@@ -4,16 +4,14 @@
 #include <string.h>
 
 #include "net/gcoap.h"
-#include "xtimer.h"
+#include "ztimer.h"
 
 #include "coap_suit.h"
 #include "coap_utils.h"
 
 #include "riotboot/slot.h"
 
-#ifdef MODULE_SUITREG
 #include "suitreg.h"
-#endif
 
 #define ENABLE_DEBUG (0)
 #include "debug.h"
@@ -105,7 +103,7 @@ void *suit_coap_thread(void *args)
 {
     (void) args;
     msg_init_queue(_suit_coap_thread_msg_queue, SUIT_COAP_MSG_QUEUE_SIZE);
-    xtimer_t timer;
+    ztimer_t timer;
     msg_t m, m_tx;
     size_t p = 0;
     uint8_t response[64];
@@ -131,12 +129,12 @@ void *suit_coap_thread(void *args)
             case SUIT_SIGNATURE_ERROR:
                 suit_state = SUIT_STATE_SIGNATURE_ERROR;
                 m_tx.type = SUIT_IDLE;
-                xtimer_set_msg(&timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
+                ztimer_set_msg(ZTIMER_USEC, &timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_SEQ_NR_ERROR:
                 suit_state = SUIT_STATE_SEQ_NR_ERROR;
                 m_tx.type = SUIT_IDLE;
-                xtimer_set_msg(&timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
+                ztimer_set_msg(ZTIMER_USEC, &timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_DIGEST_START:
                 suit_state = SUIT_STATE_DIGEST_START;
@@ -144,7 +142,7 @@ void *suit_coap_thread(void *args)
             case SUIT_DIGEST_ERROR:
                 suit_state = SUIT_STATE_DIGEST_ERROR;
                 m_tx.type = SUIT_IDLE;
-                xtimer_set_msg(&timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
+                ztimer_set_msg(ZTIMER_USEC, &timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_REBOOT:
                 suit_state = SUIT_STATE_DOWNLOAD_END;
@@ -168,7 +166,7 @@ void *suit_coap_thread(void *args)
             case SUIT_DOWNLOAD_ERROR:
                 suit_state = SUIT_STATE_DOWNLOAD_ERROR;
                 m_tx.type = SUIT_IDLE;
-                xtimer_set_msg(&timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
+                ztimer_set_msg(ZTIMER_USEC, &timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_IDLE:
                 suit_state = SUIT_STATE_IDLE;
