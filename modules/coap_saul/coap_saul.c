@@ -35,8 +35,8 @@ static ssize_t _read_saul_data_str(uint8_t *buf, uint8_t type, uint8_t subtype)
     /* get first sensor of <type> */
     saul_reg_t *saul = saul_reg_find_type_and_subtype(type, subtype);
     if ((saul == NULL)) {
-        DEBUG("[ERROR] Unable to find sensors of type,subtype %"PRIu8","
-            "%"PRIu8"\n", subtype, type);
+        DEBUG("[ERROR] Unable to find sensors of type,subtype %02x, %02x\n",
+              type, subtype);
         return -1;
     }
 
@@ -44,14 +44,44 @@ static ssize_t _read_saul_data_str(uint8_t *buf, uint8_t type, uint8_t subtype)
     phydat_t data;
     int dim = saul_reg_read(saul, &data);
     if (dim <= 0) {
+        DEBUG_PUTS("[ERROR] dim <= 0");
         return -1;
     }
 
     /* format data string */
     char data_str[16];
-    size_t len = fmt_s16_dfp(data_str, data.val[0], data.scale);
+    char scale_prefix;
+    size_t len;
+    int8_t scale;
+    /* add unit prefix for some units */
+    switch (data.unit) {
+        case UNIT_UNDEF:
+        case UNIT_NONE:
+        case UNIT_M2:
+        case UNIT_M3:
+        case UNIT_PERCENT:
+        case UNIT_TEMP_C:
+        case UNIT_TEMP_F:
+        case UNIT_DBM:
+            /* no string conversion */
+            scale_prefix = '\0';
+            scale = data.scale;
+            break;
+        default:
+            scale = 0;
+            scale_prefix = phydat_prefix_from_scale(data.scale);
+    }
+    len = fmt_s16_dfp(data_str, data.val[0], scale);
     data_str[len] = '\0';
-    size_t p = sprintf((char*)buf, "%s%s", data_str, phydat_unit_to_str(data.unit));
+    size_t p;
+    if (scale_prefix) {
+        p = sprintf((char*)buf, "%s %c%s", data_str,
+                    scale_prefix, phydat_unit_to_str(data.unit));
+    }
+    else {
+        p = sprintf((char*)buf, "%s %s", data_str,
+                    phydat_unit_to_str(data.unit));
+    }
     *(buf + p) = '\0';
     DEBUG("%s: %s\n", __FUNCTION__, buf);
 
@@ -61,11 +91,12 @@ static ssize_t _read_saul_data_str(uint8_t *buf, uint8_t type, uint8_t subtype)
 ssize_t saul_coap_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 {
     uint8_t type = *((uint8_t*) ctx);
-    uint8_t subtype = *((uint8_t*) ctx++);
+    uint8_t subtype = *((uint8_t*) ++ctx);
     uint8_t data_str[16];
-    DEBUG("%s: %d\n", __FUNCTION__, type);
+    DEBUG("%s: type,subtype %02x, %02x\n", __FUNCTION__, type, subtype);
     size_t data_len = _read_saul_data_str(data_str, type, subtype);
     if (data_len <= 0 ) {
+        DEBUG_PUTS("[ERROR] data_len <= 0");
         return -1;
     }
     /* Prepare COAP response */
@@ -76,7 +107,7 @@ void saul_coap_send(void *args)
 {
 
     uint8_t type = *((uint8_t*) args);
-    uint8_t subtype = *((uint8_t*) args++);
+    uint8_t subtype = *((uint8_t*) ++args);
     uint8_t data_str[16];
     size_t data_len = _read_saul_data_str(data_str, type, subtype);
     if (data_len == 0 ) {
