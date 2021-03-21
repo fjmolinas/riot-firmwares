@@ -3,6 +3,9 @@ name: deploy
 on:
   push:
     branches: master
+    paths: .github/workflows/deploy.yml
+  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   deploy:
