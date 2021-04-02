@@ -1,0 +1,27 @@
+---
+version: "3"
+
+services:
+  coap-gw:
+    image: ${DOCKERHUB_REGISTRY}/coap-gw:latest
+    container_name: coap-gw
+    restart: always
+    environment:
+      BROKER_HOST: ${SERVER_URI}
+      BROKER_PORT: "8000"
+      COAP_PORT: "5685"
+      KEY_FILE: "/home/.pyaiot/keys"
+    volumes:
+      - ${PYAIOT_KEYS}:/home/.pyaiot
+    network_mode: "host"
+  ota-server:
+    image: ${DOCKERHUB_REGISTRY}/ota-server:latest
+    container_name: ota-server
+    restart: always
+    environment:
+      # This needs to be a reachable ip address from the device to update
+      COAP_HOST: "[fd00:dead:beef::1]"
+      COAP_PORT: "5684"
+      HTTP_PORT: "8080"
+      HTTP_HOST: "192.168.0.19"
+    network_mode: "host"
