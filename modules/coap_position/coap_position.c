@@ -10,13 +10,6 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-#ifndef NODE_LAT
-#define NODE_LAT "48.714784"
-#endif
-#ifndef NODE_LNG
-#define NODE_LNG "2.205502"
-#endif
-
 static uint8_t response[64] = { 0 };
 
 ssize_t position_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
@@ -27,7 +20,7 @@ ssize_t position_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
     coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
     size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
     p += sprintf((char*)response, "{\"lat\":%s,\"lng\":%s}",
-                 NODE_LAT, NODE_LNG);
+                 CONFIG_POSITION_LAT, CONFIG_POSITION_LNG);
     response[p] = '\0';
 
     if (pdu->payload_len >= p) {
