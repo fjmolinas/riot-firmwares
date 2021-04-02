@@ -7,6 +7,10 @@ ifneq (,$(filter suit/%,$(MAKECMDGOALS)))
   OTASERVER ?= 1
   ifeq (1,$(OTASERVER))
     RIOT_MAKEFILES_GLOBAL_POST += $(TREEBASE)/makefiles/suit.http.mk
+  else
+    # If using openvisualizer this will the local endpoint
+    SUIT_COAP_SERVER ?= [fd00:dead:beef::1]
+    SUIT_COAP_FSROOT ?= $(TREEBASE)/coaproot
   endif
 endif
 
