@@ -34,7 +34,7 @@ enum {
     SUIT_STATE_REBOOT,                 /**< suit is going to reboot device*/
 };
 
-static msg_t _suit_coap_thread_msg_queue[SUIT_COAP_MSG_QUEUE_SIZE];
+static msg_t _suit_coap_thread_msg_queue[CONFIG_SUIT_COAP_MSG_QUEUE_SIZE];
 static char suit_coap_thread_stack[THREAD_STACKSIZE_DEFAULT];
 
 static uint8_t suit_state = SUIT_STATE_IDLE;
@@ -102,7 +102,7 @@ ssize_t suit_state_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 void *suit_coap_thread(void *args)
 {
     (void) args;
-    msg_init_queue(_suit_coap_thread_msg_queue, SUIT_COAP_MSG_QUEUE_SIZE);
+    msg_init_queue(_suit_coap_thread_msg_queue, CONFIG_SUIT_COAP_MSG_QUEUE_SIZE);
     ztimer_t timer;
     msg_t m, m_tx;
     size_t p = 0;
@@ -129,12 +129,12 @@ void *suit_coap_thread(void *args)
             case SUIT_SIGNATURE_ERROR:
                 suit_state = SUIT_STATE_SIGNATURE_ERROR;
                 m_tx.type = SUIT_IDLE;
-                ztimer_set_msg(ZTIMER_USEC, &timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
+                ztimer_set_msg(ZTIMER_USEC, &timer, CONFIG_SUIT_STALE_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_SEQ_NR_ERROR:
                 suit_state = SUIT_STATE_SEQ_NR_ERROR;
                 m_tx.type = SUIT_IDLE;
-                ztimer_set_msg(ZTIMER_USEC, &timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
+                ztimer_set_msg(ZTIMER_USEC, &timer, CONFIG_SUIT_STALE_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_DIGEST_START:
                 suit_state = SUIT_STATE_DIGEST_START;
@@ -142,7 +142,7 @@ void *suit_coap_thread(void *args)
             case SUIT_DIGEST_ERROR:
                 suit_state = SUIT_STATE_DIGEST_ERROR;
                 m_tx.type = SUIT_IDLE;
-                ztimer_set_msg(ZTIMER_USEC, &timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
+                ztimer_set_msg(ZTIMER_USEC, &timer, CONFIG_SUIT_STALE_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_REBOOT:
                 suit_state = SUIT_STATE_DOWNLOAD_END;
@@ -161,12 +161,12 @@ void *suit_coap_thread(void *args)
                     send_coap_post((uint8_t*)"/server", response);
                 }
                 count++;
-                count = count % SUIT_FW_PROGRESS_CYCLE;
+                count = count % CONFIG_SUIT_FW_PROGRESS_CYCLE;
                 break;
             case SUIT_DOWNLOAD_ERROR:
                 suit_state = SUIT_STATE_DOWNLOAD_ERROR;
                 m_tx.type = SUIT_IDLE;
-                ztimer_set_msg(ZTIMER_USEC, &timer, SUIT_STALE_DELAY, &m_tx, thread_getpid());
+                ztimer_set_msg(ZTIMER_USEC, &timer, CONFIG_SUIT_STALE_DELAY, &m_tx, thread_getpid());
                 break;
             case SUIT_IDLE:
                 suit_state = SUIT_STATE_IDLE;
