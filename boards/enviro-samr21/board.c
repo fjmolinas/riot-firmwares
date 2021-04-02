@@ -13,20 +13,13 @@
  * @author  Martine Lenders <m.lenders@fu-berlin.de>
  */
 
-#include "cpu.h"
 #include "board.h"
-
 #include "periph/gpio.h"
 
-extern void board_feather_nrf52840_init(void);
+// extern void board_samr21_xpro_init(void);
 
-void board_init(void)
-{
-    board_feather_nrf52840_init();
-
-#ifdef ST7735_PARAM_BL
-    gpio_init(ST7735_PARAM_BL, GPIO_OUT);
-#endif
-}
-
+// void board_init(void)
+// {
+//     board_samr21_xpro_init();
+// }
 /** @} */

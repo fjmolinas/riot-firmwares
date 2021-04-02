@@ -1,0 +1,12 @@
+# Copyright (c) 2021 Inria
+#
+# This file is subject to the terms and conditions of the GNU Lesser
+# General Public License v2.1. See the file LICENSE in the top level
+# directory for more details.
+
+config BOARD
+    default "enviro-samr21" if BOARD_ENVIRO_SAMR21
+    select BOARD_SAMR21_XPRO
+
+source ${TREEBASE}/RIOT/boards/samr21-xpro/Kconfig
+

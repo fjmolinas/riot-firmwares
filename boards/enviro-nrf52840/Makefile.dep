@@ -1,8 +1,10 @@
 # This must be a different name than 'board' as it is implemented by 'native'
 USEMODULE += board_enviro_nrf52840
-USEMODULE += stdio_cdc_acm
 
-# Include all sensor modules by default
-USEMODULE += bme280_i2c
+ifneq (1, $(RIOTBOOT_BUILD))
+  USEMODULE += stdio_cdc_acm
+  # Include all sensor modules by default
+  USEMODULE += bme280_i2c
+endif
 
 include $(RIOTBOARD)/feather-nrf52840/Makefile.dep

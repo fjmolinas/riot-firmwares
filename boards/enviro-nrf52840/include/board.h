@@ -64,6 +64,28 @@ extern "C" {
 #define BMX280_PARAM_I2C_ADDR       (0x76)
 /** @} */
 
+/**
+ * @name    Configuration for ST7735 feather BOARD
+ * @{
+ */
+#define ST7735_PARAM_CS                 GPIO_PIN(0, 7)
+#define ST7735_PARAM_DCX                GPIO_PIN(1, 8)
+#define ST7735_PARAM_BL                 GPIO_PIN(0, 26)
+#define ST7735_PARAM_INVERTED           1
+#define ST7735_PARAM_NUM_LINES          160U
+#define ST7735_PARAM_RGB_CHANNELS       80U
+#define ST7735_OFFSET_X                 1
+#define ST7735_OFFSET_Y                 26
+#define BACKLIGHT_ON                    gpio_set(ST7735_PARAM_BL)
+#define BACKLIGHT_OFF                   gpio_clear(ST7735_PARAM_BL)
+
+/**
+ * @name    Configuration for ILI9341 feather BOARD
+ * @{
+ */
+#define ILI9341_PARAM_CS             GPIO_PIN(0, 6)
+#define ILI9341_PARAM_DCX            GPIO_PIN(0, 27)
+
 #ifdef __cplusplus
 }
 #endif

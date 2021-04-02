@@ -1,0 +1,1 @@
+include $(RIOTBOARD)/samr21-xpro/Makefile.features
