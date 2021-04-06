@@ -14,6 +14,11 @@ services:
       KEY_FILE: "/home/.pyaiot/keys"
     volumes:
       - ${PYAIOT_KEYS}:/home/.pyaiot
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
 
   dashboard:
     image: fjmolinas/dashboard
@@ -30,3 +35,8 @@ services:
       KEY_FILE: "/home/.pyaiot/keys"
     volumes:
       - ${PYAIOT_KEYS}:/home/.pyaiot
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
