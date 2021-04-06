@@ -14,6 +14,11 @@ services:
     volumes:
       - ${PYAIOT_KEYS}:/home/.pyaiot
     network_mode: "host"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
   ota-server:
     image: ${DOCKERHUB_REGISTRY}/ota-server:latest
     container_name: ota-server
@@ -25,3 +30,8 @@ services:
       HTTP_PORT: "8080"
       HTTP_HOST: "192.168.0.19"
     network_mode: "host"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
