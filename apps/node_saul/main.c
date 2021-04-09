@@ -29,7 +29,7 @@
 
 #define BEACON_SEND_INTERVAL    (30 * MS_PER_SEC)
 
-#define MAIN_QUEUE_SIZE       (8)
+#define MAIN_QUEUE_SIZE         (8)
 static msg_t _main_msg_queue[MAIN_QUEUE_SIZE];
 
 static uint8_t _saul_list[][2] = {

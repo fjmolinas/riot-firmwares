@@ -1,4 +1,8 @@
 # Include external boards directory
-EXTERNAL_BOARD_DIRS ?= $(TREEBASE)/boards
+EXTERNAL_BOARD_DIRS ?= $(RIOT_FIRMWARES_BASE)/boards
+
 # Include external driver modules
-INCLUDES += -I$(TREEBASE)/drivers/include/
+INCLUDES += -I$(RIOT_FIRMWARES_BASE)/drivers/include/
+
+# export RIOT_FIRMWARES_BASE
+export RIOT_FIRMWARES_BASE

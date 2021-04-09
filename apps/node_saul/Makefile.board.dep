@@ -1,1 +1,1 @@
-include $(TREEBASE)/apps/Makefile.dep
+include $(RIOT_FIRMWARES_BASE)/apps/Makefile.dep
