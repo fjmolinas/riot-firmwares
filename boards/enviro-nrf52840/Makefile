@@ -1,4 +1,4 @@
-MODULE += board_enviro_nrf52840
+MODULE = board_enviro_nrf52840
 
 DIRS += $(RIOTBOARD)/feather-nrf52840
 
