@@ -2,13 +2,12 @@
 USEMODULE += board_enviro_samr21
 
 # Include all sensor modules by default
-
-ifneq (1, $(RIOTBOOT_BUILD))
+ifneq (,$(filter saul_default,$(USEMODULE)))
   USEMODULE += io1_xplained
-  USEMODULE += ccs811
+  USEMODULE += sgp30
+  DISABLE_MODULE += sgp30_strict
   USEMODULE += sm_pwm_01c
   USEMODULE += sm_pwm_01c_ma
-  EXTERNAL_MODULE_DIRS += $(TREEBASE)/drivers/sm_pwm_01c
 endif
 
 include $(RIOTBOARD)/samr21-xpro/Makefile.dep

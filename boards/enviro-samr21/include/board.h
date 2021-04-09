@@ -148,21 +148,6 @@ enum {
 #endif
 /**@}*/
 
-/**
- * @name    Set default configuration parameters for the CCS811
- * @{
- */
-#ifndef CCS811_PARAM_RESET_PIN
-#define CCS811_PARAM_RESET_PIN   (GPIO_PIN(PA, 18))
-#endif
-#ifndef CCS811_PARAM_INT_PIN
-#define CCS811_PARAM_INT_PIN     (GPIO_PIN(PA, 19))
-#endif
-#ifndef CCS811_PARAM_I2C_ADDR
-#define CCS811_PARAM_I2C_ADDR    (CCS811_I2C_ADDRESS_2)
-#endif
-/**@}*/
-
 
 /**
  * @brief   Initialize board specific hardware, including clock, LEDs and std-IO
