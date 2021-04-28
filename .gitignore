@@ -37,3 +37,4 @@ RIOT-Fw.*
 
 # Ignore demo firmwares folder
 firmwares/
+coaproot/
