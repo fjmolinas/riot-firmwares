@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 #ifndef CONFIG_NAME_RESOURCE_STR
-#define CONFIG_NAME_RESOURCE_STR     "riotfp"
+#define CONFIG_NAME_RESOURCE_STR     "riotfp-"
 #endif
 
 ssize_t name_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);

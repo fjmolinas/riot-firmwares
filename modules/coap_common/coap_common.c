@@ -37,7 +37,10 @@ ssize_t _handler_str(coap_pkt_t* pdu, uint8_t *buf, size_t len, const char* str)
 ssize_t name_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 {
     (void)ctx;
-    return _handler_str(pdu, buf, len, CONFIG_NAME_RESOURCE_STR);
+    size_t msg_len = strlen(CONFIG_NAME_RESOURCE_STR) + sizeof(uid);
+    char msg_buf[msg_len];
+    snprintf(msg_buf, msg_len, "%s%s", CONFIG_NAME_RESOURCE_STR, uid);
+    return _handler_str(pdu, buf, len, msg_buf);
 }
 
 ssize_t board_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)

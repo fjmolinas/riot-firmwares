@@ -9,33 +9,15 @@
 
 #include "coap_utils.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
-
-ssize_t _saul_gcoap_response(coap_pkt_t* pdu, uint8_t *buf, size_t len,
-                             void *ctx, uint8_t* payload, size_t payload_len)
-{
-    (void)ctx;
-    gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
-    coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
-    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
-    if (pdu->payload_len >= payload_len) {
-        memcpy(pdu->payload, payload, payload_len);
-        return resp_len + payload_len;
-    }
-    else {
-        puts("ERROR: msg buffer too small");
-        return gcoap_response(pdu, buf, len,
-            COAP_CODE_INTERNAL_SERVER_ERROR);
-    }
-}
 
 static ssize_t _read_saul_data_str(uint8_t *buf, uint8_t type, uint8_t subtype)
 {
     /* get first sensor of <type> */
     saul_reg_t *saul = saul_reg_find_type_and_subtype(type, subtype);
     if ((saul == NULL)) {
-        DEBUG("[ERROR] Unable to find sensors of type,subtype %02x, %02x\n",
+        DEBUG("[ERROR]: Unable to find sensors of type,subtype %02x, %02x\n",
               type, subtype);
         return -1;
     }
@@ -44,7 +26,7 @@ static ssize_t _read_saul_data_str(uint8_t *buf, uint8_t type, uint8_t subtype)
     phydat_t data;
     int dim = saul_reg_read(saul, &data);
     if (dim <= 0) {
-        DEBUG_PUTS("[ERROR] dim <= 0");
+        DEBUG_PUTS("[ERROR]: dim <= 0");
         return -1;
     }
 
@@ -88,16 +70,36 @@ static ssize_t _read_saul_data_str(uint8_t *buf, uint8_t type, uint8_t subtype)
     return p;
 }
 
+
+ssize_t _saul_gcoap_response(coap_pkt_t* pdu, uint8_t *buf, size_t len,
+                             void *ctx, uint8_t* payload, size_t payload_len)
+{
+    (void)ctx;
+    gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
+    coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
+    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
+    if (pdu->payload_len >= payload_len) {
+        memcpy(pdu->payload, payload, payload_len);
+        return resp_len + payload_len;
+    }
+    else {
+        puts("[ERROR]: msg buffer too small");
+        return gcoap_response(pdu, buf, len,
+               COAP_CODE_INTERNAL_SERVER_ERROR);
+    }
+}
+
+
 ssize_t saul_coap_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 {
     uint8_t type = *((uint8_t*) ctx);
     uint8_t subtype = *((uint8_t*) ++ctx);
     uint8_t data_str[16];
     DEBUG("%s: type,subtype %02x, %02x\n", __FUNCTION__, type, subtype);
-    size_t data_len = _read_saul_data_str(data_str, type, subtype);
+    int data_len = _read_saul_data_str(data_str, type, subtype);
     if (data_len <= 0 ) {
-        DEBUG_PUTS("[ERROR] data_len <= 0");
-        return -1;
+        DEBUG_PUTS("[ERROR]: data_len <= 0");
+        return gcoap_response(pdu, buf, data_len, COAP_CODE_404);
     }
     /* Prepare COAP response */
     return _saul_gcoap_response(pdu, buf, len, ctx, data_str, data_len);
