@@ -6,11 +6,11 @@ all: build
 
 # Clean all firmwares
 clean:
-	for fw in `ls apps`; do make -C apps/$$fw distclean; done
+	for app in `ls apps`; do make -C apps/$$app distclean; done
 
 # Build all firmwares
 build: init_submodules
-	for fw in `ls apps`; do make -C apps/$$fw all; done
+	for app in `ls apps`; do make -C apps/$$app all; done
 
 init_submodules:
 	git submodule sync --quiet
