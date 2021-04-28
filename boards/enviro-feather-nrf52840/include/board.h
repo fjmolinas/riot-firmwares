@@ -83,7 +83,7 @@ extern "C" {
  * @name    Configuration for ILI9341 feather BOARD
  * @{
  */
-#define ILI9341_PARAM_CS             GPIO_PIN(0, 6)
+#define ILI9341_PARAM_CS             GPIO_PIN(0, 26)
 #define ILI9341_PARAM_DCX            GPIO_PIN(0, 27)
 
 #ifdef __cplusplus

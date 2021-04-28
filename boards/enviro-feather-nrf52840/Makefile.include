@@ -5,4 +5,13 @@ INCLUDES += $(addprefix -I,$(wildcard $(RIOTBOARD)/feather-nrf52840/include))
 # Write a random serial number to help identify the BOARD
 CFLAGS += -DCONFIG_USB_SERIAL_STR=\"RIOTFP4441125307157009\"
 
+CFLAGS += -DCONFIG_POSITION_LAT=\"45.196878\"
+CFLAGS += -DCONFIG_POSITION_LNG=\"5.723220\"
+
+CFLAGS += -DCONFIG_USBUS_CDC_ACM_STDIO_BUF_SIZE=1024
+
+ifneq (,$(filter jlink,$(PROGRAMMER)))
+  PROGAMMER := openocd
+endif
+
 include $(RIOTBOARD)/feather-nrf52840/Makefile.include

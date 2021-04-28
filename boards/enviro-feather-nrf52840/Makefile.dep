@@ -1,11 +1,9 @@
 # This must be a different name than 'board' as it is implemented by 'native'
-USEMODULE += board_enviro_nrf52840
+USEMODULE += board_enviro_feather_nrf52840
 
-ifneq (1,$(RIOTBOOT_BUILD))
-  USEMODULE += stdio_cdc_acm
-endif
 ifneq (,$(filter saul_default,$(USEMODULE)))
   USEMODULE += bme280_i2c
+  USEMODULE += pms5003
 endif
 
 include $(RIOTBOARD)/feather-nrf52840/Makefile.dep

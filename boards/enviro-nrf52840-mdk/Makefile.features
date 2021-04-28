@@ -1,0 +1,1 @@
+include $(RIOTBOARD)/nrf52840-mdk/Makefile.features

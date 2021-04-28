@@ -8,5 +8,5 @@ config BOARD
     default "enviro-samr21" if BOARD_ENVIRO_SAMR21
     select BOARD_SAMR21_XPRO
 
-source ${TREEBASE}/RIOT/boards/samr21-xpro/Kconfig
+source ${RIOT_FIRMWARES_BASE}/RIOT/boards/samr21-xpro/Kconfig
 

@@ -1,5 +1,5 @@
 # This must be a different name than 'board' as it is implemented by 'native'
-USEMODULE += board_enviro_samr21
+USEMODULE += board_enviro_samr21_xpro
 
 # Include all sensor modules by default
 ifneq (,$(filter saul_default,$(USEMODULE)))

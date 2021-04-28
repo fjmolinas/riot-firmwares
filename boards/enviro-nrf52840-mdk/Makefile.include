@@ -1,0 +1,11 @@
+# We must duplicate the include done by $(RIOTBASE)/Makefile.include
+# to also include the main board header
+INCLUDES += $(addprefix -I,$(wildcard $(RIOTBOARD)/nrf52840-mdk/include))
+
+# Change default i2c address
+CFLAGS += -DCCS811_PARAM_I2C_ADDR=CCS811_I2C_ADDRESS_2
+
+CFLAGS += -DCONFIG_POSITION_LAT=\"45.190173\"
+CFLAGS += -DCONFIG_POSITION_NG=\"5.736230\"
+
+include $(RIOTBOARD)/nrf52840-mdk/Makefile.include

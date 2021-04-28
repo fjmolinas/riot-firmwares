@@ -16,10 +16,10 @@
 #include "board.h"
 #include "periph/gpio.h"
 
-// extern void board_samr21_xpro_init(void);
+extern void board_samr21_xpro_init(void);
 
-// void board_init(void)
-// {
-//     board_samr21_xpro_init();
-// }
+void board_init(void)
+{
+    board_samr21_xpro_init();
+}
 /** @} */

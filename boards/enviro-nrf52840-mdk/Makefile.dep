@@ -1,0 +1,18 @@
+# This must be a different name than 'board' as it is implemented by 'native'
+USEMODULE += board_enviro_nrf52840_mdk
+
+ifneq (,$(filter saul_default,$(USEMODULE)))
+  USEMODULE += bme280_i2c
+  USEMODULE += ccs811
+  USEMODULE += saul_gpio
+  USEMODULE += hm3301
+endif
+
+ifneq (,$(filter nrf52811xxaa nrf52820xxaa nrf52833xxaa nrf52840xxaa,$(CPU_MODEL)))
+  # include dependencies for 802.15.4 radio
+  include $(RIOTBOARD)/common/nrf52/Makefile.nrf802154.dep
+else
+  # include dependencies for BLE
+  include $(RIOTBOARD)/common/nrf52/Makefile.nimble.dep
+endif
+

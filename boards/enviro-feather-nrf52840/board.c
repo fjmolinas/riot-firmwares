@@ -17,16 +17,13 @@
 #include "board.h"
 
 #include "periph/gpio.h"
+#include "kernel_defines.h"
 
 extern void board_feather_nrf52840_init(void);
 
 void board_init(void)
 {
     board_feather_nrf52840_init();
-
-#ifdef ST7735_PARAM_BL
-    gpio_init(ST7735_PARAM_BL, GPIO_OUT);
-#endif
 }
 
 /** @} */
