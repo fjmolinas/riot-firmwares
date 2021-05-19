@@ -1,0 +1,2 @@
+USEMODULE_INCLUDES_saul_coap := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/include
+USEMODULE_INCLUDES += $(USEMODULE_INCLUDES_saul_coap)
