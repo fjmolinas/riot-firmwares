@@ -1,2 +1,0 @@
-USEMODULE_INCLUDES_coap_led := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/include
-USEMODULE_INCLUDES += $(USEMODULE_INCLUDES_coap_led)
