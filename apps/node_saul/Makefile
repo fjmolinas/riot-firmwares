@@ -12,19 +12,18 @@ RIOT_FIRMWARES_BASE ?= $(CURDIR)/../..
 # Riot Application modules
 USEMODULE += shell_common
 
+# Workaround nrf52 issue
+DEVELHELP ?= 1
+
 # Include pyaiot modules
 USEMODULE += coap_common
-EXTERNAL_MODULE_DIRS += $(RIOT_FIRMWARES_BASE)/modules/coap_common
 USEMODULE += coap_utils
-EXTERNAL_MODULE_DIRS += $(RIOT_FIRMWARES_BASE)/modules/coap_utils
-USEMODULE += coap_saul
-EXTERNAL_MODULE_DIRS += $(RIOT_FIRMWARES_BASE)/modules/coap_saul
-USEMODULE += coap_led
-EXTERNAL_MODULE_DIRS += $(RIOT_FIRMWARES_BASE)/modules/coap_led
+USEMODULE += saul_coap
 USEMODULE += coap_position
-EXTERNAL_MODULE_DIRS += $(RIOT_FIRMWARES_BASE)/modules/coap_position
 USEMODULE += schedreg
-EXTERNAL_MODULE_DIRS += $(RIOT_FIRMWARES_BASE)/modules/schedreg
+
+# Add external modules
+EXTERNAL_MODULE_DIRS += $(RIOT_FIRMWARES_BASE)/modules
 
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1
@@ -32,6 +31,7 @@ QUIET ?= 1
 # Application specific definitions and includes
 APPLICATION_NAME ?= "Saul\ Node"
 CFLAGS += -DAPPLICATION_NAME="\"$(APPLICATION_NAME)\""
+CFLAGS += -DTHREAD_STACKSIZE_MAIN=THREAD_STACKSIZE_LARGE
 
 RIOT_MAKEFILES_GLOBAL_PRE += $(RIOT_FIRMWARES_BASE)/Makefile.pre
 RIOT_MAKEFILES_GLOBAL_PRE += $(RIOT_FIRMWARES_BASE)/apps/Makefile.include

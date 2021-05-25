@@ -18,7 +18,7 @@
 /* RIOT firmware libraries */
 #include "coap_common.h"
 #include "coap_position.h"
-#include "coap_saul.h"
+#include "saul/coap.h"
 #include "schedreg.h"
 
 #ifdef MODULE_COAP_SUIT
@@ -32,7 +32,7 @@
 #define MAIN_QUEUE_SIZE         (8)
 static msg_t _main_msg_queue[MAIN_QUEUE_SIZE];
 
-static uint8_t _saul_list[][2] = {
+static uint8_t saul_sense_supported[][2] = {
     {SAUL_SENSE_CO2, SAUL_CLASS_ANY},
     {SAUL_SENSE_HUM, SAUL_CLASS_ANY},
     {SAUL_SENSE_LIGHT, SAUL_CLASS_ANY},
@@ -59,24 +59,15 @@ static const uint32_t _send_int[] = {
 /* CoAP resources (alphabetical order) */
 static const coap_resource_t _resources[] = {
     { "/board", COAP_GET, board_handler, NULL },
-    { "/eco2", COAP_GET, saul_coap_handler, &_saul_list[0][0]},
-    { "/humidity", COAP_GET, saul_coap_handler, &_saul_list[1][0] },
-    { "/light", COAP_GET, saul_coap_handler, &_saul_list[2][0] },
     { "/mcu", COAP_GET, mcu_handler, NULL },
     { "/name", COAP_GET, name_handler, NULL },
     { "/os", COAP_GET, os_handler, NULL },
-    { "/pm10", COAP_GET, saul_coap_handler, &_saul_list[3][0] },
-    { "/pm1", COAP_GET, saul_coap_handler, &_saul_list[4][0] },
-    { "/pm2.5", COAP_GET, saul_coap_handler, &_saul_list[5][0] },
     { "/position", COAP_GET, position_handler, NULL },
-    { "/pressure", COAP_GET, saul_coap_handler, &_saul_list[6][0] },
 #ifdef MODULE_COAP_SUIT
     /* this line adds the whole "/suit"-subtree */
     SUIT_COAP_SUBTREE,
     { "/suit_state", COAP_GET, suit_state_handler, (void*) NULL },
 #endif
-    { "/temperature", COAP_GET, saul_coap_handler, &_saul_list[7][0] },
-    { "/tvoc", COAP_GET, saul_coap_handler, &_saul_list[8][0]},
 #ifdef MODULE_COAP_SUIT
     { "/vendor", COAP_GET, vendor_handler, NULL },
     { "/version", COAP_GET, version_handler, NULL },
@@ -100,7 +91,7 @@ int main(void)
 
     /* start coap server loop */
     gcoap_register_listener(&_listener);
-
+    saul_sense_coap_init();
 #ifdef MODULE_COAP_SUIT
     printf("running from slot %u\n", riotboot_slot_current());
     riotboot_slot_print_hdr(riotboot_slot_current());
@@ -126,9 +117,9 @@ int main(void)
 
     for (uint8_t i = 0; i < ARRAY_SIZE(_send_int); i++)
     {
-        schedreg_init_pid(&saul_reg[i], saul_coap_send, &_saul_list[i][0],
+        schedreg_init_pid(&saul_reg[i], saul_sense_coap_send, &saul_sense_supported[i][0],
             &msgs[i], &timer[i], _send_int[i]);
-        if (saul_reg_find_type_and_subtype(_saul_list[i][0], _saul_list[i][1])) {
+        if (saul_reg_find_type_and_subtype(saul_sense_supported[i][0], saul_sense_supported[i][1])) {
             schedreg_register(&saul_reg[i], sched_pid);
         }
     }

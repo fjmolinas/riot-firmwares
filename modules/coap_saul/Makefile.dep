@@ -1,2 +1,0 @@
-USEMODULE += saul_default
-USEMODULE += fmt

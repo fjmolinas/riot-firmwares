@@ -20,6 +20,18 @@
 
 static ssize_t _saul_sense_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, void *ctx);
 
+uint8_t saul_sense_supported[][2] = {
+    {SAUL_SENSE_CO2, SAUL_CLASS_ANY},
+    {SAUL_SENSE_HUM, SAUL_CLASS_ANY},
+    {SAUL_SENSE_LIGHT, SAUL_CLASS_ANY},
+    {SAUL_SENSE_PM, SAUL_SENSE_PM_10},
+    {SAUL_SENSE_PM, SAUL_SENSE_PM_1},
+    {SAUL_SENSE_PM, SAUL_SENSE_PM_2p5},
+    {SAUL_SENSE_PRESS, SAUL_CLASS_ANY},
+    {SAUL_SENSE_TEMP, SAUL_CLASS_ANY},
+    {SAUL_SENSE_TVOC, SAUL_CLASS_ANY},
+};
+
 /* CoAP resources (alphabetical order) */
 static const coap_resource_t _resources[] = {
     { "/sense/co2", COAP_GET, _saul_sense_handler, &saul_sense_supported[0][0]},
@@ -67,18 +79,14 @@ static ssize_t _saul_sense_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, vo
         }
     }
     else {
-        uint8_t payload[CONFIG_SAUL_COAP_SENML_BUF_SIZE];
-        size_t payload_len = senml_saulreg_encode_json(payload,
-                                                       CONFIG_SAUL_COAP_SENML_BUF_SIZE,
-                                                       dev);
+        size_t payload_len = senml_saulreg_encode_json(NULL, 0, dev);
         if (payload_len <= 0) {
-            DEBUG_PUTS("[saul_coap]: failed to encode")
+            DEBUG_PUTS("[saul_coap]: can't encode")
             return gcoap_response(pdu, buf, len,
                                   COAP_CODE_INTERNAL_SERVER_ERROR);
         }
         else if (pdu->payload_len >= payload_len) {
-            memcpy(pdu->payload, payload, payload_len);
-            gcoap_response(pdu, buf, len, COAP_CODE_204);
+            size_t payload_len = senml_saulreg_encode_json(pdu->payload, pdu->payload_len, dev);
             return resp_len + payload_len;
         }
         else {
@@ -98,9 +106,13 @@ void saul_sense_coap_send(void *args)
     uint8_t buf[CONFIG_SAUL_COAP_SENML_BUF_SIZE];
     saul_reg_t *dev = saul_reg_find_type_and_subtype(type, subtype);
     if (!dev) {
-        return -1;
+        return;
     }
-    senml_saulreg_encode_json(buf, CONFIG_SAUL_COAP_SENML_BUF_SIZE, &dev);
+    size_t len = senml_saulreg_encode_json(NULL, 0, dev);
+    if (len > CONFIG_SAUL_COAP_SENML_BUF_SIZE) {
+        return;
+    }
+    senml_saulreg_encode_json(buf, CONFIG_SAUL_COAP_SENML_BUF_SIZE, dev);
     send_coap_post((uint8_t *)"/server", buf);
 }
 

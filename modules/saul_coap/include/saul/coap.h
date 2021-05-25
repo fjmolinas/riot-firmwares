@@ -12,17 +12,7 @@ extern "C" {
 /**
  * @brief   Supported saul sensors list
  */
-const uint8_t saul_sense_supported[][2] = {
-    {SAUL_SENSE_CO2, SAUL_CLASS_ANY},
-    {SAUL_SENSE_HUM, SAUL_CLASS_ANY},
-    {SAUL_SENSE_LIGHT, SAUL_CLASS_ANY},
-    {SAUL_SENSE_PM, SAUL_SENSE_PM_10},
-    {SAUL_SENSE_PM, SAUL_SENSE_PM_1},
-    {SAUL_SENSE_PM, SAUL_SENSE_PM_2p5},
-    {SAUL_SENSE_PRESS, SAUL_CLASS_ANY},
-    {SAUL_SENSE_TEMP, SAUL_CLASS_ANY},
-    {SAUL_SENSE_TVOC, SAUL_CLASS_ANY},
-};
+extern uint8_t saul_sense_supported[][2];
 
 /**
  * @brief   Send a SenML JSON encode saul sensor measurement
